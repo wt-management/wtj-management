@@ -206,6 +206,13 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
     <div class="nav-item" onclick="showPage('payment-input')">
       <span class="nav-icon">💳</span><span id="navPayIn">입금 입력</span>
     </div>
+    <!-- 관리자 전용 -->
+    <div id="nav-admin-group" style="display:none">
+      <div class="nav-label" style="margin-top:8px">관리자</div>
+      <div class="nav-item" onclick="showPage('user-mgmt')">
+        <span class="nav-icon">👥</span><span>사용자 관리</span>
+      </div>
+    </div>
   </div>
   <!-- 사용자 정보 -->
   <div id="sidebar-user" style="display:none;padding:12px 16px;border-top:1px solid #1e293b;margin-top:auto">
@@ -899,6 +906,60 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
       </div>
     </div>
 
+    <!-- ═══ 사용자 관리 (관리자 전용) ═══ -->
+    <div class="page" id="page-user-mgmt">
+      <div class="form-card" style="max-width:860px">
+        <div class="form-title">👥 사용자 관리</div>
+        <div class="form-sub">일본법인 관리시스템 접근 권한을 관리합니다 (CRM과 독립 운영)</div>
+
+        <!-- 사용자 추가 -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:20px 0">
+          <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px">➕ 새 사용자 추가</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:end">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">이메일 *</label>
+              <input id="um-email" type="email" placeholder="email@example.com" class="filter-input" style="width:100%">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">이름 *</label>
+              <input id="um-name" type="text" placeholder="홍길동" class="filter-input" style="width:100%">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">권한</label>
+              <select id="um-role" class="filter-input">
+                <option value="member">일반</option>
+                <option value="admin">관리자</option>
+              </select>
+            </div>
+            <button onclick="addWtjMember()" style="padding:8px 18px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">추가</button>
+          </div>
+          <div id="um-add-msg" style="font-size:12px;margin-top:10px;display:none"></div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:10px">
+            ※ 추가 후 해당 이메일로 Supabase 계정이 없으면 <strong>초기 비밀번호 설정 메일</strong>을 보낼 수 있습니다
+          </div>
+        </div>
+
+        <!-- 사용자 목록 -->
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px">📋 등록된 사용자</div>
+        <div id="um-loader" style="text-align:center;padding:40px;color:#94a3b8">불러오는 중...</div>
+        <div id="um-content" style="display:none;overflow-x:auto">
+          <table class="data-table" style="width:100%">
+            <thead>
+              <tr>
+                <th>이메일</th>
+                <th>이름</th>
+                <th style="text-align:center">권한</th>
+                <th style="text-align:center">상태</th>
+                <th style="text-align:center">등록일</th>
+                <th style="text-align:center">관리</th>
+              </tr>
+            </thead>
+            <tbody id="um-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -908,8 +969,7 @@ var SUPABASE_URL = 'https://mhfacbsittfdkknwybhc.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_aPMOOWAlyJlMcP1ZM_gpPA_jlrcvCRd';
 var _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// WTJ 접근 허용 이메일 (CRM과 별도 관리)
-var WTJ_ALLOWED = ['pmw0406@gmail.com', 'kanari100@gmail.com', 'pjin2174@gmail.com'];
+var _currentUser = null; // {email, name, role, id}
 
 async function doLogin() {
   var email = (document.getElementById('login-email').value || '').trim().toLowerCase();
@@ -919,6 +979,7 @@ async function doLogin() {
   if (!email || !pw) { errEl.textContent='이메일과 비밀번호를 입력하세요'; errEl.style.display='block'; return; }
   btn.disabled = true; btn.textContent = '로그인 중...';
   errEl.style.display = 'none';
+
   var res = await _sb.auth.signInWithPassword({email: email, password: pw});
   if (res.error) {
     errEl.textContent = '❌ 이메일 또는 비밀번호가 올바르지 않습니다';
@@ -926,22 +987,33 @@ async function doLogin() {
     btn.disabled = false; btn.textContent = '로그인 / ログイン';
     return;
   }
-  // WTJ 접근 권한 확인
-  if (WTJ_ALLOWED.indexOf(res.data.user.email.toLowerCase()) === -1) {
+
+  // wtj_members 테이블에서 접근 권한 확인
+  var member = await _getWtjMember(res.data.user.email);
+  if (!member || !member.is_active) {
     await _sb.auth.signOut();
-    errEl.textContent = '❌ 이 시스템에 대한 접근 권한이 없습니다';
+    errEl.textContent = member ? '❌ 계정이 비활성화 상태입니다' : '❌ 이 시스템에 대한 접근 권한이 없습니다';
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = '로그인 / ログイン';
     return;
   }
-  _applyLoginUI(res.data.user);
+
+  _currentUser = {email: member.email, name: member.display_name, role: member.role, id: member.id};
+  _applyLoginUI();
   document.getElementById('login-screen').style.display = 'none';
   await _bootApp();
 }
 
+async function _getWtjMember(email) {
+  var r = await _sb.from('wtj_members').select('*').eq('email', email.toLowerCase()).maybeSingle();
+  return r.data || null;
+}
+
 async function doLogout() {
   await _sb.auth.signOut();
+  _currentUser = null;
   document.getElementById('sidebar-user').style.display = 'none';
+  document.getElementById('nav-admin-group').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-email').value = '';
   document.getElementById('login-pw').value = '';
@@ -949,26 +1021,102 @@ async function doLogout() {
   document.getElementById('login-btn').textContent = '로그인 / ログイン';
 }
 
-function _applyLoginUI(user) {
-  var email = user.email || '';
-  var name  = email.split('@')[0];
+function _applyLoginUI() {
+  var name = _currentUser.name || _currentUser.email.split('@')[0];
   document.getElementById('sidebar-user').style.display = 'block';
   document.getElementById('sidebar-user-name').textContent  = name;
-  document.getElementById('sidebar-user-email').textContent = email;
+  document.getElementById('sidebar-user-email').textContent = _currentUser.email;
   document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
-  // GitHub 토큰 자동 설정 (로그인 후 write 기능용)
+  // 관리자 메뉴 표시
+  if (_currentUser.role === 'admin') document.getElementById('nav-admin-group').style.display = 'block';
+  // GitHub 토큰 자동 설정
   var _tk = ['gh','p_','xikfNazz8k','sajhaHDWw9','5t8zBotpMP0wRwEH'];
   localStorage.setItem('wtj_gh_token', _tk.join(''));
 }
 
 async function _bootApp() {
-  await new Promise(function(resolve) {
-    loadData(function() { resolve(); });
-  });
+  await new Promise(function(resolve) { loadData(function() { resolve(); }); });
   var dl = document.getElementById('facilityList');
   if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
+  showPage('dashboard');
   renderDashboard(_data.dashboard);
   showDataTimestamp();
+}
+
+// ── 사용자 관리 ───────────────────────────────────────────────
+function loadUserMgmt() {
+  document.getElementById('um-loader').style.display = 'block';
+  document.getElementById('um-content').style.display = 'none';
+  _sb.from('wtj_members').select('*').order('created_at', {ascending: true})
+    .then(function(r) {
+      document.getElementById('um-loader').style.display = 'none';
+      document.getElementById('um-content').style.display = 'block';
+      renderUserMgmt(r.data || []);
+    });
+}
+
+function renderUserMgmt(members) {
+  document.getElementById('um-tbody').innerHTML = members.map(function(m) {
+    var roleLabel = m.role === 'admin'
+      ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">관리자</span>'
+      : '<span style="background:#f0f9ff;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">일반</span>';
+    var statusLabel = m.is_active
+      ? '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">활성</span>'
+      : '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">비활성</span>';
+    var date = (m.created_at || '').substring(0, 10);
+    var isSelf = _currentUser && m.email === _currentUser.email;
+    return '<tr>'
+      + '<td>' + m.email + (isSelf ? ' <span style="font-size:10px;color:#3b82f6">(나)</span>' : '') + '</td>'
+      + '<td>' + (m.display_name || '-') + '</td>'
+      + '<td style="text-align:center">' + roleLabel + '</td>'
+      + '<td style="text-align:center">' + statusLabel + '</td>'
+      + '<td style="text-align:center;color:#94a3b8;font-size:12px">' + date + '</td>'
+      + '<td style="text-align:center;white-space:nowrap">'
+      + (!isSelf ? '<button class="edit-btn" onclick="toggleMemberActive(\'' + m.id + '\',' + m.is_active + ')" style="margin-right:4px">'
+          + (m.is_active ? '비활성화' : '활성화') + '</button>'
+        + '<button class="edit-btn" onclick="toggleMemberRole(\'' + m.id + '\',\'' + m.role + '\')">'
+          + (m.role === 'admin' ? '→일반' : '→관리자') + '</button>' : '-')
+      + '</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px">등록된 사용자 없음</td></tr>';
+}
+
+async function addWtjMember() {
+  var email = (document.getElementById('um-email').value || '').trim().toLowerCase();
+  var name  = (document.getElementById('um-name').value  || '').trim();
+  var role  = document.getElementById('um-role').value;
+  var msg   = document.getElementById('um-add-msg');
+  if (!email || !name) { msg.textContent = '이메일과 이름을 입력하세요'; msg.style.color = '#dc2626'; msg.style.display = 'block'; return; }
+
+  var r = await _sb.from('wtj_members').insert({email: email, display_name: name, role: role, is_active: true});
+  if (r.error) {
+    msg.textContent = r.error.code === '23505' ? '❌ 이미 등록된 이메일입니다' : '❌ ' + r.error.message;
+    msg.style.color = '#dc2626'; msg.style.display = 'block'; return;
+  }
+  msg.textContent = '✅ 추가 완료! 해당 이메일로 비밀번호 설정 메일을 보내려면 아래 버튼을 클릭하세요.';
+  msg.style.color = '#16a34a'; msg.style.display = 'block';
+  document.getElementById('um-email').value = '';
+  document.getElementById('um-name').value  = '';
+
+  // 비밀번호 설정 메일 발송 옵션
+  var send = confirm('✉️ "' + email + '" 에게 비밀번호 설정 메일을 발송할까요?\n(Supabase 계정이 없는 신규 사용자에게 필요합니다)');
+  if (send) {
+    await _sb.auth.resetPasswordForEmail(email, {redirectTo: 'https://pmw0406.github.io/wtj-management/'});
+    msg.textContent = '✅ 추가 완료 + 메일 발송됨';
+  }
+  loadUserMgmt();
+}
+
+async function toggleMemberActive(id, current) {
+  if (!confirm((current ? '비활성화' : '활성화') + ' 하시겠습니까?')) return;
+  await _sb.from('wtj_members').update({is_active: !current}).eq('id', id);
+  loadUserMgmt();
+}
+
+async function toggleMemberRole(id, current) {
+  var newRole = current === 'admin' ? 'member' : 'admin';
+  if (!confirm(newRole === 'admin' ? '관리자 권한을 부여하시겠습니까?' : '일반 사용자로 변경하시겠습니까?')) return;
+  await _sb.from('wtj_members').update({role: newRole}).eq('id', id);
+  loadUserMgmt();
 }
 
 // ── GitHub Pages 모드 설정 ─────────────────────────────────────
@@ -1419,6 +1567,7 @@ function showPage(id){
   else if(id==='budget-actual') loadBudgetActual();
   else if(id==='outstanding') loadOutstandingPage();
   else if(id==='payment-input') loadOutstandingOrders();
+  else if(id==='user-mgmt') loadUserMgmt();
 }
 
 // ─── Formatting ─────────────────────────────────────────────
