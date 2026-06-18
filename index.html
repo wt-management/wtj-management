@@ -2622,14 +2622,14 @@ window.onload = async function() {
   // 기존 세션 확인
   var res = await _sb.auth.getSession();
   if (res.data && res.data.session) {
-    var member = await _getWtjMember(res.data.session.user.email, res.data.session.user.id);
-    if (member && member.is_active) {
-      _currentUser = {email: member.email, name: member.display_name, role: member.role, id: member.id};
-      _applyLoginUI();
-      await _bootApp();
-    } else {
-      document.getElementById('login-screen').style.display = 'flex';
-    }
+    // 세션이 있으면 무조건 입장 (wtj_members 없어도 OK)
+    var sUser = res.data.session.user;
+    var wtjM = await _getWtjMember(sUser.email, sUser.id);
+    var displayName = (wtjM && wtjM.display_name) || sUser.email.split('@')[0];
+    var role = (wtjM && wtjM.role) || 'general';
+    _currentUser = {email: sUser.email, name: displayName, role: role, id: sUser.id};
+    _applyLoginUI();
+    await _bootApp();
   } else {
     document.getElementById('login-screen').style.display = 'flex';
   }
