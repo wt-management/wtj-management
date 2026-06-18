@@ -235,6 +235,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
       <div style="overflow:hidden;flex:1;min-width:0">
         <div id="sidebar-user-name" style="font-size:12px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div>
         <div id="sidebar-user-email" style="font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div>
+        <div id="sidebar-user-dept" style="font-size:10px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
       </div>
       <button onclick="doLogout()" title="로그아웃" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;padding:2px;flex-shrink:0" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">⏏</button>
     </div>
@@ -1019,9 +1020,16 @@ async function doLogout() {
 function _applyLoginUI() {
   var name = _currentUser.name || _currentUser.email.split('@')[0];
   document.getElementById('sidebar-user').style.display = 'block';
-  document.getElementById('sidebar-user-name').textContent  = name;
-  document.getElementById('sidebar-user-email').textContent = _currentUser.email;
   document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
+  // crm_profiles에서 직급/부서 로드
+  _sb.from('crm_profiles').select('position,dept').eq('id', _currentUser.id).maybeSingle().then(function(r) {
+    var pos = (r.data && r.data.position) || '';
+    var dept = (r.data && r.data.dept) || '';
+    document.getElementById('sidebar-user-name').textContent = pos ? name + ' ' + pos : name;
+    document.getElementById('sidebar-user-email').textContent = dept || _currentUser.email;
+    var deptEl = document.getElementById('sidebar-user-dept');
+    if (deptEl) deptEl.textContent = dept ? _currentUser.email : '';
+  });
   // 관리자 메뉴 표시
   var ag2=document.getElementById('nav-admin-group'); if(ag2 && _currentUser.role==='admin') ag2.style.display = 'block';
   // GitHub 토큰 자동 설정
