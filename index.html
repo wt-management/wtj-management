@@ -2222,25 +2222,11 @@ function _closeSidebar() {
 
 
 
-async function doLogout() {
+async async function doLogout() {
 
   await _sb.auth.signOut();
 
-  _currentUser = null;
-
-  document.getElementById('sidebar-user').style.display = 'none';
-
-  var ag=document.getElementById('nav-admin-group'); if(ag) ag.style.display = 'none';
-
-  document.getElementById('login-screen').style.display = 'flex';
-
-  document.getElementById('login-email').value = '';
-
-  document.getElementById('login-pw').value = '';
-
-  document.getElementById('login-btn').disabled = false;
-
-  document.getElementById('login-btn').textContent = '로그인 / ログイン';
+  location.href = 'https://wt-management.github.io/wontech/';
 
 }
 
