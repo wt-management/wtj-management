@@ -475,12 +475,6 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
     </div>
 
-    <div class="nav-item" onclick="showPage('facility-analysis')">
-
-      <span class="nav-icon"><i class="bi bi-building"></i></span><span id="navFacility">거래처별 분석</span>
-
-    </div>
-
     <div class="nav-item" onclick="showPage('product-analysis')">
 
       <span class="nav-icon"><i class="bi bi-box-seam"></i></span><span id="navProduct">제품별 분석</span>
@@ -2108,62 +2102,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
       </div>
 
-    <!-- 거래처별 분석 -->
-    <div class="page" id="page-facility-analysis">
-      <div class="table-card" style="margin-bottom:16px">
-        <div class="table-header">
-          <div class="table-title">거래처별 분석</div>
-          <div class="table-filters">
-            <select class="filter-input" id="facYearFilter" onchange="renderFacilityAnalysis()">
-              <option value="">전체연도</option>
-              <option value="2026">2026년</option>
-              <option value="2025">2025년</option>
-              <option value="2024">2024년</option>
-            </select>
-            <select class="filter-input" id="facCatFilter" onchange="renderFacilityAnalysis()">
-              <option value="">전체</option>
-              <option value="기기">기기</option>
-              <option value="소모품">소모품</option>
-              <option value="카트리지">카트리지</option>
-              <option value="팁">팁</option>
-              <option value="기타">기타</option>
-            </select>
-            <input class="filter-input" id="facSearch" placeholder="거래처 검색..." oninput="renderFacilityAnalysis()" style="width:160px">
-          </div>
-        </div>
-      </div>
-      <div id="fac-list-view">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-          <div class="kpi-card"><div class="kpi-label">거래처 수</div><div class="kpi-value" id="facKpiCount">-</div></div>
-          <div class="kpi-card"><div class="kpi-label">총 수주금액</div><div class="kpi-value" id="facKpiTotal">-</div></div>
-        </div>
-        <div class="table-card">
-          <table class="data-table">
-            <thead><tr><th style="width:36px">#</th><th>거래처</th><th class="amount">수주금액</th><th class="amount">점유율</th><th class="amount">건수</th><th>기기/소모품</th></tr></thead>
-            <tbody id="facTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="fac-detail-view" style="display:none">
-        <button onclick="document.getElementById('fac-list-view').style.display='';document.getElementById('fac-detail-view').style.display='none'" style="background:rgba(8,145,178,.1);border:1px solid rgba(8,145,178,.3);border-radius:8px;padding:6px 14px;color:#0891b2;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:16px">&larr; 목록으로</button>
-        <div id="fac-detail-name" style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:12px"></div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
-          <div class="kpi-card"><div class="kpi-label">총 수주금액</div><div class="kpi-value" id="fd-total">-</div></div>
-          <div class="kpi-card"><div class="kpi-label">수주건수</div><div class="kpi-value" id="fd-count">-</div></div>
-          <div class="kpi-card"><div class="kpi-label">기기</div><div class="kpi-value" id="fd-machine">-</div></div>
-          <div class="kpi-card"><div class="kpi-label">소모품/기타</div><div class="kpi-value" id="fd-cons">-</div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-          <div class="table-card"><div class="table-title" style="margin-bottom:12px">연도별 수주 추이</div><canvas id="facYearChart" height="200"></canvas></div>
-          <div class="table-card"><div class="table-title" style="margin-bottom:12px">제품별 내역</div><canvas id="facProdChart" height="200"></canvas></div>
-        </div>
-        <div class="table-card">
-          <div class="table-title" style="margin-bottom:12px">수주 상세</div>
-          <table class="data-table"><thead><tr><th>날짜</th><th>제품</th><th>카테고리</th><th class="amount">수량</th><th class="amount">금액</th></tr></thead>
-          <tbody id="fac-detail-tbody"></tbody></table>
-        </div>
-      </div>
-    </div>
+
 
     <!-- 제품별 분석 -->
     <div class="page" id="page-product-analysis">
@@ -3460,9 +3399,9 @@ function setLang(l){
 
 // ─── Navigation ─────────────────────────────────────────────
 
-var pageTitles={'dashboard':{kr:'대시보드',jp:'ダッシュボード'},'consumable-trend':{kr:'소모품 트렌드',jp:'消耗品トレンド'},'orders-list':{kr:'수주 현황',jp:'受注一覧'},'payments-list':{kr:'입금 현황',jp:'入金一覧'},'budget-actual':{kr:'목표 vs 실적',jp:'予実管理'},'outstanding':{kr:'미수금 현황',jp:'未収金一覧'},'excel-upload':{kr:'엑셀 업로드',jp:'Excelアップロード'},'order-input':{kr:'수주 입력',jp:'受注入力'},'payment-input':{kr:'입금 입력',jp:'入金入力'},'facility-analysis':{kr:'거래처별 분석',jp:'施設別分析'},'product-analysis':{kr:'제품별 분석',jp:'製品別分析'}};
+var pageTitles={'dashboard':{kr:'대시보드',jp:'ダッシュボード'},'consumable-trend':{kr:'소모품 트렌드',jp:'消耗品トレンド'},'orders-list':{kr:'수주 현황',jp:'受注一覧'},'payments-list':{kr:'입금 현황',jp:'入金一覧'},'budget-actual':{kr:'목표 vs 실적',jp:'予実管理'},'outstanding':{kr:'미수금 현황',jp:'未収金一覧'},'excel-upload':{kr:'엑셀 업로드',jp:'Excelアップロード'},'order-input':{kr:'수주 입력',jp:'受注入力'},'payment-input':{kr:'입금 입력',jp:'入金入力'},'product-analysis':{kr:'제품별 분석',jp:'製品別分析'}};
 
-var pageSubtitles={'dashboard':{kr:'2026년도 매출 현황 (입금기준)',jp:'2026年度 売上サマリー（入金基準）'},'consumable-trend':{kr:'소모품 매출 트렌드 분석 (입금기준)',jp:'消耗品 売上トレンド分析（入金基準）'},'orders-list':{kr:'수주 기준 전체 내역',jp:'受注ベース全件一覧'},'payments-list':{kr:'입금 전체 내역',jp:'入金全件一覧'},'budget-actual':{kr:'제품별 목표 달성 현황',jp:'商品別目標達成状況'},'outstanding':{kr:'2025년 이후 미입금 수주 내역',jp:'2025年以降 未収金受注一覧'},'excel-upload':{kr:'매출현황 엑셀 → 구글 시트 동기화',jp:'売上ExcelデータをGoogleシートに同期'},'order-input':{kr:'새 수주 건 등록',jp:'新規受注登録'},'payment-input':{kr:'새 입금 건 등록',jp:'新規入金登録'},'facility-analysis':{kr:'거래처별 수주 현황',jp:''},'product-analysis':{kr:'제품별 수주 현황',jp:''}};
+var pageSubtitles={'dashboard':{kr:'2026년도 매출 현황 (입금기준)',jp:'2026年度 売上サマリー（入金基準）'},'consumable-trend':{kr:'소모품 매출 트렌드 분석 (입금기준)',jp:'消耗品 売上トレンド分析（入金基準）'},'orders-list':{kr:'수주 기준 전체 내역',jp:'受注ベース全件一覧'},'payments-list':{kr:'입금 전체 내역',jp:'入金全件一覧'},'budget-actual':{kr:'제품별 목표 달성 현황',jp:'商品別目標達成状況'},'outstanding':{kr:'2025년 이후 미입금 수주 내역',jp:'2025年以降 未収金受注一覧'},'excel-upload':{kr:'매출현황 엑셀 → 구글 시트 동기화',jp:'売上ExcelデータをGoogleシートに同期'},'order-input':{kr:'새 수주 건 등록',jp:'新規受注登録'},'payment-input':{kr:'새 입금 건 등록',jp:'新規入金登録'},'product-analysis':{kr:'제품별 수주 현황',jp:''}};
 
 
 
@@ -3498,9 +3437,7 @@ function showPage(id){
 
   else if(id==='user-mgmt') loadUserMgmt();
 
-  else if(id==='facility-analysis'){ renderFacilityAnalysis(); }
-
-  else if(id==='product-analysis'){ renderProductAnalysis(); }
+  else if(id==='product-analysis'){ loadProductAnalysis(); }
 
 }
 
@@ -5769,6 +5706,149 @@ async function doChangePw(){
   if(res.error){err.textContent=res.error.message;err.style.display='block';}
   else{document.getElementById('pw-modal').style.display='none';alert('비밀번호가 변경되었습니다.');}
 }
+
+// ── 제품별 분석 ───────────────────────────────────────────────────
+function loadProductAnalysis(){
+  if(allOrders.length > 0){ renderProductAnalysis(); return; }
+  loadData(function(){ renderProductAnalysis(); });
+}
+
+var _prodCat = '';
+var _prodCharts2 = {};
+function _dpc(id){ if(_prodCharts2[id]){ _prodCharts2[id].destroy(); delete _prodCharts2[id]; } }
+
+function setProdCat(cat){
+  _prodCat = cat;
+  ['prodCatAll','prodCatMachine','prodCatCons'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.background = '#fff'; el.style.color = '#374151'; el.style.borderColor = '#e5e7eb';
+  });
+  var activeId = cat==='' ? 'prodCatAll' : cat==='기기' ? 'prodCatMachine' : 'prodCatCons';
+  var el2 = document.getElementById(activeId);
+  if(el2){ el2.style.background='#0891b2'; el2.style.color='#fff'; el2.style.borderColor='#0891b2'; }
+  renderProductAnalysis();
+}
+
+function renderProductAnalysis(){
+  var yr = (document.getElementById('prodYearFilter')||{}).value || '';
+  var rows = allOrders.filter(function(o){
+    if(yr && !(o.date||'').startsWith(yr)) return false;
+    if(_prodCat){
+      if(_prodCat==='소모품') return o.category !== '기기';
+      return o.category === _prodCat;
+    }
+    return true;
+  });
+
+  var map = {};
+  rows.forEach(function(o){
+    var p = o.product || '(미지정)';
+    if(!map[p]) map[p] = {name:p, cat:o.category||'-', total:0, cnt:0, facs:{}};
+    map[p].total += (o.amount||0);
+    map[p].cnt++;
+    map[p].facs[o.facility||''] = 1;
+  });
+
+  var list = Object.values(map).sort(function(a,b){ return b.total - a.total; });
+  var grandTotal = list.reduce(function(s,r){ return s + r.total; }, 0);
+  var allFacs = {};
+  rows.forEach(function(o){ if(o.facility) allFacs[o.facility]=1; });
+
+  var kpiCount = document.getElementById('prodKpiCount');
+  var kpiTotal = document.getElementById('prodKpiTotal');
+  var kpiFacs  = document.getElementById('prodKpiFacs');
+  if(kpiCount) kpiCount.textContent = list.length + '개';
+  if(kpiTotal) kpiTotal.textContent = '¥' + fmt(grandTotal);
+  if(kpiFacs)  kpiFacs.textContent  = Object.keys(allFacs).length + '개';
+
+  // Bar chart top 10
+  var top10 = list.slice(0,10);
+  var colors10 = ['#0891b2','#0d9488','#7c3aed','#f59e0b','#ef4444','#10b981','#8b5cf6','#f97316','#06b6d4','#84cc16'];
+  _dpc('prodBarChart');
+  var bc = document.getElementById('prodBarChart');
+  if(bc) _prodCharts2['prodBarChart'] = new Chart(bc, {
+    type:'bar',
+    data:{
+      labels: top10.map(function(r){ return r.name.length>18 ? r.name.substring(0,18)+'...' : r.name; }),
+      datasets:[{ label:'수주금액', data:top10.map(function(r){ return r.total; }), backgroundColor:colors10, borderRadius:6 }]
+    },
+    options:{ indexAxis:'y', plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{ callback:function(v){ return '¥'+fmt(v); } } } } }
+  });
+
+  // Table
+  var tbody = document.getElementById('prodTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = list.map(function(r,i){
+    var pct = grandTotal>0 ? (r.total/grandTotal*100).toFixed(1) : '0.0';
+    var catColor = r.cat==='기기'?'#0891b2':r.cat==='소모품'?'#0d9488':r.cat==='카트리지'?'#7c3aed':'#94a3b8';
+    return '<tr style="cursor:pointer" onclick="showProdDetail('+JSON.stringify(r.name)+')" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">' +
+      '<td style="color:#94a3b8">'+(i+1)+'</td>' +
+      '<td style="font-weight:600">'+r.name+'</td>' +
+      '<td><span style="background:'+catColor+'1a;color:'+catColor+';padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">'+r.cat+'</span></td>' +
+      '<td class="amount">¥'+fmt(r.total)+'</td>' +
+      '<td class="amount">'+pct+'%</td>' +
+      '<td class="amount">'+r.cnt+'건</td>' +
+      '<td class="amount">'+Object.keys(r.facs).length+'개</td>' +
+      '</tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px">데이터 없음</td></tr>';
+}
+
+function showProdDetail(prodName){
+  var lv = document.getElementById('prod-list-view');
+  var dv = document.getElementById('prod-detail-view');
+  if(lv) lv.style.display = 'none';
+  if(dv) dv.style.display = '';
+  var dn = document.getElementById('prod-detail-name');
+  if(dn) dn.textContent = prodName;
+
+  var rows = allOrders.filter(function(o){ return o.product === prodName; });
+  var total = rows.reduce(function(s,o){ return s+(o.amount||0); }, 0);
+  var facs = {};
+  rows.forEach(function(o){ if(o.facility) facs[o.facility]=(facs[o.facility]||0)+(o.amount||0); });
+
+  var el = function(id){ return document.getElementById(id); };
+  if(el('pd-total'))  el('pd-total').textContent  = '¥'+fmt(total);
+  if(el('pd-count'))  el('pd-count').textContent  = rows.length+'건';
+  if(el('pd-facs'))   el('pd-facs').textContent   = Object.keys(facs).length+'개';
+
+  // 연도별 추이
+  var yearMap = {};
+  rows.forEach(function(o){ var y=(o.date||'').substring(0,4); yearMap[y]=(yearMap[y]||0)+(o.amount||0); });
+  var years = Object.keys(yearMap).sort();
+  _dpc('prodYearChart');
+  var yc = document.getElementById('prodYearChart');
+  if(yc) _prodCharts2['prodYearChart'] = new Chart(yc, {
+    type:'bar',
+    data:{ labels:years, datasets:[{ label:'수주금액', data:years.map(function(y){ return yearMap[y]; }), backgroundColor:'rgba(124,58,237,.75)', borderRadius:6 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ callback:function(v){ return '¥'+fmt(v); } } } } }
+  });
+
+  // Top 거래처 도넛
+  var topFacs = Object.entries(facs).sort(function(a,b){ return b[1]-a[1]; }).slice(0,8);
+  var colors8 = ['#0891b2','#0d9488','#7c3aed','#f59e0b','#ef4444','#10b981','#8b5cf6','#f97316'];
+  _dpc('prodFacChart');
+  var fc = document.getElementById('prodFacChart');
+  if(fc) _prodCharts2['prodFacChart'] = new Chart(fc, {
+    type:'doughnut',
+    data:{
+      labels: topFacs.map(function(f){ return f[0].length>14?f[0].substring(0,14)+'...':f[0]; }),
+      datasets:[{ data:topFacs.map(function(f){ return f[1]; }), backgroundColor:colors8, borderWidth:2 }]
+    },
+    options:{ plugins:{ legend:{ position:'right', labels:{ font:{size:10}, boxWidth:12 } } } }
+  });
+
+  // 거래처별 테이블
+  var tb = document.getElementById('prod-detail-tbody');
+  if(tb){
+    var facList = Object.entries(facs).sort(function(a,b){ return b[1]-a[1]; });
+    tb.innerHTML = facList.map(function(f){
+      var cnt = rows.filter(function(o){ return o.facility===f[0]; }).length;
+      return '<tr><td>'+f[0]+'</td><td class="amount">¥'+fmt(f[1])+'</td><td class="amount">'+cnt+'건</td></tr>';
+    }).join('');
+  }
+}
+
 </script>
 
 
