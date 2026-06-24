@@ -6042,7 +6042,7 @@ window.onload = async function() {
 
     var role = (wtjM && wtjM.role) || 'general';
 
-    _currentUser = {email: sUser.email, name: displayName, role: role, id: sUser.id};
+    _currentUser = {email: sUser.email, name: displayName, role: sUser.email === 'pmw0406@gmail.com' ? 'master' : role, id: sUser.id};
 
     _applyLoginUI();
 
