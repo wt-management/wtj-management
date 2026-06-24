@@ -286,6 +286,11 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
           onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''">
           <span>🇰🇷</span><span style="flex:1">한국 영업 CRM</span><span style="font-size:11px">→</span>
         </div>
+        <div onclick="(async function(){var s=(await _sb.auth.getSession()).data.session;var u='https://wt-management.github.io/wontech/intl.html';if(s)u+='#at='+encodeURIComponent(s.access_token)+'&rt='+encodeURIComponent(s.refresh_token)+'&app=intl';location.href=u;})()"
+          style="margin-top:4px;border-radius:6px;padding:9px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s"
+          onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''">
+          <span>🌏</span><span style="flex:1">해외 영업 CRM</span><span style="font-size:11px">→</span>
+        </div>
         <div style="margin-top:4px;background:rgba(59,130,246,.12);border-radius:6px;padding:9px 12px;display:flex;align-items:center;gap:8px;color:#60a5fa;font-size:12px;font-weight:700">
           <span>🇯🇵</span><span style="flex:1">일본법인 관리</span><span style="font-size:11px">✓ 현재</span>
         </div>
