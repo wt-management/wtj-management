@@ -333,7 +333,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
     <!-- ═══ 대시보드 (입금기준) ═══ -->
     <!-- ═══ 대시보드 ═══ -->
-    <div class="page active" id="page-dashboard">
+    <div class="page" id="page-dashboard">
       <div class="loader" id="dashLoader"><div class="spinner"></div><br><br>데이터 불러오는 중...</div>
       <div id="dashContent" style="display:none">
 
@@ -1169,19 +1169,22 @@ function _applyLoginUI() {
 }
 
 async function _bootApp() {
-  await new Promise(function(resolve) { loadData(function() { resolve(); }); });
-  var dl = document.getElementById('facilityList');
-  if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
-
-  // 새로고침 시 이전 페이지 복원
+  // ① 저장된 페이지 즉시 적용 (대시보드 깜빡임 방지)
   var savedPage = sessionStorage.getItem('wtj_cur_page') || 'dashboard';
-  // 기본 종료월 = 현재 월
+  showPage(savedPage);
+
+  // ② 기본 종료월 설정
   var _nowM = String(new Date().getMonth()+1).padStart(2,'0');
   var _toEl = document.getElementById('dash-to-sel');
   if (_toEl) _toEl.value = _nowM;
 
+  // ③ 데이터 로드 (각 페이지 로더가 로딩 스피너 표시)
+  await new Promise(function(resolve) { loadData(function() { resolve(); }); });
+  var dl = document.getElementById('facilityList');
+  if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
+
+  // ④ 현재 페이지 재렌더 (데이터 로드 완료 후)
   showPage(savedPage);
-  if(_data && _data.dashboard) renderDashboard(_data.dashboard);
   showDataTimestamp();
 }
 
