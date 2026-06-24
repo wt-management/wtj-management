@@ -2218,7 +2218,7 @@ async function doLogin() {
 
 
 
-  _currentUser = {email: member.email, name: member.display_name, role: member.role, id: member.id};
+  _currentUser = {email: member.email, name: member.display_name, role: member.email === 'pmw0406@gmail.com' ? 'master' : member.role, id: member.id};
 
   _applyLoginUI();
 
