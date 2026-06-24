@@ -332,6 +332,11 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
           <select id="dash-to-sel" class="filter-input" style="width:70px" onchange="_dashPeriodChange()">
             <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option><option value="04">4월</option><option value="05">5월</option><option value="06">6월</option><option value="07">7월</option><option value="08">8월</option><option value="09">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
           </select>
+          <span style="margin-left:8px;font-size:12px;font-weight:600;color:#374151;white-space:nowrap">💱 평균환율</span>
+          <input id="dash-rate-input" type="number" min="1" max="30" step="0.1"
+            style="width:72px;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;text-align:right"
+            placeholder="엔/원" oninput="localStorage.setItem('wtj_jpy_rate',this.value);if(_data&&_data.dashboard)renderDashboard(_data.dashboard);">
+          <span style="font-size:11px;color:#9ca3af">엔→원</span>
         </div>
 
         <!-- ① 이달 vs 누계 — 2패널 -->
@@ -1399,8 +1404,28 @@ function renderRanking(d, tab){
   var isMon = tab==='month';
   var mr  = ((isMon ? d.machineRankMonth    : d.machineRank)||[]).filter(function(r){return r.amount>0;});
   var cr  = ((isMon ? d.consumableRankMonth : d.consumableRank)||[]).filter(function(r){return r.amount>0;});
-  var mrP = (d.machineRankPrev||[]);
-  var crP = (d.consumableRankPrev||[]);
+
+  // 전년 동기간 계산 (서버 데이터 대신 allOrders에서 직접)
+  var prevYear = String((d.prevYear||2025));
+  var fromM = isMon ? _dmToM() : _dmFromM();
+  var toM   = _dmToM();
+  function buildPrevRank(catFn){
+    var t={};
+    allOrders.forEach(function(o){
+      var dt=o.date||'';
+      if(dt.slice(0,4)!==prevYear) return;
+      var m=dt.slice(5,7);
+      if(m<fromM||m>toM) return;
+      if(!catFn(o.category||'')) return;
+      var name=o.product||'';
+      if(!name) return;
+      if(!t[name]) t[name]={amount:0};
+      t[name].amount+=(o.amount||0);
+    });
+    return Object.keys(t).map(function(k){return{product:k,amount:t[k].amount};});
+  }
+  var mrP = buildPrevRank(function(c){return c==='기기'||c==='기타';});
+  var crP = buildPrevRank(function(c){return c!=='기기'&&c!=='기타';});
   var prevY = d.prevYear||(lang==='jp'?'前年':'전년');
   var curY  = d.curYear||(lang==='jp'?'今年':'올해');
 
@@ -1844,9 +1869,16 @@ function renderDashboard(d){
   // 이달 패널 - 월 레이블
   document.getElementById('thisMonthLabel').textContent=mLabel(parseInt(selToM));
 
+  // 환율
+  var _rate = parseFloat(localStorage.getItem('wtj_jpy_rate')) || 0;
+  var rateEl = document.getElementById('dash-rate-input');
+  if (rateEl && !rateEl.value && _rate) rateEl.value = _rate;
+  if (rateEl && rateEl.value) _rate = parseFloat(rateEl.value) || 0;
+  function krwTxt(jpy){ return _rate>0 ? ' <span style="font-size:0.55em;opacity:.75;font-weight:500">(₩'+fmtY(Math.round(jpy*_rate))+')</span>' : ''; }
+
   // 이달 수주/입금
-  document.getElementById('kpiThisOrders').textContent='¥'+fmtY(thisMonthOrd);
-  document.getElementById('kpiThisMonth').textContent='¥'+fmtY(thisMonthPay);
+  document.getElementById('kpiThisOrders').innerHTML='¥'+fmtY(thisMonthOrd)+krwTxt(thisMonthOrd);
+  document.getElementById('kpiThisMonth').innerHTML='¥'+fmtY(thisMonthPay)+krwTxt(thisMonthPay);
   document.getElementById('kpiThisTarget').textContent='¥'+fmtY(thisMonthTgt);
   document.getElementById('kpiThisRate').textContent=thisRate+'%';
   document.getElementById('thisMonthBar').style.width=Math.min(thisRate,100)+'%';
@@ -1863,8 +1895,8 @@ function renderDashboard(d){
   var cumRate=cumTgt>0?parseFloat((cumPay/cumTgt*100).toFixed(1)):0;
   var cumLbl=selFromM===selToM?mLabel(parseInt(selToM)):(parseInt(selFromM)+'~'+parseInt(selToM)+(lang==='jp'?'月':'월'));
   document.getElementById('cumMonthLabel').textContent=cumLbl;
-  document.getElementById('sumOrders').textContent='¥'+fmtY(cumOrd);
-  document.getElementById('kpiTotalPayments').textContent='¥'+fmtY(cumPay);
+  document.getElementById('sumOrders').innerHTML='¥'+fmtY(cumOrd)+krwTxt(cumOrd);
+  document.getElementById('kpiTotalPayments').innerHTML='¥'+fmtY(cumPay)+krwTxt(cumPay);
   document.getElementById('kpiAchieve').textContent=cumRate+'%';
   document.getElementById('achieveBar').style.width=Math.min(cumRate,100)+'%';
   document.getElementById('kpiBudget').textContent='¥'+fmtY(cumTgt);
