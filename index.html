@@ -1218,13 +1218,37 @@ var DATA_URL = 'https://raw.githubusercontent.com/wt-management/wtj-management/m
 var GAS_API_KEY = 'wtj2026';
 var _data = null; // data.json 캐시
 
+function computeDashboard(orders, payments, existingTarget) {
+  var monthlyPayments={}, monthlyMachine={}, monthlyConsumable={}, monthlyTarget=existingTarget||{};
+  payments.forEach(function(p){
+    var m=p.date?p.date.slice(0,7):'';
+    if(m) monthlyPayments[m]=(monthlyPayments[m]||0)+(p.amount||0);
+  });
+  orders.forEach(function(o){
+    var m=o.date?o.date.slice(0,7):'';
+    if(!m) return;
+    var cat=o.category||'기기';
+    if(cat==='기기'||cat==='기타'){
+      monthlyMachine[m]=(monthlyMachine[m]||0)+(o.amount||0);
+    } else {
+      monthlyConsumable[m]=(monthlyConsumable[m]||0)+(o.amount||0);
+    }
+  });
+  return {monthlyPayments:monthlyPayments, monthlyMachine:monthlyMachine,
+          monthlyConsumable:monthlyConsumable, monthlyTarget:monthlyTarget};
+}
+
 function loadData(cb) {
   fetch(DATA_URL + '?t=' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(d){
-      _data = d;
       allOrders = d.orders || [];
       allPayments = d.payments || [];
+      // dashboard 없으면 클라이언트에서 계산
+      if (!d.dashboard || !d.dashboard.monthlyPayments) {
+        d.dashboard = computeDashboard(allOrders, allPayments, d.dashboard && d.dashboard.monthlyTarget);
+      }
+      _data = d;
       if (cb) cb(d);
     })
     .catch(function(e){ console.error('loadData 실패:', e); if(cb) cb(null); });
