@@ -722,13 +722,13 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
           <span style="margin-left:8px;font-size:12px;font-weight:600;color:#374151;white-space:nowrap">💱 평균환율</span>
 
-          <input id="dash-rate-input" type="number" min="1" max="30" step="0.1"
+          <input id="dash-rate-input" type="number" min="1" max="3000" step="1"
 
             style="width:72px;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;text-align:right"
 
-            placeholder="엔/원" oninput="localStorage.setItem('wtj_jpy_rate',this.value);if(_data&&_data.dashboard)renderDashboard(_data.dashboard);">
+            placeholder="100엔→원" oninput="updateJpyRate();">
 
-          <span style="font-size:11px;color:#9ca3af">엔→원</span>
+          <span style="font-size:11px;color:#9ca3af">원/100엔</span>
 
         </div>
 
@@ -3613,6 +3613,37 @@ function fmtY(n){
 
 }
 
+var _jpyRate = 950;
+var _lastDashAmt = null;
+function fmtKRW(won){
+  if(!won && won!==0) return '-';
+  var a=Math.abs(won);
+  if(a>=1e8) return (won/1e8).toFixed(1)+'억원';
+  if(a>=1e4) return Math.round(won/1e4).toLocaleString()+'만원';
+  return Math.round(won).toLocaleString()+'원';
+}
+function krwTxt(jpy){
+  if(!(_jpyRate>0)) return '';
+  return ' <span style="font-size:0.8em;opacity:.85;font-weight:600;color:#0f766e">('+fmtKRW(jpy*_jpyRate/100)+')</span>';
+}
+function initJpyRate(){
+  var r=parseFloat(localStorage.getItem('wtj_jpy_rate'));
+  if(!(r>0) || r<50) r=950;
+  _jpyRate=r;
+  localStorage.setItem('wtj_jpy_rate', String(r));
+  var el=document.getElementById('dash-rate-input');
+  if(el && !el.value) el.value=r;
+}
+function updateJpyRate(){
+  var el=document.getElementById('dash-rate-input');
+  var r=parseFloat(el.value);
+  if(r>0){ _jpyRate=r; localStorage.setItem('wtj_jpy_rate', String(r)); }
+  if(!_lastDashAmt) return;
+  var a=_lastDashAmt;
+  var setKrw=function(id,v){var e=document.getElementById(id); if(e) e.innerHTML='¥'+fmtY(v)+krwTxt(v);};
+  setKrw('kpiThisOrders',a.thisOrd); setKrw('kpiThisMonth',a.thisPay);
+  setKrw('sumOrders',a.cumOrd); setKrw('kpiTotalPayments',a.cumPay);
+}
 function achCls(r){return r>=100?'achieve-high':r>=80?'achieve-high':r>=50?'achieve-mid':'achieve-low';}
 
 function catBadge(cat){
@@ -3847,15 +3878,15 @@ function renderDashboard(d){
 
   // 환율
 
-  var _rate = parseFloat(localStorage.getItem('wtj_jpy_rate')) || 0;
+  initJpyRate();
 
-  var rateEl = document.getElementById('dash-rate-input');
 
-  if (rateEl && !rateEl.value && _rate) rateEl.value = _rate;
 
-  if (rateEl && rateEl.value) _rate = parseFloat(rateEl.value) || 0;
 
-  function krwTxt(jpy){ return _rate>0 ? ' <span style="font-size:0.55em;opacity:.75;font-weight:500">(₩'+fmtY(Math.round(jpy*_rate))+')</span>' : ''; }
+
+
+
+
 
 
 
@@ -3897,6 +3928,7 @@ function renderDashboard(d){
 
   document.getElementById('cumMonthLabel').textContent=cumLbl;
 
+  _lastDashAmt={thisOrd:thisMonthOrd,thisPay:thisMonthPay,cumOrd:cumOrd,cumPay:cumPay};
   document.getElementById('sumOrders').innerHTML='¥'+fmtY(cumOrd)+krwTxt(cumOrd);
 
   document.getElementById('kpiTotalPayments').innerHTML='¥'+fmtY(cumPay)+krwTxt(cumPay);
