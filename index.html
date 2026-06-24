@@ -1174,7 +1174,8 @@ function _applyLoginUI() {
 
 async function _bootApp() {
   // ① 저장된 페이지 즉시 적용 (대시보드 깜빡임 방지)
-  var savedPage = sessionStorage.getItem('wtj_cur_page') || 'dashboard';
+  // 사이트 전환으로 도착한 경우(#at= 포함) → 항상 대시보드
+  var savedPage = location.hash.includes('#at=') ? 'dashboard' : (sessionStorage.getItem('wtj_cur_page') || 'dashboard');
   showPage(savedPage);
 
   // ② 기본 종료월 설정
