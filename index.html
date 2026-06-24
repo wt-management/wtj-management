@@ -1521,7 +1521,7 @@ var T = {
     euTitle:'📤 엑셀 업로드',euSub:'매출현황 엑셀 파일을 업로드하여 수주/입금 데이터를 동기화합니다',
     euDropLabel:'파일을 드래그하거나 클릭해서 선택',
     euLblYear:'연도',euLblMonth:'월',euLblType:'구분',
-    btnUpload:'구글 시트에 저장',
+    btnUpload:'GitHub에 저장',
     lblCumPayTitle:'누계 매출',
     ctDTh1:'입금일',ctDTh2:'거래처명',ctDTh3:'수량',ctDTh4:'입금금액',
     placeholders:{inFacility:'거래처명 입력 (자동완성)',inPayDesc:'거래처명 또는 내용',payOrderSearch:'거래처명 또는 제품명으로 검색...',osSearchFilter:'거래처명 / 제품명 검색...'}
@@ -2358,38 +2358,42 @@ function submitUpload(){
   document.getElementById('euSuccess').style.display='none';
   document.getElementById('euError').style.display='none';
   var orders=_euParsed.orders||[], pays=_euParsed.payments||[];
-  var CHUNK=30, oIdx=0, pIdx=0;
-  function nextStep(){
-    if(oIdx===0){
-      gasGet('importClear',{},function(r){if(r&&r.success)nextStep();else fail(r&&r.error);});
-      oIdx=-1; return;
-    }
-    if(oIdx===-1) oIdx=0;
-    if(oIdx<orders.length){
-      gasGet('importOrdersChunk',{rows:orders.slice(oIdx,oIdx+CHUNK),replace:false},function(r){
-        if(r&&r.success){oIdx+=CHUNK;setTimeout(nextStep,5000);}else fail(r&&r.error);
-      }); return;
-    }
-    if(pIdx<pays.length){
-      gasGet('importPaymentsChunk',{rows:pays.slice(pIdx,pIdx+CHUNK),replace:pIdx===0},function(r){
-        if(r&&r.success){pIdx+=CHUNK;setTimeout(nextStep,5000);}else fail(r&&r.error);
-      }); return;
-    }
-    gasGetWithPush('exportNow',{},function(res){
-      btn.disabled=false; btn.textContent=(jp2?'Googleシートに保存':'구글 시트에 저장');
+
+  var token=localStorage.getItem('wtj_gh_token');
+  if(!token){
+    btn.disabled=false; btn.textContent=(jp2?'GitHubに保存':'GitHub에 저장');
+    document.getElementById('euError').textContent='❌ GitHub 토큰 없음';
+    document.getElementById('euError').style.display='block';
+    return;
+  }
+
+  var json=JSON.stringify({orders:orders,payments:pays,updatedAt:new Date().toISOString()});
+  var b64=btoa(unescape(encodeURIComponent(json)));
+  var apiUrl='https://api.github.com/repos/wt-management/wtj-management/contents/data.json';
+  var headers={'Authorization':'token '+token,'Content-Type':'application/json','User-Agent':'WTJ-App'};
+
+  fetch(apiUrl,{headers:headers})
+    .then(function(r){return r.ok?r.json():{};})
+    .then(function(cur){
+      var body={message:'엑셀 업로드 '+new Date().toLocaleDateString('ko-KR'),content:b64};
+      if(cur&&cur.sha) body.sha=cur.sha;
+      return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+    })
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      btn.disabled=false; btn.textContent=(jp2?'GitHubに保存':'GitHub에 저장');
       document.getElementById('euSuccess').textContent=jp2
         ?'✅ 完了！受注:'+orders.length+'件 / 入金:'+pays.length+'件'
         :'✅ 완료! 수주:'+orders.length+'건 / 입금:'+pays.length+'건';
       document.getElementById('euSuccess').style.display='block';
+      allOrders=orders; allPayments=pays; _data={orders:orders,payments:pays};
       _ctData=null; _baData=null;
+    })
+    .catch(function(e){
+      btn.disabled=false; btn.textContent=(jp2?'GitHubに保存':'GitHub에 저장');
+      document.getElementById('euError').textContent='❌ '+(e.message||'오류');
+      document.getElementById('euError').style.display='block';
     });
-  }
-  function fail(e){
-    btn.disabled=false; btn.textContent=(jp2?'Googleシートに保存':'구글 시트에 저장');
-    document.getElementById('euError').textContent='❌ '+(e||'오류');
-    document.getElementById('euError').style.display='block';
-  }
-  nextStep();
 }
 
 function resetUpload(){
