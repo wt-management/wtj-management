@@ -2156,19 +2156,25 @@ function filterPayments(){
 }
 function renderPayments(data){
   data=data.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  // orderRef → 수주 데이터 맵
+  var orderMap={};
+  allOrders.forEach(function(o){ if(o.stableId) orderMap[o.stableId]=o; });
   var total=0,tbody=document.getElementById('paymentsTableBody');
   tbody.innerHTML=data.map(function(p){
     total+=p.amount||0;
     var idx=allPayments.indexOf(p);
+    var o=orderMap[p.orderRef||'']||{};
+    var orderDate=o.date||'-';
+    var product=o.product||p.product||'-';
+    var category=o.category||p.category||'';
+    var qty=o.qty||p.qty||null;
     return '<tr>'+
       '<td>'+p.date+'</td>'+
-      '<td style="color:#94a3b8;font-size:12px">'+(p.orderDate||'-')+'</td>'+
-      '<td>'+p.description+'</td>'+
-      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(p.product||'')+'">'+
-        (p.product?p.product:'<span style="color:#cbd5e1">-</span>')+
-      '</td>'+
-      '<td>'+(p.category?catBadge(p.category):'<span style="color:#cbd5e1">-</span>')+'</td>'+
-      '<td class="amount">'+(p.qty?fmt(p.qty):'<span style="color:#cbd5e1">-</span>')+'</td>'+
+      '<td style="color:#64748b;font-size:12px">'+orderDate+'</td>'+
+      '<td>'+(p.description||o.facility||'-')+'</td>'+
+      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+product+'">'+product+'</td>'+
+      '<td>'+(category?catBadge(category):'<span style="color:#cbd5e1">-</span>')+'</td>'+
+      '<td class="amount">'+(qty!=null?fmt(qty):'<span style="color:#cbd5e1">-</span>')+'</td>'+
       '<td class="amount">¥'+fmt(p.amount)+'</td>'+
       '<td style="white-space:nowrap">'+
         '<button class="edit-btn" onclick="openEditPayment('+idx+')">✏️</button> '+
