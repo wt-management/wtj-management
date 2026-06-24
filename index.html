@@ -1392,6 +1392,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
                   <th id="thPayStatus" style="text-align:center">입금상태</th>
 
+                  <th id="thInvoice" style="text-align:center">인보이스/매출</th>
+
                 </tr>
 
               </thead>
@@ -2563,6 +2565,78 @@ function computeDashboard(orders, payments, existingTarget) {
 
 }
 
+// ── 인보이스(매출 인식) — 매출 = 인보이스 발행 기준 ──────────────────
+var WTJ_INV = {};   // order_id → invoice row
+function _orderKey(o){ return String((o&&(o.stableId||o._row||o.excelNo))||''); }
+function _todayStrJP(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+// 인보이스 데이터를 주문에 병합하고 월별 매출(인보이스 기준) 계산
+function applyInvoices(d, invoices, ok){
+  WTJ_INV = {};
+  (invoices||[]).forEach(function(v){ if(v && v.order_id) WTJ_INV[v.order_id]=v; });
+  var monthlyRevenue={};
+  (d.orders||[]).forEach(function(o){
+    var inv=WTJ_INV[_orderKey(o)];
+    if(inv){
+      o.invoiceNo=inv.invoice_no; o.invoiceDate=inv.invoice_date;
+      o.invoiceAmount=(inv.amount!=null?inv.amount:(o.amount||0));
+      var m=(inv.invoice_date||'').slice(0,7);
+      if(m) monthlyRevenue[m]=(monthlyRevenue[m]||0)+(o.invoiceAmount||0);
+    } else { o.invoiceNo=null; o.invoiceDate=null; o.invoiceAmount=0; }
+  });
+  d.dashboard=d.dashboard||{};
+  d.dashboard.monthlyRevenue=monthlyRevenue;
+  if(ok) d.dashboard.monthlyPayments=monthlyRevenue;   // 테이블 정상일 때만 매출을 인보이스 기준으로 교체(없으면 기존 유지)
+  allOrders=d.orders||allOrders;
+}
+
+function openInvoice(idx){
+  var o=allOrders[idx]; if(!o) return;
+  var jp=lang==='jp';
+  document.getElementById('invOrderIdx').value=idx;
+  document.getElementById('invInfo').textContent=o.date+' / '+o.facility+' / '+o.product+' / ¥'+fmt(o.amount);
+  var inv=WTJ_INV[_orderKey(o)];
+  document.getElementById('invNo').value=inv?inv.invoice_no:'';
+  document.getElementById('invDate').value=inv?inv.invoice_date:_todayStrJP();
+  document.getElementById('invAmount').value=inv?(inv.amount!=null?inv.amount:o.amount):(o.amount||0);
+  document.getElementById('invMemo').value=(inv&&inv.memo)?inv.memo:'';
+  document.getElementById('invError').style.display='none';
+  document.getElementById('btnDelInvoice').style.display=inv?'inline-block':'none';
+  document.getElementById('invModalTitle').textContent=jp?'請求書（売上認識）':'인보이스 (매출 인식)';
+  document.getElementById('modalInvoice').style.display='flex';
+}
+function closeInvoice(){ document.getElementById('modalInvoice').style.display='none'; }
+
+function saveInvoice(){
+  var jp=lang==='jp';
+  var idx=document.getElementById('invOrderIdx').value;
+  var o=allOrders[idx]; if(!o) return;
+  var no=document.getElementById('invNo').value.trim();
+  var dt=document.getElementById('invDate').value;
+  var amt=Math.round(Number(document.getElementById('invAmount').value||0));
+  var err=document.getElementById('invError');
+  if(!no||!dt){ err.textContent=jp?'請求番号と発行日を入力してください。':'인보이스 번호와 발행일을 입력하세요.'; err.style.display='block'; return; }
+  var btn=document.getElementById('btnSaveInvoice'); btn.disabled=true; btn.textContent=jp?'保存中...':'저장 중...';
+  var row={order_id:_orderKey(o), invoice_no:no, invoice_date:dt, amount:amt||(o.amount||0), memo:document.getElementById('invMemo').value.trim()||null, updated_at:new Date().toISOString()};
+  _sb.from('wtj_invoices').upsert(row).then(function(r){
+    btn.disabled=false; btn.textContent=jp?'保存':'저장';
+    if(r.error){ err.textContent='❌ '+r.error.message; err.style.display='block'; return; }
+    closeInvoice();
+    loadData(function(){ renderOrders(allOrders); });
+  });
+}
+function deleteInvoice(){
+  var jp=lang==='jp';
+  var idx=document.getElementById('invOrderIdx').value;
+  var o=allOrders[idx]; if(!o) return;
+  if(!confirm(jp?'この請求（売上認識）を取消しますか？':'이 인보이스(매출 인식)를 취소할까요?')) return;
+  _sb.from('wtj_invoices').delete().eq('order_id', _orderKey(o)).then(function(r){
+    if(r.error){ alert('❌ '+r.error.message); return; }
+    closeInvoice();
+    loadData(function(){ renderOrders(allOrders); });
+  });
+}
+
 
 
 function loadData(cb) {
@@ -2585,9 +2659,16 @@ function loadData(cb) {
 
       }
 
-      _data = d;
+      // 인보이스(매출 인식) 병합 — 매출 = 인보이스 발행 기준
+      return _sb.from('wtj_invoices').select('*').then(function(ir){
 
-      if (cb) cb(d);
+        applyInvoices(d, (ir && !ir.error && ir.data) || [], !!(ir && !ir.error));
+
+        _data = d;
+
+        if (cb) cb(d);
+
+      });
 
     })
 
@@ -3086,7 +3167,7 @@ var T = {
 
     ordersTableTitle:'수주 현황',paymentsTableTitle:'입금 현황',baTableTitle:'목표 vs 실적 ('+new Date().getFullYear()+'년도)',
 
-    thOrderDate:'수주일',thFacility:'거래처명',thProduct:'제품명',thCategory:'구분',thQty:'수량',thUnitPrice:'단가(엔)',thAmount:'금액(엔)',
+    thOrderDate:'수주일',thFacility:'거래처명',thProduct:'제품명',thCategory:'구분',thQty:'수량',thUnitPrice:'단가(엔)',thAmount:'금액(엔)',thInvoice:'인보이스/매출',
 
     thPayDate:'입금일',thPayOrderDate:'수주일',thDesc:'거래처/내용',thPayProduct:'제품명',thPayCat:'구분',thPayQty:'수량',thPayAmount:'금액(엔)',thBaProduct:'제품명',
 
@@ -3110,11 +3191,11 @@ var T = {
 
     lblThisPanelTitle:'📅 이달 현황',lblThisOrdersTitle:'수주 금액',lblThisPayTitle:'매출',
 
-    lblThisRateTitle:'이달 달성률 (입금기준)',lblThisTargetTitle:'목표',
+    lblThisRateTitle:'이달 달성률 (인보이스 매출기준)',lblThisTargetTitle:'목표',
 
     cumMonthStart:'1월',lblCumPanelTitle:'📊 누계',lblCumOrdersTitle:'수주 누계',lblCumPayTitle:'누계 매출',
 
-    lblUnpaidTitle:'· 미수금',lblCumRateTitle:'누계 달성률 (입금기준)',lblCumBudgetTitle:'누계 목표',
+    lblUnpaidTitle:'· 미수금',lblCumRateTitle:'누계 달성률 (인보이스 매출기준)',lblCumBudgetTitle:'누계 목표',
 
     chartTitleAchieve:'📈 월별 매출 실적 vs 목표 & 달성률',
 
@@ -3180,7 +3261,7 @@ var T = {
 
     baLblTarget:'연간 목표',baLblCumPay:'누계 매출',baLblRate:'목표 달성률',baLblYoy:'전년 매출 대비',
 
-    baKpiMonthSfx:'월까지 누계',baLblBadge:'입금기준',
+    baKpiMonthSfx:'월까지 누계',baLblBadge:'인보이스기준',
 
     euTitle:'📤 엑셀 업로드',euSub:'매출현황 엑셀 파일을 업로드하여 수주/입금 데이터를 동기화합니다',
 
@@ -3208,7 +3289,7 @@ var T = {
 
     ordersTableTitle:'受注一覧',paymentsTableTitle:'入金一覧',baTableTitle:'予実管理 ('+new Date().getFullYear()+'年度)',
 
-    thOrderDate:'受注日',thFacility:'取引先名',thProduct:'商品名',thCategory:'区分',thQty:'数量',thUnitPrice:'単価(円)',thAmount:'金額(円)',
+    thOrderDate:'受注日',thFacility:'取引先名',thProduct:'商品名',thCategory:'区分',thQty:'数量',thUnitPrice:'単価(円)',thAmount:'金額(円)',thInvoice:'請求/売上',
 
     thPayDate:'入金日',thPayOrderDate:'受注日',thDesc:'取引先/内容',thPayProduct:'商品名',thPayCat:'区分',thPayQty:'数量',thPayAmount:'金額(円)',thBaProduct:'商品名',
 
@@ -3232,17 +3313,17 @@ var T = {
 
     lblThisPanelTitle:'📅 今月実績',lblThisOrdersTitle:'受注金額',lblThisPayTitle:'売上',
 
-    lblThisRateTitle:'今月達成率（入金基準）',lblThisTargetTitle:'目標',
+    lblThisRateTitle:'今月達成率（請求/売上基準）',lblThisTargetTitle:'目標',
 
     cumMonthStart:'1月',lblCumPanelTitle:'📊 累計',lblCumOrdersTitle:'受注累計',lblCumPayTitle:'累計売上',
 
-    lblUnpaidTitle:'· 未収金',lblCumRateTitle:'累計達成率（入金基準）',lblCumBudgetTitle:'累計目標',
+    lblUnpaidTitle:'· 未収金',lblCumRateTitle:'累計達成率（請求/売上基準）',lblCumBudgetTitle:'累計目標',
 
     chartTitleAchieve:'📈 月別売上実績 vs 目標 & 達成率',
 
     chartTitleCat:'🔀 機器 / 消耗品 月別受注 & 比率',
 
-    tableAchieveTitle:'📋 月別目標 · 実績 · 達成率',tableAchieveSub:'入金基準',
+    tableAchieveTitle:'📋 月別目標 · 実績 · 達成率',tableAchieveSub:'請求基準',
 
     thAchCat:'区分',thAchYear:'年間',
 
@@ -3298,7 +3379,7 @@ var T = {
 
     baLblTarget:'年間目標',baLblCumPay:'累計売上',baLblRate:'目標達成率',baLblYoy:'前年売上比',
 
-    baKpiMonthSfx:'月まで累計',baLblBadge:'入金基準',
+    baKpiMonthSfx:'月まで累計',baLblBadge:'請求基準',
 
     euTitle:'📤 Excelアップロード',euSub:'売上ExcelファイルをアップロードしてGoogleシートにデータを同期します',
 
@@ -4310,6 +4391,14 @@ function renderOrders(data){
 
   }
 
+  function invCell(o,idx){
+    var jp=lang==='jp';
+    if(o.invoiceNo){
+      return '<span style="background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer" onclick="openInvoice('+idx+')" title="'+(jp?'発行日':'발행일')+': '+(o.invoiceDate||'')+' — '+(jp?'クリックで編集':'클릭하면 수정')+'">🧾 '+o.invoiceNo+'</span>';
+    }
+    return '<button class="edit-btn" style="font-size:11px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:6px;padding:3px 8px;cursor:pointer" onclick="openInvoice('+idx+')">'+(jp?'🧾 請求発行':'🧾 인보이스 발행')+'</button>';
+  }
+
   var total=0,tbody=document.getElementById('ordersTableBody');
 
   tbody.innerHTML=data.map(function(o){
@@ -4326,6 +4415,8 @@ function renderOrders(data){
 
       '<td style="text-align:center">'+payBadge(o)+'</td>'+
 
+      '<td style="text-align:center">'+invCell(o,idx)+'</td>'+
+
       '<td style="white-space:nowrap">'+
 
         '<button class="edit-btn" onclick="openEditOrder('+idx+')">✏️</button> '+
@@ -4334,7 +4425,7 @@ function renderOrders(data){
 
       '</td></tr>';
 
-  }).join('')||'<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'データなし':'데이터 없음')+'</td></tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'データなし':'데이터 없음')+'</td></tr>';
 
   document.getElementById('ordersFooter').textContent=(lang==='jp'?'合計 '+data.length+'件 | 合計金額':'총 '+data.length+'건 | 합계')+' ¥'+fmt(total);
 
@@ -6117,6 +6208,37 @@ document.addEventListener('click', function(e) {
 </div>
 
 
+
+<!-- ── 인보이스(매출 인식) 모달 ── -->
+
+<div id="modalInvoice" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:28px;width:460px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 id="invModalTitle" style="font-size:16px;font-weight:700;color:#0f172a">🧾 인보이스 (매출 인식)</h3>
+      <button onclick="closeInvoice()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b">✕</button>
+    </div>
+    <div id="invInfo" style="font-size:12px;color:#64748b;margin-bottom:16px;padding:8px 10px;background:#f8fafc;border-radius:8px"></div>
+    <input type="hidden" id="invOrderIdx">
+    <div style="display:grid;gap:12px">
+      <div><label style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">인보이스 번호 / 請求番号 *</label>
+        <input type="text" id="invNo" class="form-input" placeholder="예: INV-2026-001" autocomplete="off"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">발행일 / 発行日 * <span style="color:#94a3b8;font-weight:400">(매출인식일)</span></label>
+          <input type="date" id="invDate" class="form-input"></div>
+        <div><label style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">매출 금액 / 売上金額 (엔)</label>
+          <input type="number" id="invAmount" class="form-input"></div>
+      </div>
+      <div><label style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">비고 / 備考</label>
+        <input type="text" id="invMemo" class="form-input"></div>
+    </div>
+    <div id="invError" style="display:none;margin-top:10px;color:#ef4444;font-size:12px"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+      <button id="btnDelInvoice" onclick="deleteInvoice()" style="display:none;margin-right:auto;padding:8px 18px;border:1px solid #fecaca;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;color:#dc2626">매출 취소</button>
+      <button onclick="closeInvoice()" style="padding:8px 18px;border:1px solid #e2e8f0;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;color:#64748b">닫기</button>
+      <button id="btnSaveInvoice" onclick="saveInvoice()" style="padding:8px 18px;background:#2563eb;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#fff">저장</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── 입금 수정 모달 ── -->
 
