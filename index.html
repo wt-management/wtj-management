@@ -198,6 +198,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 </style>
 </head>
 <body>
+<div id="__page_veil" style="position:fixed;inset:0;background:#0f172a;z-index:9999"></div>
 
 <!-- ── 로그인 화면 ──────────────────────────────────────────── -->
 <div id="login-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1a2744 100%);z-index:9999;align-items:center;justify-content:center">
@@ -1173,23 +1174,16 @@ function _applyLoginUI() {
 }
 
 async function _bootApp() {
-  // ① 저장된 페이지 즉시 적용 (대시보드 깜빡임 방지)
-  // 사이트 전환으로 도착한 경우(#at= 포함) → 항상 대시보드
-  var savedPage = location.hash.includes('#at=') ? 'dashboard' : (sessionStorage.getItem('wtj_cur_page') || 'dashboard');
-  showPage(savedPage);
-
-  // ② 기본 종료월 설정
+  var savedPage = location.hash.includes('at=') ? 'dashboard' : (sessionStorage.getItem('wtj_cur_page') || 'dashboard');
   var _nowM = String(new Date().getMonth()+1).padStart(2,'0');
   var _toEl = document.getElementById('dash-to-sel');
   if (_toEl) _toEl.value = _nowM;
-
-  // ③ 데이터 로드 (각 페이지 로더가 로딩 스피너 표시)
   await new Promise(function(resolve) { loadData(function() { resolve(); }); });
   var dl = document.getElementById('facilityList');
   if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
-
-  // ④ 현재 페이지 재렌더 (데이터 로드 완료 후)
   showPage(savedPage);
+  var veil = document.getElementById('__page_veil');
+  if(veil) veil.style.display = 'none';
   showDataTimestamp();
 }
 
