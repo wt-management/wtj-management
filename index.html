@@ -1437,6 +1437,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
             <div class="table-title" id="paymentsTableTitle">입금 현황</div>
 
+            <button id="btnAddPayment" onclick="openAddPayment()" style="padding:7px 14px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">➕ 입금 추가</button>
+
             <div class="table-filters">
 
               <select class="filter-input" id="payYearFilter" onchange="filterPayments()">
@@ -2679,7 +2681,7 @@ function loadData(cb) {
 
       allOrders = d.orders || [];
 
-      allPayments = d.payments || [];
+      allPayments = (d.payments||[]).concat(d.manualPayments||[]);
 
       // dashboard 없으면 클라이언트에서 계산
 
@@ -2857,11 +2859,15 @@ function gasGetWithPush(action, data, cb) {
 
     if (res && res.success && res.data) {
 
+      var _mp=(_data&&_data.manualPayments)||[];
+
       _data = res.data;
+
+      if(_mp.length&&!(_data.manualPayments&&_data.manualPayments.length)) _data.manualPayments=_mp;
 
       allOrders = _data.orders || [];
 
-      allPayments = _data.payments || [];
+      allPayments = (_data.payments||[]).concat(_data.manualPayments||[]);
 
       pushDataJson(_data);
 
@@ -3434,6 +3440,8 @@ var T = {
 T.kr.thClinic='클리닉명'; T.kr.thPayClinic='클리닉명'; T.kr.osDClinic='클리닉명';
 
 T.jp.thClinic='クリニック名'; T.jp.thPayClinic='クリニック名'; T.jp.osDClinic='クリニック名';
+
+T.kr.btnAddPayment='➕ 입금 추가'; T.jp.btnAddPayment='➕ 入金追加';
 
 function setLang(l){
 
@@ -4547,6 +4555,8 @@ function renderPayments(data){
 
     var idx=allPayments.indexOf(p);
 
+    var isM=!!p.manual;
+
     var o=orderMap[p.orderRef||'']||{};
 
     var orderDate=o.date||'-';
@@ -4563,7 +4573,7 @@ function renderPayments(data){
 
       '<td style="color:#64748b;font-size:12px">'+orderDate+'</td>'+
 
-      '<td>'+(p.description||o.facility||'-')+'</td>'+
+      '<td>'+(isM?'<span style="background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px">수기</span>':'')+(p.description||o.facility||'-')+'</td>'+
 
       '<td>'+(o.clinic||'<span style="color:#cbd5e1">-</span>')+'</td>'+
 
@@ -4577,9 +4587,7 @@ function renderPayments(data){
 
       '<td style="white-space:nowrap">'+
 
-        '<button class="edit-btn" onclick="openEditPayment('+idx+')">✏️</button> '+
-
-        '<button class="del-btn" onclick="confirmDeletePayment('+idx+')">🗑️</button>'+
+        (isM?('<button class="edit-btn" onclick="openEditPayment('+idx+')">✏️</button> '+'<button class="del-btn" onclick="confirmDeletePayment('+idx+')">🗑️</button>'):'<span style="color:#cbd5e1;font-size:11px">자금일보</span>')+
 
       '</td></tr>';
 
@@ -5619,23 +5627,31 @@ function submitPayment(){
 
   var desc=document.getElementById('inPayDesc').value.trim();
 
-  var amt=document.getElementById('inPayAmount').value;
+  var amt=parseFloat(String(document.getElementById('inPayAmount').value).replace(/,/g,''))||0;
 
   if(!d||!desc||!amt){alert(lang==='kr'?'모든 필수 항목을 입력해주세요.':'必須項目を入力してください。');return;}
 
+  if(!_data){alert(lang==='jp'?'データ読み込み後に再試行してください。':'데이터 로딩 후 다시 시도하세요.');return;}
+
   btn.disabled=true;btn.textContent=(lang==='jp'?'登録中...':'등록 중...');
 
-  gasGetWithPush('addPayment',{date:d,description:desc,amount:amt,orderRef:document.getElementById('inPayOrderRef').value},function(res){
+  if(!_data.manualPayments) _data.manualPayments=[];
 
-    btn.disabled=false;btn.textContent=T[lang].btnSubmitPay;
+  _data.manualPayments.push({mid:'M'+Date.now()+Math.floor(Math.random()*1000),manual:true,date:d,description:desc,amount:amt,note:'',orderRef:document.getElementById('inPayOrderRef').value});
 
-    var ok=document.getElementById('paySuccess'),err=document.getElementById('payError');
+  pushDataJson(_data);
 
-    if(res&&res.success){ok.textContent=T[lang].msgPaySuccess;ok.style.display='block';err.style.display='none';resetPayForm();setTimeout(function(){ok.style.display='none';},3000);}
+  allPayments=(_data.payments||[]).concat(_data.manualPayments||[]);
 
-    else{err.style.display='block';err.textContent='❌ '+(res&&res.error||'오류');}
+  _ctData=null;_baData=null;_osData=null;
 
-  });
+  btn.disabled=false;btn.textContent=T[lang].btnSubmitPay;
+
+  var ok=document.getElementById('paySuccess'),err=document.getElementById('payError');
+
+  ok.textContent=(lang==='jp'?'✅ 入金を登録しました。':'✅ 입금이 등록되었습니다.');ok.style.display='block';err.style.display='none';
+
+  resetPayForm();setTimeout(function(){ok.style.display='none';},3000);
 
 }
 
@@ -6035,13 +6051,45 @@ function confirmDeleteOrder(idx){
 
 
 
+function openAddPayment(){
+
+  document.getElementById('epRow').value='';
+
+  document.getElementById('epMid').value='';
+
+  document.getElementById('epOrderRef').value='';
+
+  document.getElementById('epDate').value=new Date().toISOString().slice(0,10);
+
+  document.getElementById('epDesc').value='';
+
+  document.getElementById('epAmount').value='';
+
+  document.getElementById('epNote').value='';
+
+  document.getElementById('epError').style.display='none';
+
+  document.getElementById('epTitle').textContent=(lang==='jp'?'➕ 入金追加':'➕ 입금 추가');
+
+  document.getElementById('modalEditPayment').style.display='flex';
+
+}
+
+
+
 function openEditPayment(idx){
 
   var p=allPayments[idx];
 
   if(!p) return;
 
-  document.getElementById('epRow').value=p._row;
+  document.getElementById('epRow').value=p._row||'';
+
+  document.getElementById('epMid').value=p.mid||'';
+
+  document.getElementById('epOrderRef').value=p.orderRef||'';
+
+  document.getElementById('epTitle').textContent=(lang==='jp'?'✏️ 入金修正':'✏️ 입금 수정');
 
   document.getElementById('epDate').value=p.date;
 
@@ -6061,43 +6109,47 @@ function closeEditPayment(){ document.getElementById('modalEditPayment').style.d
 
 function saveEditPayment(){
 
-  var btn=document.getElementById('btnSavePayment');
+  var mid=document.getElementById('epMid').value;
 
-  btn.disabled=true; btn.textContent=(lang==='jp'?'保存中...':'저장 중...');
+  var date=document.getElementById('epDate').value;
 
-  var d={
+  var desc=document.getElementById('epDesc').value.trim();
 
-    _row: document.getElementById('epRow').value,
+  var amount=parseFloat(String(document.getElementById('epAmount').value).replace(/,/g,''))||0;
 
-    date: document.getElementById('epDate').value,
+  var note=document.getElementById('epNote').value;
 
-    description: document.getElementById('epDesc').value.trim(),
+  var orderRef=document.getElementById('epOrderRef').value;
 
-    amount: document.getElementById('epAmount').value,
-
-    note: document.getElementById('epNote').value
-
-  };
-
-  if(!d.date||!d.description||!d.amount){
+  if(!date||!desc||!amount){
 
     document.getElementById('epError').textContent=(lang==='jp'?'必須項目を入力してください。':'필수 항목을 모두 입력해주세요.');
 
-    document.getElementById('epError').style.display='block';
-
-    btn.disabled=false; btn.textContent=(lang==='jp'?'保存':'저장'); return;
+    document.getElementById('epError').style.display='block'; return;
 
   }
 
-  gasGetWithPush('updatePayment',d,function(res){
+  if(!_data) return;
 
-    btn.disabled=false; btn.textContent=(lang==='jp'?'保存':'저장');
+  if(!_data.manualPayments) _data.manualPayments=[];
 
-    if(res&&res.success){closeEditPayment();loadPaymentsList();}
+  if(mid){
 
-    else{document.getElementById('epError').textContent='❌ '+(res&&res.error||'오류');document.getElementById('epError').style.display='block';}
+    for(var i=0;i<_data.manualPayments.length;i++){ if(_data.manualPayments[i].mid===mid){ _data.manualPayments[i].date=date; _data.manualPayments[i].description=desc; _data.manualPayments[i].amount=amount; _data.manualPayments[i].note=note; _data.manualPayments[i].orderRef=orderRef; break; } }
 
-  });
+  } else {
+
+    _data.manualPayments.push({mid:'M'+Date.now()+Math.floor(Math.random()*1000),manual:true,date:date,description:desc,amount:amount,note:note,orderRef:orderRef});
+
+  }
+
+  pushDataJson(_data);
+
+  allPayments=(_data.payments||[]).concat(_data.manualPayments||[]);
+
+  _ctData=null; _baData=null; _osData=null;
+
+  closeEditPayment(); loadPaymentsList();
 
 }
 
@@ -6107,19 +6159,25 @@ function confirmDeletePayment(idx){
 
   if(!p) return;
 
+  if(!p.manual){ alert(lang==='jp'?'資金日報データは削除できません。手動追加分のみ削除可能です。':'자금일보 데이터는 삭제할 수 없습니다. 수기 추가분만 삭제됩니다.'); return; }
+
   if(!confirm((p.date+' / '+p.description+' / ¥'+fmt(p.amount)+'\n\n'+(lang==='jp'?'この入金を削除しますか？':'이 입금 건을 삭제할까요?')))) return;
 
-  gasGetWithPush('deletePayment',{row:p._row},function(res){
+  if(_data&&_data.manualPayments){
 
-    if(res&&res.success){loadPaymentsList();}
+    _data.manualPayments=_data.manualPayments.filter(function(x){return x.mid!==p.mid;});
 
-    else alert('❌ '+(res&&res.error||'오류'));
+    pushDataJson(_data);
 
-  });
+    allPayments=(_data.payments||[]).concat(_data.manualPayments||[]);
+
+    _ctData=null; _baData=null; _osData=null;
+
+  }
+
+  loadPaymentsList();
 
 }
-
-
 
 // ─── Init ────────────────────────────────────────────────────
 
@@ -6308,13 +6366,17 @@ document.addEventListener('click', function(e) {
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
 
-      <h3 style="font-size:16px;font-weight:700;color:#0f172a">✏️ 입금 수정</h3>
+      <h3 id="epTitle" style="font-size:16px;font-weight:700;color:#0f172a">✏️ 입금 수정</h3>
 
       <button onclick="closeEditPayment()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b">✕</button>
 
     </div>
 
     <input type="hidden" id="epRow">
+
+    <input type="hidden" id="epMid">
+
+    <input type="hidden" id="epOrderRef">
 
     <div style="display:grid;gap:12px">
 
