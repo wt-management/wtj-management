@@ -1387,6 +1387,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
                   <th id="thFacility">거래처명</th>
 
+                  <th id="thClinic">클리닉명</th>
+
                   <th id="thProduct">제품명</th>
 
                   <th id="thCategory">구분</th>
@@ -1484,6 +1486,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
                   <th id="thPayOrderDate">수주일</th>
 
                   <th id="thDesc">거래처 / 내용</th>
+
+                  <th id="thPayClinic">클리닉명</th>
 
                   <th id="thPayProduct">제품명</th>
 
@@ -1966,6 +1970,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
                   <th id="osD1">수주일</th>
 
                   <th id="osD2">거래처명</th>
+
+                  <th id="osDClinic">클리닉명</th>
 
                   <th id="osD3">제품명</th>
 
@@ -3425,6 +3431,10 @@ var T = {
 
 
 
+T.kr.thClinic='클리닉명'; T.kr.thPayClinic='클리닉명'; T.kr.osDClinic='클리닉명';
+
+T.jp.thClinic='クリニック名'; T.jp.thPayClinic='クリニック名'; T.jp.osDClinic='クリニック名';
+
 function setLang(l){
 
   lang=l;
@@ -4431,7 +4441,7 @@ function renderOrders(data){
 
     var idx=allOrders.indexOf(o);
 
-    return '<tr><td>'+o.date+'</td><td>'+o.facility+'</td><td>'+o.product+'</td>'+
+    return '<tr><td>'+o.date+'</td><td>'+o.facility+'</td><td>'+(o.clinic||'<span style="color:#cbd5e1">-</span>')+'</td><td>'+o.product+'</td>'+
 
       '<td>'+catBadge(o.category)+'</td>'+
 
@@ -4449,7 +4459,7 @@ function renderOrders(data){
 
       '</td></tr>';
 
-  }).join('')||'<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'データなし':'데이터 없음')+'</td></tr>';
+  }).join('')||'<tr><td colspan="11" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'データなし':'데이터 없음')+'</td></tr>';
 
   document.getElementById('ordersFooter').textContent=(lang==='jp'?'合計 '+data.length+'件 | 合計金額':'총 '+data.length+'건 | 합계')+' ¥'+fmt(total);
 
@@ -4555,6 +4565,8 @@ function renderPayments(data){
 
       '<td>'+(p.description||o.facility||'-')+'</td>'+
 
+      '<td>'+(o.clinic||'<span style="color:#cbd5e1">-</span>')+'</td>'+
+
       '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+product+'">'+product+'</td>'+
 
       '<td>'+(category?catBadge(category):'<span style="color:#cbd5e1">-</span>')+'</td>'+
@@ -4571,7 +4583,7 @@ function renderPayments(data){
 
       '</td></tr>';
 
-  }).join('')||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'データなし':'데이터 없음')+'</td></tr>';
+  }).join('')||'<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'データなし':'데이터 없음')+'</td></tr>';
 
   document.getElementById('paymentsFooter').textContent=(lang==='jp'?'合計 '+data.length+'件 | 合計金額':'총 '+data.length+'건 | 합계')+' ¥'+fmt(total);
 
@@ -4683,6 +4695,8 @@ function filterOutstandingPage(){
 
       '<td style="font-weight:600">'+r.facility+'</td>'+
 
+      '<td>'+(r.clinic||'<span style="color:#cbd5e1">-</span>')+'</td>'+
+
       '<td>'+r.product+'</td>'+
 
       '<td>'+catBadge(r.category)+'</td>'+
@@ -4699,7 +4713,7 @@ function filterOutstandingPage(){
 
       '</tr>';
 
-  }).join('')||'<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'未収金なし 🎉':'미수금 없음 🎉')+'</td></tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:24px">'+(lang==='jp'?'未収金なし 🎉':'미수금 없음 🎉')+'</td></tr>';
 
   var jp2=lang==='jp';
 
@@ -5051,6 +5065,26 @@ function toDateStr(v){
 
 }
 
+function _wtjIsAgency(f){ var u=String(f||'').toUpperCase(); return u==='JK JAPAN'||u==='INFIX'; }
+
+function extractClinic(facility, rawProd){
+
+  if(!_wtjIsAgency(facility)) return String(facility||'').trim();
+
+  var ms=String(rawProd||'').match(/[(（]([^)）]*)[)）]/g);
+
+  if(!ms||!ms.length) return '';
+
+  var c=ms[ms.length-1].replace(/^[(（]/,'').replace(/[)）]$/,'').trim();
+
+  if(c.indexOf('→')>=0) c=c.split('→').pop().trim();
+
+  if(/used products|demo|선수금|box|\bea\b/i.test(c)) return '';
+
+  return c;
+
+}
+
 function parseExcelFile(wb){
 
   var ws=wb.Sheets[wb.SheetNames[0]];
@@ -5079,6 +5113,8 @@ function parseExcelFile(wb){
 
     var norm=normalizeProduct(rawProd);
 
+    var clinic=extractClinic(facility, rawProd);
+
     var unitPrice=parseFloat(String(r[11]||'0').replace(/,/g,''))||0;
 
     var qty=parseInt(r[7])||1;
@@ -5091,7 +5127,7 @@ function parseExcelFile(wb){
 
     orders.push({excelNo:excelNo,stableId:stableId,date:dateStr,facility:facility,
 
-      product:norm.name,category:norm.cat,unitPrice:unitPrice,qty:qty,amount:amount,note:''});
+      product:norm.name,category:norm.cat,unitPrice:unitPrice,qty:qty,amount:amount,clinic:clinic,note:''});
 
     // 입금: 연도별 컬럼 스캔 (U열 기준)
 
