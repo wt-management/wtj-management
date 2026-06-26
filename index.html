@@ -526,6 +526,12 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
     </div>
 
+    <div class="nav-item" onclick="showPage('customer-analysis')">
+
+      <span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span>
+
+    </div>
+
     <div class="nav-label" style="margin-top:8px" id="navGroupKr2">데이터 입력</div>
 
     <div id="nav-excel-upload" class="nav-item" style="display:none" onclick="showPage('excel-upload')">
@@ -883,7 +889,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
           <div class="chart-card">
 
-            <div class="chart-title" id="chartTitleMachine">🔧 제품별 수주 금액 순위</div>
+            <div class="chart-title" id="chartTitleMachine">🔧 제품별 수주 금액 현황</div>
 
             <div class="chart-container" style="height:220px"><canvas id="machineChart"></canvas></div>
 
@@ -891,7 +897,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
           <div class="chart-card">
 
-            <div class="chart-title" id="chartTitleConsumable">📦 소모품별 수주 금액 순위</div>
+            <div class="chart-title" id="chartTitleConsumable">📦 소모품별 수주 금액 현황</div>
 
             <div class="chart-container" style="height:220px"><canvas id="consumableChart"></canvas></div>
 
@@ -1155,13 +1161,13 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-        <!-- 랭킹 2열 -->
+        <!-- 현황 2열 -->
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
 
           <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
 
-            <div id="ctProductRankTitle" style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:16px">🏅 제품별 입금 랭킹</div>
+            <div id="ctProductRankTitle" style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:16px">🏅 제품별 입금 현황</div>
 
             <div style="height:220px"><canvas id="ctProductChart"></canvas></div>
 
@@ -1169,7 +1175,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
           <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
 
-            <div id="ctFacilityRankTitle" style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:16px">🏥 거래처별 입금 랭킹</div>
+            <div id="ctFacilityRankTitle" style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:16px">🏥 거래처별 입금 현황</div>
 
             <div style="height:220px"><canvas id="ctFacilityChart"></canvas></div>
 
@@ -1645,6 +1651,14 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
           <div class="form-group">
 
+            <label id="lClinic">클리닉명</label>
+
+            <input type="text" id="inClinic" list="facilityList" placeholder="대리점이면 실제 클리닉명 (비우면 거래처와 동일)" autocomplete="off">
+
+          </div>
+
+          <div class="form-group">
+
             <label id="lProduct">商品名 *</label>
 
             <input type="text" id="inProduct" list="productList" oninput="onProductInput()" placeholder="제품 선택 또는 직접 입력" autocomplete="off" required>
@@ -1970,6 +1984,28 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
     <!-- ═══ 엑셀 업로드 ═══ -->
+
+<div class="page" id="page-customer-analysis">
+  <div class="form-card" style="margin-bottom:16px">
+    <div class="form-title" id="caTitle">🔍 거래처 분석</div>
+    <div class="form-sub" id="caSub">거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+      <input type="text" id="caSearch" list="caList" placeholder="거래처/클리닉 검색 또는 선택" autocomplete="off" oninput="renderCustomerAnalysis()" style="flex:1;min-width:220px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px">
+      <datalist id="caList"></datalist>
+      <select id="caYear" onchange="renderCustomerAnalysis()" style="padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px">
+        <option value="">전체기간</option><option value="2026">2026년</option><option value="2025">2025년</option><option value="2024">2024년</option>
+      </select>
+    </div>
+  </div>
+  <div id="caEmpty" style="text-align:center;color:#94a3b8;padding:48px;font-size:14px">거래처를 선택하세요</div>
+  <div id="caContent" style="display:none">
+    <div id="caKpi" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px"></div>
+    <div class="table-card" style="margin-bottom:16px"><div class="table-header"><div class="table-title" id="caMonthTitle">📅 월별 수주·수금</div></div><div style="overflow-x:auto"><table><thead id="caMonthHead"></thead><tbody id="caMonthBody"></tbody></table></div></div>
+    <div class="table-card" style="margin-bottom:16px"><div class="table-header"><div class="table-title" id="caProdTitle">📦 제품별 매입</div></div><div style="overflow-x:auto"><table><thead id="caProdHead"></thead><tbody id="caProdBody"></tbody></table></div></div>
+    <div class="table-card" id="caClinicCard" style="margin-bottom:16px;display:none"><div class="table-header"><div class="table-title" id="caClinicTitle">🏥 클리닉별 매입 (대리점)</div></div><div style="overflow-x:auto"><table><thead id="caClinicHead"></thead><tbody id="caClinicBody"></tbody></table></div></div>
+    <div class="table-card"><div class="table-header"><div class="table-title" id="caTxnTitle">📋 거래 상세</div></div><div style="overflow-x:auto"><table><thead id="caTxnHead"></thead><tbody id="caTxnBody"></tbody></table></div></div>
+  </div>
+</div>
 
     <div class="page" id="page-excel-upload">
 
@@ -3159,7 +3195,7 @@ var T = {
 
     navGroupKr1:'보고 / 조회',navGroupKr2:'데이터 입력',
 
-    navDash:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navOrderIn:'수주 입력',navPayIn:'입금 입력',
+    navDash:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
     ordersTableTitle:'수주 현황',paymentsTableTitle:'입금 현황',baTableTitle:'목표 vs 실적 ('+new Date().getFullYear()+'년도)',
 
@@ -3203,7 +3239,7 @@ var T = {
 
     secLabelProducts:'🏆 제품별 매출 현황',
 
-    chartTitleMachine:'🔧 제품별 수주 금액 순위',chartTitleConsumable:'📦 소모품별 수주 금액 순위',
+    chartTitleMachine:'🔧 제품별 수주 금액 현황',chartTitleConsumable:'📦 소모품별 수주 금액 현황',
 
     tableTitleMachine:'🔧 제품 수주 상세',tableTitleConsumable:'📦 소모품 수주 상세',
 
@@ -3221,7 +3257,7 @@ var T = {
 
     ctTcTitle:'🔬 Tightan Cartridge 상세 분석',ctOkTitle:'🔬 OligioKiss Tip 상세 분석',
 
-    ctProductRankTitle:'🏅 제품별 입금 랭킹',ctFacilityRankTitle:'🏥 거래처별 입금 랭킹',
+    ctProductRankTitle:'🏅 제품별 입금 현황',ctFacilityRankTitle:'🏥 거래처별 입금 현황',
 
     ctProductDetailTitle:'📋 품목별 입금 상세',ctFacilityDetailTitle:'🏥 거래처별 입금 상세',
 
@@ -3281,7 +3317,7 @@ var T = {
 
     navGroupKr1:'報告 / 照会',navGroupKr2:'データ入力',
 
-    navDash:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navOrderIn:'受注入力',navPayIn:'入金入力',
+    navDash:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
     ordersTableTitle:'受注一覧',paymentsTableTitle:'入金一覧',baTableTitle:'予実管理 ('+new Date().getFullYear()+'年度)',
 
@@ -3325,7 +3361,7 @@ var T = {
 
     secLabelProducts:'🏆 商品別売上状況',
 
-    chartTitleMachine:'🔧 機器別受注金額ランキング',chartTitleConsumable:'📦 消耗品別受注金額ランキング',
+    chartTitleMachine:'🔧 機器別受注金額現況',chartTitleConsumable:'📦 消耗品別受注金額現況',
 
     tableTitleMachine:'🔧 機器受注詳細',tableTitleConsumable:'📦 消耗品受注詳細',
 
@@ -3343,7 +3379,7 @@ var T = {
 
     ctTcTitle:'🔬 Tightan Cartridge 詳細分析',ctOkTitle:'🔬 OligioKiss Tip 詳細分析',
 
-    ctProductRankTitle:'🏅 商品別売上ランキング',ctFacilityRankTitle:'🏥 取引先別売上ランキング',
+    ctProductRankTitle:'🏅 商品別売上現況',ctFacilityRankTitle:'🏥 取引先別売上現況',
 
     ctProductDetailTitle:'📋 品目別売上詳細',ctFacilityDetailTitle:'🏥 取引先別売上詳細',
 
@@ -3596,6 +3632,8 @@ function showPage(id, fromHistory){
   else if(id==='budget-actual') loadBudgetActual();
 
   else if(id==='outstanding') loadOutstandingPage();
+
+  else if(id==='customer-analysis') loadCustomerAnalysis();
 
   else if(id==='payment-input') loadOutstandingOrders();
 
@@ -4655,6 +4693,66 @@ function renderPayments(data){
 
 var _osData=null;
 
+function _caKrw(j){ return (_jpyRate>0)?' ('+fmtKRW(j*_jpyRate/100)+')':''; }
+var _caInit=false;
+function loadCustomerAnalysis(){
+  function done(){
+    var seen={}, facs=[];
+    (allOrders||[]).forEach(function(o){ if(o.facility&&!seen[o.facility]){seen[o.facility]=1;facs.push(o.facility);} });
+    facs.sort();
+    document.getElementById('caList').innerHTML=facs.map(function(f){return '<option value="'+String(f).replace(/"/g,'&quot;')+'">';}).join('');
+    renderCustomerAnalysis();
+  }
+  if(_data){done();}else{loadData(done);}
+}
+function renderCustomerAnalysis(){
+  var jp=lang==='jp';
+  var fac=(document.getElementById('caSearch').value||'').trim();
+  var yr=document.getElementById('caYear').value;
+  var emptyEl=document.getElementById('caEmpty'), contEl=document.getElementById('caContent');
+  if(!fac){ emptyEl.textContent=(jp?'取引先を選択してください':'거래처를 선택하세요'); emptyEl.style.display='block'; contEl.style.display='none'; return; }
+  var orders=(allOrders||[]).filter(function(o){return o.facility===fac && (!yr||String(o.date||'').slice(0,4)===yr);});
+  if(!orders.length){ emptyEl.textContent=(jp?'該当データなし':'해당 거래처 데이터 없음'); emptyEl.style.display='block'; contEl.style.display='none'; return; }
+  emptyEl.style.display='none'; contEl.style.display='block';
+  var oids={}; orders.forEach(function(o){oids[o.stableId]=o;});
+  var paysFac=(allPayments||[]).filter(function(p){return p.orderRef&&oids[p.orderRef];});
+  var paidMap={}; paysFac.forEach(function(p){paidMap[p.orderRef]=(paidMap[p.orderRef]||0)+(p.amount||0);});
+  var totOrd=orders.reduce(function(s,o){return s+(o.amount||0);},0);
+  var totPay=paysFac.filter(function(p){return !yr||String(p.date||'').slice(0,4)===yr;}).reduce(function(s,p){return s+(p.amount||0);},0);
+  var outst=orders.reduce(function(s,o){return s+Math.max(0,(o.amount||0)-(paidMap[o.stableId]||0));},0);
+  var ds=orders.map(function(o){return o.date;}).filter(Boolean).sort();
+  var kpi=[
+    {l:(jp?'受注額(売上)':'수주액(매출)'),v:'¥'+fmt(Math.round(totOrd))+_caKrw(totOrd)},
+    {l:(jp?'入金額':'수금액'),v:'¥'+fmt(Math.round(totPay))},
+    {l:(jp?'未収金':'미수금'),v:'¥'+fmt(Math.round(outst)),c:'#ef4444'},
+    {l:(jp?'取引件数':'거래 건수'),v:orders.length+(jp?'件':'건')},
+    {l:(jp?'初取引':'첫 거래'),v:ds[0]||'-'},
+    {l:(jp?'最近取引':'최근 거래'),v:ds[ds.length-1]||'-'}
+  ];
+  document.getElementById('caKpi').innerHTML=kpi.map(function(k){return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px"><div style="font-size:11px;color:#64748b;margin-bottom:6px">'+k.l+'</div><div style="font-size:16px;font-weight:800;color:'+(k.c||'#0f172a')+'">'+k.v+'</div></div>';}).join('');
+  var mo={};
+  orders.forEach(function(o){var m=String(o.date||'').slice(0,7);if(m){mo[m]=mo[m]||{ord:0,pay:0};mo[m].ord+=(o.amount||0);}});
+  paysFac.forEach(function(p){var m=String(p.date||'').slice(0,7);if(m&&(!yr||m.slice(0,4)===yr)){mo[m]=mo[m]||{ord:0,pay:0};mo[m].pay+=(p.amount||0);}});
+  var mks=Object.keys(mo).sort();
+  document.getElementById('caMonthHead').innerHTML='<tr><th>'+(jp?'年月':'연월')+'</th><th style="text-align:right">'+(jp?'受注':'수주')+'</th><th style="text-align:right">'+(jp?'入金':'수금')+'</th></tr>';
+  document.getElementById('caMonthBody').innerHTML=mks.map(function(m){return '<tr><td>'+m+'</td><td class="amount">¥'+fmt(Math.round(mo[m].ord))+'</td><td class="amount">¥'+fmt(Math.round(mo[m].pay))+'</td></tr>';}).join('')||'<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:14px">-</td></tr>';
+  var pr={}; orders.forEach(function(o){var k=o.product||'-';pr[k]=pr[k]||{qty:0,amt:0,cnt:0};pr[k].qty+=(o.qty||0);pr[k].amt+=(o.amount||0);pr[k].cnt++;});
+  var prk=Object.keys(pr).sort(function(a,b){return pr[b].amt-pr[a].amt;});
+  document.getElementById('caProdHead').innerHTML='<tr><th>'+(jp?'商品':'제품')+'</th><th style="text-align:right">'+(jp?'数量':'수량')+'</th><th style="text-align:right">'+(jp?'件数':'건수')+'</th><th style="text-align:right">'+(jp?'金額':'금액')+'</th></tr>';
+  document.getElementById('caProdBody').innerHTML=prk.map(function(k){return '<tr><td>'+k+'</td><td class="amount">'+fmt(pr[k].qty)+'</td><td class="amount">'+pr[k].cnt+'</td><td class="amount">¥'+fmt(Math.round(pr[k].amt))+'</td></tr>';}).join('');
+  var clMap={}, hasC=false;
+  orders.forEach(function(o){ if(o.clinic&&o.clinic!==fac) hasC=true; var c=o.clinic||fac; clMap[c]=clMap[c]||{amt:0,cnt:0}; clMap[c].amt+=(o.amount||0); clMap[c].cnt++; });
+  if(hasC){
+    document.getElementById('caClinicCard').style.display='';
+    document.getElementById('caClinicHead').innerHTML='<tr><th>'+(jp?'クリニック':'클리닉')+'</th><th style="text-align:right">'+(jp?'件数':'건수')+'</th><th style="text-align:right">'+(jp?'金額':'금액')+'</th></tr>';
+    var clk=Object.keys(clMap).sort(function(a,b){return clMap[b].amt-clMap[a].amt;});
+    document.getElementById('caClinicBody').innerHTML=clk.map(function(c){return '<tr><td>'+c+'</td><td class="amount">'+clMap[c].cnt+'</td><td class="amount">¥'+fmt(Math.round(clMap[c].amt))+'</td></tr>';}).join('');
+  } else { document.getElementById('caClinicCard').style.display='none'; }
+  document.getElementById('caTxnHead').innerHTML='<tr><th>'+(jp?'日付':'날짜')+'</th><th>'+(jp?'クリニック':'클리닉')+'</th><th>'+(jp?'商品':'제품')+'</th><th>'+(jp?'区分':'구분')+'</th><th style="text-align:right">'+(jp?'数量':'수량')+'</th><th style="text-align:right">'+(jp?'金額':'금액')+'</th><th style="text-align:center">'+(jp?'入金':'입금')+'</th></tr>';
+  var txns=orders.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));});
+  document.getElementById('caTxnBody').innerHTML=txns.map(function(o){var paid=paidMap[o.stableId]||0;var amt=o.amount||0;var st=paid>=amt?'<span style="color:#16a34a;font-weight:700">'+(jp?'完了':'완료')+'</span>':paid>0?'<span style="color:#b45309;font-weight:700">'+(jp?'一部':'일부')+'</span>':'<span style="color:#dc2626;font-weight:700">'+(jp?'未':'미입금')+'</span>';return '<tr><td style="white-space:nowrap">'+o.date+'</td><td>'+(o.clinic||'-')+'</td><td>'+o.product+'</td><td>'+catBadge(o.category)+'</td><td class="amount">'+fmt(o.qty)+'</td><td class="amount">¥'+fmt(Math.round(amt))+'</td><td style="text-align:center">'+st+'</td></tr>';}).join('');
+}
+
 function loadOutstandingPage(){
 
   document.getElementById('outstandingPageLoader').style.display='block';
@@ -5643,7 +5741,9 @@ function submitOrder(){
 
   var sid='MO'+Date.now()+Math.floor(Math.random()*1000);
 
-  _data.manualOrders.push({stableId:sid,manual:true,date:date,facility:f,product:p,category:cat,unitPrice:u,qty:q,amount:u*q,clinic:f,note:''});
+  var cl=(document.getElementById('inClinic')&&document.getElementById('inClinic').value.trim())||f;
+
+  _data.manualOrders.push({stableId:sid,manual:true,date:date,facility:f,product:p,category:cat,unitPrice:u,qty:q,amount:u*q,clinic:cl,note:''});
 
   pushDataJson(_data);
 
@@ -5663,7 +5763,7 @@ function submitOrder(){
 
 function resetOrderForm(){
 
-  ['inOrderDate','inFacility','inUnitPrice'].forEach(function(id){document.getElementById(id).value='';});
+  ['inOrderDate','inFacility','inClinic','inUnitPrice'].forEach(function(id){var e=document.getElementById(id); if(e) e.value='';});
 
   document.getElementById('inProduct').value='';
 
@@ -5913,7 +6013,7 @@ function renderConsumableTrend(d){
 
 
 
-  // 제품 랭킹 수평 막대
+  // 제품 현황 수평 막대
 
   var topProd=d.productRank.slice(0,10);
 
@@ -5941,7 +6041,7 @@ function renderConsumableTrend(d){
 
 
 
-  // 시설 랭킹 수평 막대
+  // 시설 현황 수평 막대
 
   var topFac=d.facilityRank.slice(0,10);
 
