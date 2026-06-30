@@ -6279,9 +6279,9 @@ function renderConsumableTrend(d){
 
     var pct=total>0?Math.round(r.amount/total*1000)/10:0;
 
-    return '<tr><td style="text-align:center;font-weight:700;color:#64748b">'+(i+1)+'</td>'+
+    return '<tr style="cursor:pointer" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'" onclick="openDrill({facility:\''+_dq(r.facility)+'\',title:\''+_dq(r.facility)+'\'})"><td style="text-align:center;font-weight:700;color:#64748b">'+(i+1)+'</td>'+
 
-      '<td>'+r.facility+'</td><td class="amount">'+r.count+(lang==='jp'?'件':'건')+'</td>'+
+      '<td><span style="color:#3b82f6;text-decoration:underline;text-underline-offset:2px">'+r.facility+'</span></td><td class="amount">'+r.count+(lang==='jp'?'件':'건')+'</td>'+
 
       '<td class="amount">¥'+fmt(r.amount)+'</td><td class="amount">'+pct+'%</td></tr>';
 
