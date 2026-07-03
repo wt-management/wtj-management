@@ -168,7 +168,7 @@ body{font-family:'Pretendard','Pretendard Variable','Segoe UI','Noto Sans JP',sa
 
 table{width:100%;border-collapse:collapse}
 
-thead th{padding:10px 16px;font-size:11px;font-weight:700;color:#64748b;text-align:left;background:#f8fafc;border-bottom:1px solid #e2e8f0;text-transform:uppercase;white-space:nowrap}
+thead th{padding:10px 16px;font-size:11px;font-weight:700;color:#64748b;text-align:left;background:#f8fafc;border-bottom:1px solid #e2e8f0;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;z-index:2}
 
 tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
 
@@ -2446,11 +2446,9 @@ function _applyLoginUI() {
   var roM = document.getElementById('role-opt-master');
   if(_isMaster) { if(roU) roU.style.display=''; if(roM) roM.style.display=''; }
 
-  // GitHub 토큰 자동 설정
-
-  var _tk = ['gh','p_','xikfNazz8k','sajhaHDWw9','5t8zBotpMP0wRwEH'];
-
-  localStorage.setItem('wtj_gh_token', _tk.join(''));
+  // GitHub 토큰 자동설정 제거(보안 2026-07-03): 하드코딩 PAT가 공개소스에 노출되어 폐기.
+  // 데이터 저장은 Supabase(wtj_data)로 일원화됨. GitHub data.json 업로드가 필요하면
+  // getGHToken() 프롬프트로 업로더 개인의 fine-grained 토큰을 입력받아 사용.
 
 }
 
@@ -2714,7 +2712,7 @@ function applyInvoices(d, invoices, ok){
   d.dashboard=d.dashboard||{};
   d.dashboard.monthlyRevenue=monthlyRevenue;   // 계산해 두되(나중 전환용), 매출 교체는 스위치가 'invoice'일 때만
   if(ok && WTJ_REVENUE_MODE==='invoice') d.dashboard.monthlyPayments=monthlyRevenue;
-  allOrders=d.orders||allOrders;
+  allOrders=(d.orders||[]).concat(d.manualOrders||[]);
 }
 
 function openInvoice(idx){
@@ -2942,7 +2940,7 @@ function getGHToken() {
 }
 
 function pushDataJson(data) {
-  _sb.from('wtj_data').upsert({key:'main', data:data, updated_at:new Date().toISOString()}, {onConflict:'key'}).then(function(r){ if(r.error) console.warn('Supabase 저장 실패:', r.error); else console.log('wtj_data 저장 완료'); });
+  _sb.from('wtj_data').upsert({key:'main', data:data, updated_at:new Date().toISOString()}, {onConflict:'key'}).then(function(r){ if(r.error){ console.warn('Supabase 저장 실패:', r.error); alert('❌ 저장 실패: '+r.error.message+'\n새로고침 후 다시 시도하세요.'); } else console.log('wtj_data 저장 완료'); });
 
 }
 
@@ -2960,7 +2958,7 @@ function gasGetWithPush(action, data, cb) {
 
       if(_mp.length&&!(_data.manualPayments&&_data.manualPayments.length)) _data.manualPayments=_mp;
 
-      allOrders = _data.orders || [];
+      allOrders = (_data.orders||[]).concat(_data.manualOrders||[]);
 
       allPayments = (_data.payments||[]).concat(_data.manualPayments||[]);
 
@@ -3770,6 +3768,8 @@ window.addEventListener('popstate', function(e){
 
 function fmt(n){if(!n&&n!==0)return '-';return Number(n).toLocaleString('ja-JP');}
 
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 function fmtY(n){
 
   if(!n&&n!==0)return '-';
@@ -3946,7 +3946,7 @@ function openDrill(opts){
   document.getElementById('esDrillTitle').textContent=(opts.title||'')+'  ('+rows.length+(jp?'件':'건')+')';
   var nw='white-space:nowrap';
   document.getElementById('esDrillHead').innerHTML='<tr><th style="text-align:left;'+nw+'">'+(jp?'日付':'날짜')+'</th><th style="text-align:left;'+nw+'">'+(jp?'取引先':'거래처')+'</th><th style="text-align:left;'+nw+'">'+(jp?'クリニック':'클리닉')+'</th><th style="text-align:left;'+nw+'">'+(jp?'商品':'제품')+'</th><th style="text-align:center;'+nw+'">'+(jp?'区分':'구분')+'</th><th style="text-align:right;'+nw+'">'+(jp?'数量':'수량')+'</th><th style="text-align:right;'+nw+'">'+(jp?'金額':'금액')+'</th><th style="text-align:center;'+nw+'">'+(jp?'入金':'입금')+'</th></tr>';
-  document.getElementById('esDrillBody').innerHTML=rows.map(function(o){var pd=paid[o.stableId]||0;var amt=o.amount||0;var st=pd>=amt?'<span style="color:#16a34a">'+(jp?'完了':'완료')+'</span>':pd>0?'<span style="color:#b45309">'+(jp?'一部':'일부')+'</span>':'<span style="color:#dc2626">'+(jp?'未':'미입금')+'</span>';return '<tr><td style="'+nw+'">'+o.date+'</td><td style="'+nw+'">'+(o.facility||'-')+'</td><td style="'+nw+'">'+(o.clinic||'-')+'</td><td style="'+nw+'">'+o.product+'</td><td style="text-align:center">'+catBadge(o.category)+'</td><td class="num">'+fmt(o.qty)+'</td><td class="num">'+_amt(amt)+'</td><td style="text-align:center;'+nw+'">'+st+'</td></tr>';}).join('')||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:18px">-</td></tr>';
+  document.getElementById('esDrillBody').innerHTML=rows.map(function(o){var pd=paid[o.stableId]||0;var amt=o.amount||0;var st=pd>=amt?'<span style="color:#16a34a">'+(jp?'完了':'완료')+'</span>':pd>0?'<span style="color:#b45309">'+(jp?'一部':'일부')+'</span>':'<span style="color:#dc2626">'+(jp?'未':'미입금')+'</span>';return '<tr><td style="'+nw+'">'+esc(o.date)+'</td><td style="'+nw+'">'+esc(o.facility||'-')+'</td><td style="'+nw+'">'+esc(o.clinic||'-')+'</td><td style="'+nw+'">'+esc(o.product)+'</td><td style="text-align:center">'+catBadge(o.category)+'</td><td class="num">'+fmt(o.qty)+'</td><td class="num">'+_amt(amt)+'</td><td style="text-align:center;'+nw+'">'+st+'</td></tr>';}).join('')||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:18px">-</td></tr>';
   document.getElementById('esDrillFoot').textContent=(jp?'合計 ':'합계 ')+rows.length+(jp?'件 · ':'건 · ')+_amt(tot);
   document.getElementById('esDrill').style.display='flex';
 }
@@ -4023,9 +4023,9 @@ function showDetailModal(type, year, fromM, toM, label) {
 
         '<td style="padding:8px">' + (p.date||'-') + '</td>' +
 
-        '<td style="padding:8px">' + (p.description||p.facility||'-') + '</td>' +
+        '<td style="padding:8px">' + esc(p.description||p.facility||'-') + '</td>' +
 
-        '<td style="padding:8px;color:#64748b;font-size:11px">' + (p.orderRef||'-') + '</td>' +
+        '<td style="padding:8px;color:#64748b;font-size:11px">' + esc(p.orderRef||'-') + '</td>' +
 
         '<td style="padding:8px;text-align:right;font-weight:600">¥' + fmt(p.amount||0) + '</td></tr>';
 
@@ -4063,11 +4063,11 @@ function showDetailModal(type, year, fromM, toM, label) {
 
         '<td style="padding:8px">' + (o.date||'-') + '</td>' +
 
-        '<td style="padding:8px">' + (o.facility||'-') + '</td>' +
+        '<td style="padding:8px">' + esc(o.facility||'-') + '</td>' +
 
-        '<td style="padding:8px">' + (o.product||'-') + '</td>' +
+        '<td style="padding:8px">' + esc(o.product||'-') + '</td>' +
 
-        '<td style="padding:8px;text-align:center"><span style="background:' + cc + '20;color:' + cc + ';padding:2px 7px;border-radius:10px;font-size:11px">' + (o.category||'-') + '</span></td>' +
+        '<td style="padding:8px;text-align:center"><span style="background:' + cc + '20;color:' + cc + ';padding:2px 7px;border-radius:10px;font-size:11px">' + esc(o.category||'-') + '</span></td>' +
 
         '<td style="padding:8px;text-align:right">' + (o.qty||1) + '</td>' +
 
@@ -4731,7 +4731,7 @@ function renderOrders(data){
   function invCell(o,idx){
     var jp=lang==='jp';
     if(o.invoiceNo){
-      return '<span style="background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap" onclick="openInvoice('+idx+')" title="'+(jp?'発行日':'발행일')+': '+(o.invoiceDate||'')+' — '+(jp?'クリックで編集':'클릭하면 수정')+'">🧾 '+o.invoiceNo+'</span>';
+      return '<span style="background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap" onclick="openInvoice('+idx+')" title="'+(jp?'発行日':'발행일')+': '+esc(o.invoiceDate||'')+' — '+(jp?'クリックで編集':'클릭하면 수정')+'">🧾 '+esc(o.invoiceNo)+'</span>';
     }
     return '<button class="edit-btn" style="font-size:11px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:6px;padding:3px 8px;cursor:pointer;white-space:nowrap" onclick="openInvoice('+idx+')">'+(jp?'🧾 請求No.入力':'🧾 인보이스 No. 입력')+'</button>';
   }
@@ -4746,7 +4746,7 @@ function renderOrders(data){
 
     var isMO=!!o.manual;
 
-    return '<tr><td style="white-space:nowrap">'+o.date+'</td><td>'+(isMO?'<span style="background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px">수기</span>':'')+o.facility+'</td><td>'+(o.clinic||'<span style="color:#cbd5e1">-</span>')+'</td><td>'+o.product+'</td>'+
+    return '<tr><td style="white-space:nowrap">'+esc(o.date)+'</td><td>'+(isMO?'<span style="background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px">수기</span>':'')+esc(o.facility)+'</td><td>'+(o.clinic?esc(o.clinic):'<span style="color:#cbd5e1">-</span>')+'</td><td>'+esc(o.product)+'</td>'+
 
       '<td>'+catBadge(o.category)+'</td>'+
 
@@ -4870,11 +4870,11 @@ function renderPayments(data){
 
       '<td style="color:#64748b;font-size:12px;white-space:nowrap">'+orderDate+'</td>'+
 
-      '<td>'+(isM?'<span style="background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px">수기</span>':'')+(p.description||o.facility||'-')+'</td>'+
+      '<td>'+(isM?'<span style="background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px">수기</span>':'')+esc(p.description||o.facility||'-')+'</td>'+
 
-      '<td>'+(o.clinic||'<span style="color:#cbd5e1">-</span>')+'</td>'+
+      '<td>'+(o.clinic?esc(o.clinic):'<span style="color:#cbd5e1">-</span>')+'</td>'+
 
-      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+product+'">'+product+'</td>'+
+      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(product)+'">'+esc(product)+'</td>'+
 
       '<td>'+(category?catBadge(category):'<span style="color:#cbd5e1">-</span>')+'</td>'+
 
@@ -5003,7 +5003,7 @@ function renderOutstandingPage(d){
 
     return '<tr style="cursor:pointer" onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'\'" onclick="filterByFacility(\''+fac+'\')">'+
 
-      '<td><span style="color:#3b82f6;text-decoration:underline;text-underline-offset:2px">'+r.facility+'</span></td>'+
+      '<td><span style="color:#3b82f6;text-decoration:underline;text-underline-offset:2px">'+esc(r.facility)+'</span></td>'+
 
       '<td style="text-align:right">'+r.count+(lang==='jp'?'件':'건')+'</td>'+
 
@@ -5055,11 +5055,11 @@ function filterOutstandingPage(){
 
       '<td style="white-space:nowrap">'+r.orderDate+'</td>'+
 
-      '<td style="font-weight:600">'+r.facility+'</td>'+
+      '<td style="font-weight:600">'+esc(r.facility)+'</td>'+
 
-      '<td>'+(r.clinic||'<span style="color:#cbd5e1">-</span>')+'</td>'+
+      '<td>'+(r.clinic?esc(r.clinic):'<span style="color:#cbd5e1">-</span>')+'</td>'+
 
-      '<td>'+r.product+'</td>'+
+      '<td>'+esc(r.product)+'</td>'+
 
       '<td>'+catBadge(r.category)+'</td>'+
 
@@ -6375,7 +6375,7 @@ function saveEditOrder(){
 
       for(var i=0;i<_data.manualOrders.length;i++){ if(_data.manualOrders[i].stableId===sid){ var o=_data.manualOrders[i];
 
-        o.date=d.date;o.facility=d.facility;o.product=d.product;o.category=d.category;o.unitPrice=d.unitPrice;o.qty=d.qty;o.amount=d.unitPrice*d.qty;o.clinic=d.facility;o.note=d.note; break; } }
+        o.date=d.date;o.facility=d.facility;o.product=d.product;o.category=d.category;o.unitPrice=d.unitPrice;o.qty=d.qty;o.amount=d.unitPrice*d.qty;o.note=d.note; break; } }
 
       pushDataJson(_data);
 
