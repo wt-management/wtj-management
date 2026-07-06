@@ -3756,7 +3756,7 @@ function showPage(id, fromHistory){
   document.getElementById('pageTitle').textContent=pageTitles[id]?pageTitles[id][lang]:'';
 
   document.getElementById('pageSubtitle').textContent=pageSubtitles[id]?pageSubtitles[id][lang]:'';
-  if(id&&id.indexOf('fin-')===0&&window.FIN)FIN.onPage(id);
+  if(id&&id.indexOf('fin-')===0){ if(window.FIN)FIN.onPage(id); else setTimeout(function(){ if(window.FIN)FIN.onPage(id); },600); }
 
 
 
@@ -7023,7 +7023,7 @@ function onPage(id){
     else if(id==='fin-ledger')renderLedger();
     else if(id==='fin-daily')renderDaily();
     else if(id==='fin-assets')renderAssets();
-  });
+  }).catch(function(e){ console.error('FIN',e); alert('자금일보 오류: '+(e&&e.message||e)); });
 }
 function go(page,tab){ if(page==='fin-daily')_day=tab||_day; if(page==='fin-ledger')_led=tab||_led; showPage(page); }
 /* ── 필터 ── */
@@ -7381,6 +7381,7 @@ function cfgSet(k,v){ DB.settings[k]=Number(v)||0; saveDB(); }
 function cfgAcc(i,k,v){ DB.settings.accounts[i][k]=(k==='opening')?(Number(v)||0):v; saveDB(); }
 function closeModal(){ $('fxmodal').classList.remove('on'); _mCtx=null; }
 document.addEventListener('click',function(e){ if(e.target&&e.target.id==='fxmodal')closeModal(); });
+setTimeout(function(){ var act=document.querySelector('.page.active'); if(act&&act.id.indexOf('page-fin-')===0)onPage(act.id.replace('page-','')); },400);
 return {onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,
   openEntry:openEntry,saveEntry:saveEntry,delEntry:delEntry,
   openDaily:openDaily,saveDaily:saveDaily,delDaily:delDaily,
