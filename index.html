@@ -4088,13 +4088,13 @@ function renderExecSummary(){
   var d=(_data&&_data.dashboard)||{};
   var ord26=0,ord25=0,pay26=0,pay25=0,prodY={},prodP={};
   orders.forEach(function(o){var a=o.amount||0;if(inR(o.date,year)){ord26+=a;var k=o.product||'-';prodY[k]=(prodY[k]||0)+a;}else if(inR(o.date,prev)){ord25+=a;var k2=o.product||'-';prodP[k2]=(prodP[k2]||0)+a;}});
-  pays.forEach(function(p){var a=p.amount||0;if(inR(p.date,year))pay26+=a;else if(inR(p.date,prev))pay25+=a;});
+  if(_consolSales){ var _pm=consolPayCalc(year).monthly, _pmp=consolPayCalc(prev).monthly; for(var _pi=fM;_pi<=tM;_pi++){ pay26+=_pm[_pi-1]||0; pay25+=_pmp[_pi-1]||0; } } else { pays.forEach(function(p){var a=p.amount||0;if(inR(p.date,year))pay26+=a;else if(inR(p.date,prev))pay25+=a;}); }
   var tgt=0; for(var i=fM;i<=tM;i++){tgt+=(d.monthlyTarget&&d.monthlyTarget[year+'-'+('0'+i).slice(-2)])||0;}
   var paid={}; pays.forEach(function(p){if(p.orderRef)paid[p.orderRef]=(paid[p.orderRef]||0)+(p.amount||0);});
   var outAll=orders.filter(function(o){return o.stableId&&o.date&&o.date>='2025-01-01';}).map(function(o){var el=0;try{el=Math.floor((new Date()-new Date(o.date))/86400000);}catch(e){}return {o:o,out:Math.max(0,(o.amount||0)-(paid[o.stableId]||0)),el:el};}).filter(function(x){return x.out>=1;});
   var outTot=outAll.reduce(function(s,x){return s+x.out;},0);
   var ord26paid=orders.filter(function(o){return inR(o.date,year);}).reduce(function(s,o){return s+Math.min(o.amount||0,paid[o.stableId]||0);},0);
-  var coll=ord26>0?ord26paid/ord26*100:0;
+  var _csForColl=0; if(_consolSales){var _mmc=consolCalc(year).monthly; for(var _cc2=fM;_cc2<=tM;_cc2++)_csForColl+=_mmc[_cc2-1]||0;} var coll=_csForColl>0?pay26/_csForColl*100:(ord26>0?ord26paid/ord26*100:0);
   var yoyP=pay25>0?(pay26-pay25)/pay25*100:null, yoyO=ord25>0?(ord26-ord25)/ord25*100:null;
   var achv=tgt>0?pay26/tgt*100:0;
   var cs26=0,cs25=0; if(_consolSales){ var _cc=consolCalc(year); for(var _mi=fM;_mi<=tM;_mi++){cs26+=_cc.monthly[_mi-1]||0; cs25+=_cc.prevMonthly[_mi-1]||0;} }
@@ -4463,6 +4463,19 @@ function consolCalc(year){
   });
   return {monthly:m,prevMonthly:pm,total:tot,prevTotal:prev,prevCum:prevCum};
 }
+function consolPayCalc(year){
+  var m=[]; for(var i=0;i<12;i++)m.push(0);
+  var py=String(Number(year)-1), nowM=(new Date()).getMonth()+1, tot=0, prevCum=0;
+  _consolSales.forEach(function(x){
+    if(_isCommRow(x))return;
+    (x.collections||[]).forEach(function(c){
+      var d=c.date||''; if(!d)return; var yy=d.slice(0,4), mi=parseInt(d.slice(5,7),10)-1;
+      if(yy===String(year)){ tot+=c.amount||0; if(mi>=0&&mi<12)m[mi]+=c.amount||0; }
+      else if(yy===py){ if(mi+1<=nowM)prevCum+=c.amount||0; }
+    });
+  });
+  return {monthly:m,total:tot,prevCum:prevCum};
+}
 function renderConsolStrip(targetId,year,fromM,toM){
   loadConsolSales(function(s){
     var el=document.getElementById(targetId);
@@ -4598,15 +4611,16 @@ function renderDashboard(d){
 
   if(_consolSales){
     var _cc=consolCalc(curYear);
+    var _cp=consolPayCalc(curYear); var _cpThis=_cp.monthly[parseInt(selToM,10)-1]||0; var _cpCum=0; for(var _cj=parseInt(selFromM,10);_cj<=parseInt(selToM,10);_cj++)_cpCum+=_cp.monthly[_cj-1]||0;
     var _cThis=_cc.monthly[parseInt(selToM,10)-1]||0;
     var _cCum=0; for(var _ci=parseInt(selFromM,10);_ci<=parseInt(selToM,10);_ci++)_cCum+=_cc.monthly[_ci-1]||0;
     document.getElementById('kpiThisMonth').innerHTML='¥'+fmtY(_cThis)+krwTxt(_cThis);
-    document.getElementById('kpiThisOrders').innerHTML='¥'+fmtY(thisMonthPay)+krwTxt(thisMonthPay);
+    document.getElementById('kpiThisOrders').innerHTML='¥'+fmtY(_cpThis)+krwTxt(_cpThis);
     var _trt=thisMonthTgt>0?Math.round(_cThis/thisMonthTgt*100):0;
     document.getElementById('kpiThisRate').textContent=_trt+'%';
     document.getElementById('thisMonthBar').style.width=Math.min(_trt,100)+'%';
     document.getElementById('kpiTotalPayments').innerHTML='¥'+fmtY(_cCum)+krwTxt(_cCum);
-    document.getElementById('sumOrders').innerHTML='¥'+fmtY(cumPay)+krwTxt(cumPay);
+    document.getElementById('sumOrders').innerHTML='¥'+fmtY(_cpCum)+krwTxt(_cpCum);
     var _crt=cumTgt>0?parseFloat((_cCum/cumTgt*100).toFixed(1)):0;
     document.getElementById('kpiAchieve').textContent=_crt+'%';
     document.getElementById('achieveBar').style.width=Math.min(_crt,100)+'%';
