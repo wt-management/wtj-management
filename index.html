@@ -2652,6 +2652,13 @@ async function _bootApp() {
 
   var _esToEl = document.getElementById('esTo'); if (_esToEl) _esToEl.value = _nowM;
   await new Promise(function(resolve) { loadData(function() { resolve(); }); });
+  // 기준월(기간 종료월) 캡: min(달력월, 데이터 있는 마지막 월) — 월초 빈달 0/¥0 대신 마지막 실적월 표시·자동 롤오버
+  if (_toEl && _data && _data.dashboard) {
+    var _yr=(document.getElementById('dash-year-sel')||{}).value||String(new Date().getFullYear()), _lastData=0, _dash=_data.dashboard;
+    ['monthlyPayments','monthlyMachine','monthlyConsumable'].forEach(function(_mn){ var _mp=_dash[_mn]||{};
+      for(var _k in _mp){ if(String(_k).slice(0,4)===_yr && (_mp[_k]||0)!==0){ var _m2=parseInt(String(_k).slice(5,7),10); if(_m2>_lastData) _lastData=_m2; } } });
+    if(_lastData>0) _toEl.value=String(Math.min(parseInt(_nowM,10),_lastData)).padStart(2,'0');
+  }
   var dl = document.getElementById('facilityList');
   if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
   showPage(savedPage);
