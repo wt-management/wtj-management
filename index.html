@@ -957,11 +957,11 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
             <div style="display:flex;gap:18px;margin-bottom:16px">
               <div style="flex:1;min-width:0">
                 <div style="font-size:12px;color:#b8d4ed;margin-bottom:6px" id="lblThisPayTitle">매출</div>
-                <div style="font-size:30px;font-weight:900;color:#fff;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisMonth" onclick="_dmThisPay()">-</div>
+                <div style="font-size:30px;font-weight:900;color:#fff;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisMonth" onclick="showPage('fin-daily')">-</div>
               </div>
               <div style="flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.2)">
                 <div style="font-size:12px;color:#b8d4ed;margin-bottom:6px" id="lblThisOrdersTitle">수주 금액 (참고)</div>
-                <div style="font-size:28px;font-weight:800;color:#e8f3fc;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisOrders" onclick="_dmThisOrd()">-</div>
+                <div style="font-size:28px;font-weight:800;color:#e8f3fc;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisOrders" onclick="_dmThisPay()">-</div>
               </div>
             </div>
 
@@ -1001,11 +1001,11 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
             <div style="display:flex;gap:18px;margin-bottom:16px">
               <div style="flex:1;min-width:0">
                 <div style="font-size:12px;color:#c8bfed;margin-bottom:6px" id="lblCumPayTitle">누계 매출</div>
-                <div style="font-size:30px;font-weight:900;color:#fff;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiTotalPayments" onclick="_dmCumPay()">-</div>
+                <div style="font-size:30px;font-weight:900;color:#fff;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiTotalPayments" onclick="showPage('fin-daily')">-</div>
               </div>
               <div style="flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.2)">
                 <div style="font-size:12px;color:#c8bfed;margin-bottom:6px" id="lblCumOrdersTitle">수주 누계 (참고)</div>
-                <div style="font-size:28px;font-weight:800;color:#edeaf9;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="sumOrders" onclick="_dmCumOrd()">-</div>
+                <div style="font-size:28px;font-weight:800;color:#edeaf9;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="sumOrders" onclick="_dmCumPay()">-</div>
               </div>
             </div>
 
@@ -3725,7 +3725,7 @@ T.jp.thClinic='クリニック名'; T.jp.thPayClinic='クリニック名'; T.jp.
 T.kr.btnAddPayment='➕ 입금 추가'; T.jp.btnAddPayment='➕ 入金追加';
 
 function setLang(l){
-  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); },0);
+  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); try{ var _ap=document.querySelector('.page.active'); if(_ap&&_ap.id==='page-dashboard'&&window._data)renderDashboard(_data.dashboard); if(_ap&&_ap.id==='page-budget-actual'&&window._data)renderBudgetActual(_data.budgetActual); }catch(e){} },0);
 
   lang=l;
 
@@ -4410,16 +4410,16 @@ function loadConsolSales(cb){
   });
 }
 function consolCalc(year){
-  var m=[],i; for(i=0;i<12;i++)m.push(0);
+  var m=[],pm=[],i; for(i=0;i<12;i++){m.push(0);pm.push(0);}
   var tot=0,prev=0,prevCum=0;
-  var nowM=(new Date()).getMonth()+1;
+  var nowM=(new Date()).getMonth()+1, py=String(Number(year)-1);
   _consolSales.forEach(function(x){
     if(_isCommRow(x))return;
-    var d=x.date||''; var v=x.total||0;
-    if(d.slice(0,4)===String(year)){ tot+=v; var mi=parseInt(d.slice(5,7),10)-1; if(mi>=0&&mi<12)m[mi]+=v; }
-    else if(d.slice(0,4)===String(Number(year)-1)){ prev+=v; if(parseInt(d.slice(5,7),10)<=nowM)prevCum+=v; }
+    var d=x.date||'', v=x.total||0, yy=d.slice(0,4), mi=parseInt(d.slice(5,7),10)-1;
+    if(yy===String(year)){ tot+=v; if(mi>=0&&mi<12)m[mi]+=v; }
+    else if(yy===py){ prev+=v; if(mi>=0&&mi<12)pm[mi]+=v; if(mi+1<=nowM)prevCum+=v; }
   });
-  return {monthly:m,total:tot,prevTotal:prev,prevCum:prevCum};
+  return {monthly:m,prevMonthly:pm,total:tot,prevTotal:prev,prevCum:prevCum};
 }
 function renderConsolStrip(targetId,year,fromM,toM){
   loadConsolSales(function(s){
@@ -4447,6 +4447,7 @@ function renderDashboard(d){
   try{ renderConsolStrip('dashConsolStrip', document.getElementById('dash-year-sel').value, parseInt(document.getElementById('dash-from-sel').value,10), parseInt(document.getElementById('dash-to-sel').value,10)); }catch(e){}
 
   d=_wtjDashWithManual(d);
+  if(!_consolSales){ loadConsolSales(function(){ if(document.getElementById('page-dashboard').classList.contains('active'))renderDashboard(d); }); }
 
   document.getElementById('dashLoader').style.display='none';
 
@@ -4553,6 +4554,29 @@ function renderDashboard(d){
 
   document.getElementById('kpiBudget').textContent='¥'+fmtY(cumTgt);
 
+  if(_consolSales){
+    var _cc=consolCalc(curYear);
+    var _cThis=_cc.monthly[parseInt(selToM,10)-1]||0;
+    var _cCum=0; for(var _ci=parseInt(selFromM,10);_ci<=parseInt(selToM,10);_ci++)_cCum+=_cc.monthly[_ci-1]||0;
+    document.getElementById('kpiThisMonth').innerHTML='¥'+fmtY(_cThis)+krwTxt(_cThis);
+    document.getElementById('kpiThisOrders').innerHTML='¥'+fmtY(thisMonthPay)+krwTxt(thisMonthPay);
+    var _trt=thisMonthTgt>0?Math.round(_cThis/thisMonthTgt*100):0;
+    document.getElementById('kpiThisRate').textContent=_trt+'%';
+    document.getElementById('thisMonthBar').style.width=Math.min(_trt,100)+'%';
+    document.getElementById('kpiTotalPayments').innerHTML='¥'+fmtY(_cCum)+krwTxt(_cCum);
+    document.getElementById('sumOrders').innerHTML='¥'+fmtY(cumPay)+krwTxt(cumPay);
+    var _crt=cumTgt>0?parseFloat((_cCum/cumTgt*100).toFixed(1)):0;
+    document.getElementById('kpiAchieve').textContent=_crt+'%';
+    document.getElementById('achieveBar').style.width=Math.min(_crt,100)+'%';
+    var _jp=(lang==='jp');
+    document.getElementById('lblThisPayTitle').textContent=_jp?'売上(連結)':'매출 (연결)';
+    document.getElementById('lblCumPayTitle').textContent=_jp?'累計売上(連結)':'누계 매출 (연결)';
+    document.getElementById('lblThisOrdersTitle').textContent=_jp?'入金(参考)':'입금 (참고)';
+    document.getElementById('lblCumOrdersTitle').textContent=_jp?'累計入金(参考)':'입금 누계 (참고)';
+    document.getElementById('lblThisRateTitle').textContent=_jp?'今月達成率(売上基準)':'이달 달성률 (매출기준)';
+    document.getElementById('lblCumRateTitle').textContent=_jp?'累計達成率(売上基準)':'누계 달성률 (매출기준)';
+  }
+
 
 
   document.getElementById('lastUpdated').textContent=(lang==='jp'?'最終更新: ':'최종 업데이트: ')+new Date().toLocaleString(lang==='jp'?'ja-JP':'ko-KR');
@@ -4567,13 +4591,14 @@ function renderDashboard(d){
 
   // ④ 달성률 콤보 차트 — 입금 실적 vs 목표 + 월별 달성률(입금기준)
 
-  var payVals=mkeys.map(function(k){return Math.round((d.monthlyPayments[k]||0)/1e6*10)/10;});
+  var _ccM=_consolSales?consolCalc(curYear).monthly:null;
+  var payVals=mkeys.map(function(k,ci){return Math.round((( _ccM?_ccM[ci]:(d.monthlyPayments[k]||0)))/1e6*10)/10;});
 
   var tgtVals=mkeys.map(function(k){return Math.round((d.monthlyTarget[k]||0)/1e6*10)/10;});
 
   var rateVals=mkeys.map(function(k){
 
-    var pay=d.monthlyPayments[k]||0;
+    var pay=_ccM?(_ccM[mkeys.indexOf(k)]||0):(d.monthlyPayments[k]||0);
 
     var tgt=d.monthlyTarget[k]||0;
 
@@ -5374,7 +5399,26 @@ function loadBudgetActual(){
 
 }
 
+function _baToConsol(d){
+  if(!_consolSales||!d||!d.rows)return d;
+  var cc=consolCalc(d.year); var nowM=(new Date()).getMonth()+1;
+  var rows=d.rows.map(function(r){
+    var s=cc.monthly[r.month-1]||0, ps=cc.prevMonthly[r.month-1]||0, tg=r.target||0;
+    return {month:r.month,target:tg,orderActual:r.orderActual,payActual:s,prevActual:r.prevActual,prevPayActual:ps,
+      achRate:tg>0?parseFloat((s/tg*100).toFixed(1)):null, yoy:ps>0?parseFloat(((s-ps)/ps*100).toFixed(1)):null};
+  });
+  var cs=0,ct=0,cps=0; rows.forEach(function(r){ if(r.month<=nowM){cs+=r.payActual;ct+=r.target;cps+=r.prevPayActual;} });
+  var qs=[[1,2,3],[4,5,6],[7,8,9],[10,11,12]].map(function(ms,qi){
+    var s=0,tg=0,ps=0; ms.forEach(function(mo){s+=cc.monthly[mo-1]||0;ps+=cc.prevMonthly[mo-1]||0;var rr=rows[mo-1];tg+=rr?rr.target:0;});
+    return {q:qi+1,target:tg,payActual:s,prevPayActual:ps,orderActual:0,prevActual:0,achRate:tg>0?parseFloat((s/tg*100).toFixed(1)):null,yoy:ps>0?parseFloat(((s-ps)/ps*100).toFixed(1)):null};
+  });
+  return {year:d.year,prevYear:d.prevYear,rows:rows,quarters:qs,
+    cumulative:{target:ct,payActual:cs,prevPayActual:cps,orderActual:0,prevActual:0,achRate:ct>0?parseFloat((cs/ct*100).toFixed(1)):0,yoy:cps>0?parseFloat(((cs-cps)/cps*100).toFixed(1)):null},
+    annual:d.annual};
+}
 function renderBudgetActual(d){
+  if(!_consolSales){ loadConsolSales(function(){ if(document.getElementById('page-budget-actual').classList.contains('active'))renderBudgetActual(_data&&_data.budgetActual); }); }
+  d=_baToConsol(d);
 
   document.getElementById('baLoader').style.display='none';
 
