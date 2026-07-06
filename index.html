@@ -596,7 +596,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
     <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
-    <div class="nav-item" onclick="showPage('inventory')"><span class="nav-icon">📦</span><span>재고관리</span></div>
+    <div class="nav-item" onclick="showPage('inventory')"><span class="nav-icon">📦</span><span id="navInv">재고관리</span></div>
 
 
 
@@ -640,20 +640,20 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-label" style="margin-top:8px" id="navGroupFin">자금일보 <span style="background:#3b82f6;color:#fff;border-radius:8px;font-size:9px;padding:1px 6px;margin-left:4px">NEW</span></div>
+    <div class="nav-label" style="margin-top:8px" id="navGroupFin"><span id="navGroupFinTxt">자금일보</span> <span style="background:#3b82f6;color:#fff;border-radius:8px;font-size:9px;padding:1px 6px;margin-left:4px">NEW</span></div>
 
 
 
-    <div class="nav-item" onclick="showPage('fin-report')"><span class="nav-icon">📒</span><span>자금현황 보고서</span></div>
+    <div class="nav-item" onclick="showPage('fin-report')"><span class="nav-icon">📒</span><span id="navFinReport">자금현황 보고서</span></div>
 
 
 
-    <div class="nav-item" onclick="showPage('fin-ledger')"><span class="nav-icon">🏦</span><span>입금·지출 원장</span></div>
+    <div class="nav-item" onclick="showPage('fin-ledger')"><span class="nav-icon">🏦</span><span id="navFinLedger">입금·지출 원장</span></div>
 
 
 
-    <div class="nav-item" onclick="showPage('fin-daily')"><span class="nav-icon">🧾</span><span>매출·매입 일보</span></div>
-    <div class="nav-item" onclick="showPage('fin-assets')"><span class="nav-icon">🏥</span><span>자산·기준정보</span></div>
+    <div class="nav-item" onclick="showPage('fin-daily')"><span class="nav-icon">🧾</span><span id="navFinDaily">매출·매입 일보</span></div>
+    <div class="nav-item" onclick="showPage('fin-assets')"><span class="nav-icon">🏥</span><span id="navFinAssets">자산·기준정보</span></div>
 
 
 
@@ -3475,7 +3475,7 @@ var T = {
 
     sideTitle:'일본법인<br>매출현황',sideSubtitle:'',
 
-    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupKr2:'관리',
+    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',
 
     navDash:'대시보드',navExec:'임원 요약',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
@@ -3597,7 +3597,7 @@ var T = {
 
     sideTitle:'日本法人<br>管理システム',sideSubtitle:'',
 
-    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupKr2:'管理',
+    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',
 
     navDash:'ダッシュボード',navExec:'役員サマリー',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
@@ -3722,6 +3722,7 @@ T.jp.thClinic='クリニック名'; T.jp.thPayClinic='クリニック名'; T.jp.
 T.kr.btnAddPayment='➕ 입금 추가'; T.jp.btnAddPayment='➕ 入金追加';
 
 function setLang(l){
+  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); },0);
 
   lang=l;
 
@@ -7228,15 +7229,15 @@ async function saveEntry(){
   var method=$('fxmMethod').value;
   var e={date:$('fxmDate').value,method:method,accNo:method==='bank'?$('fxmAcc').value:'',
     desc:$('fxmDesc').value.trim(),amount:Math.round(Number($('fxmAmt').value)||0),_at:tdy()};
-  if(!e.date||!e.amount){ alert('일자와 금액을 입력하세요'); return; }
+  if(!e.date||!e.amount){ alert(jt('일자와 금액을 입력하세요','日付と金額を入力してください')); return; }
   if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
   else{ e.id=uid(k[0].toUpperCase()); DB[k].push(e); }
-  if(await saveDB()){ closeModal(); toast('저장 완료 ✓');
+  if(await saveDB()){ closeModal(); toast(jt('저장 완료 ✓','保存完了 ✓'));
     var act=document.querySelector('.page.active');
     if(act&&act.id==='page-fin-report')renderReport(); else renderLedger(); }
 }
 async function delEntry(id){
-  if(!confirm('이 항목을 삭제할까요?'))return;
+  if(!confirm(jt('이 항목을 삭제할까요?','この項目を削除しますか？')))return;
   DB[_led]=DB[_led].filter(function(v){return v.id!==id;});
   if(await saveDB())renderLedger();
 }
@@ -7339,7 +7340,7 @@ function renderCols(){
 }
 function addCol(){
   var d=$('fxmColDate').value, a=Math.round(Number($('fxmColAmt').value)||0);
-  if(!a){ alert('금액을 입력하세요'); return; }
+  if(!a){ alert(jt('금액을 입력하세요','金額を入力してください')); return; }
   _mCtx.cols.push({date:d,amount:a,yr:d?Number(d.slice(0,4)):0});
   $('fxmColAmt').value='';
   renderCols();
@@ -7351,13 +7352,13 @@ async function saveDaily(){
     sn:$('fxmSn').value.trim(),prod2:$('fxmProd2').value,cat:$('fxmCat').value,hqRemit:!!$('fxmHq').value,
     qty:Number($('fxmQty').value)||1,unit:Number($('fxmUnit').value)||0,
     total:Math.round(Number($('fxmTotal').value)||0),collections:_mCtx.cols,_at:tdy()};
-  if(!e.date||!e.product||!e.total){ alert('일자·제품명·금액은 필수입니다'); return; }
+  if(!e.date||!e.product||!e.total){ alert(jt('일자·제품명·금액은 필수입니다','日付・製品名・金額は必須です')); return; }
   if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
   else{ e.id=uid(k[0].toUpperCase()); DB[k].push(e); }
-  if(await saveDB()){ closeModal(); toast('저장 완료 ✓'); renderDaily(); }
+  if(await saveDB()){ closeModal(); toast(jt('저장 완료 ✓','保存完了 ✓')); renderDaily(); }
 }
 async function delDaily(){
-  if(!confirm('이 항목을 삭제할까요? (수금/지불 내역 포함)'))return;
+  if(!confirm(jt('이 항목을 삭제할까요? (수금/지불 내역 포함)','この項目を削除しますか？(集金/支払内訳を含む)')))return;
   var k=_mCtx.kind;
   DB[k]=DB[k].filter(function(v){return v.id!==_mCtx.id;});
   if(await saveDB()){ closeModal(); renderDaily(); }
@@ -7421,13 +7422,13 @@ async function saveAsset(){
   }else{
     e={prodNo:gv('fxaPno'),product:gv('fxaProd'),sn:gv('fxaSn'),qty:Number(gv('fxaQty'))||1,amount:Math.round(Number(gv('fxaAmt'))||0),location:gv('fxaLoc')};
   }
-  if(!e.product){ alert('제품명을 입력하세요'); return; }
+  if(!e.product){ alert(jt('제품명을 입력하세요','製品名を入力してください')); return; }
   if(id){ var i=list.findIndex(function(v){return v.id===id;}); e.id=id; list[i]=e; }
   else{ e.id=uid('A'); list.push(e); }
   if(await saveDB()){ closeModal(); renderAssets(); }
 }
 async function delAsset(id){
-  if(!confirm('삭제할까요?'))return;
+  if(!confirm(jt('삭제할까요?','削除しますか？')))return;
   if(_asset==='HQ')DB.assetsHQ=DB.assetsHQ.filter(function(v){return v.id!==id;});
   else if(_asset==='JP')DB.assetsJP=DB.assetsJP.filter(function(v){return v.id!==id;});
   else DB.demo=DB.demo.filter(function(v){return v.id!==id;});
@@ -7478,10 +7479,10 @@ async function quickAdd(){
   var method=$('fxQMethod').value;
   var e={date:$('fxQDate').value,method:method,accNo:method==='bank'?$('fxQAcc').value:'',
     desc:$('fxQDesc').value.trim(),amount:Math.round(Number($('fxQAmt').value)||0),_at:tdy()};
-  if(!e.date||!e.amount){ alert('일자와 금액을 입력하세요'); return; }
+  if(!e.date||!e.amount){ alert(jt('일자와 금액을 입력하세요','日付と金額を入力してください')); return; }
   e.id=uid(_led[0].toUpperCase());
   DB[_led].push(e);
-  if(await saveDB()){ toast((_led==='receipts'?'입금':'지출')+' 등록 완료 ✓ '+fmt(e.amount));
+  if(await saveDB()){ toast((_led==='receipts'?jt('입금','入金'):jt('지출','支出'))+jt(' 등록 완료 ✓ ',' 登録完了 ✓ ')+fmt(e.amount));
     $('fxQDesc').value=''; $('fxQAmt').value=''; $('fxQDesc').focus(); renderLedger(); }
 }
 function dupEntry(id){
@@ -7495,11 +7496,11 @@ function dupEntry(id){
 async function quickCollect(id){
   var kind=_day, x=DB[kind].find(function(v){return v.id===id;}); if(!x)return;
   var o=outst(x); if(o<1)return;
-  if(!confirm((kind==='sales'?'수금':'지불')+' 처리: '+(x.client||x.product)+'\n잔액 '+fmt(o)+' 전액을 오늘('+tdy()+') 날짜로 처리할까요?'))return;
+  if(!confirm((kind==='sales'?jt('수금','集金'):jt('지불','支払'))+jt(' 처리: ',' 処理: ')+(x.client||x.product)+'\n'+jt('잔액 ','残高 ')+fmt(o)+jt(' 전액을 오늘(',' 全額を本日(')+tdy()+jt(') 날짜로 처리할까요?',') 付で処理しますか？')))return;
   x.collections=x.collections||[];
   x.collections.push({date:tdy(),amount:o,yr:Number(tdy().slice(0,4))});
   x._at=tdy();
-  if(await saveDB()){ toast('처리 완료 ✓ '+fmt(o)); renderDaily(); }
+  if(await saveDB()){ toast(jt('처리 완료 ✓ ','処理完了 ✓ ')+fmt(o)); renderDaily(); }
 }
 function setAgf(v){
   _agf=(_agf===v)?'':v;
@@ -7520,7 +7521,7 @@ function csvLedger(){
   DB[kind].slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');}).forEach(function(x){
     rows.push([x.date,x.method==='cash'?'현금':'예금',x.accNo||'',x.desc,x.amount]);
   });
-  csvDL(kind==='receipts'?'수금원장':'지출원장',rows); toast('CSV 다운로드 ✓');
+  csvDL(kind==='receipts'?'수금원장':'지출원장',rows); toast(jt('CSV 다운로드 ✓','CSVダウンロード ✓'));
 }
 function csvDaily(){
   var kind=_day;
@@ -7530,7 +7531,7 @@ function csvDaily(){
     rows.push([x.date,x.client||'',x.product,x.cat||'',x.qty||1,x.unit||'',x.total,(x.total||0)-o,o,x.hqRemit?'〇':'',
       (x.collections||[]).map(function(c){return (c.date||'')+' '+(c.amount||0)+(c.adv?'(선수금)':'');}).join(' / ')]);
   });
-  csvDL(kind==='sales'?'매출일보':'매입일보',rows); toast('CSV 다운로드 ✓');
+  csvDL(kind==='sales'?'매출일보':'매입일보',rows); toast(jt('CSV 다운로드 ✓','CSVダウンロード ✓'));
 }
 function csvAssets(){
   var rows;
@@ -7539,14 +7540,114 @@ function csvAssets(){
   else{ var list=_asset==='HQ'?DB.assetsHQ:DB.assetsJP;
     rows=[[_asset==='HQ'?'본사자산':'법인자산'],['Product No.','제품','S/N','수량','금액','위치']];
     list.forEach(function(x){rows.push([x.prodNo||'',x.product,x.sn,x.qty||1,x.amount||'',x.location||''])}); }
-  csvDL('자산_'+_asset,rows); toast('CSV 다운로드 ✓');
+  csvDL('자산_'+_asset,rows); toast(jt('CSV 다운로드 ✓','CSVダウンロード ✓'));
 }
+function jt(ko,ja){ return (typeof lang!=='undefined'&&lang==='jp')?ja:ko; }
+var JA={
+'자금현황 보고서':'資金現況報告書','계좌 잔액·입출금·자산/부채 점검 (資金現況) — 기준일 선택 시 해당일로 재계산':'口座残高・入出金・資産/負債チェック — 基準日を選ぶとその日で再計算',
+'예금·현금 입출금 내역 (集金額/支出額) — 행 클릭 시 수정':'普通預金・小口現金の入出金明細 — 行クリックで編集',
+'미수채권·미지급금 자동계산 (売上/買入日報) — 행 클릭 시 수금/지불 관리':'未収金・未払金を自動計算 — 行クリックで集金/支払を管理',
+'본사/법인 자산, 데모장비, 보고서 기초값 관리':'本社/法人資産・デモ装備・レポート基礎値の管理',
+'자산·장비·기준정보':'資産・装備・基準情報','입금·지출 원장':'入出金元帳','매출·매입 일보':'売上・買入日報',
+'전일잔액 + 오늘입금 − 오늘지출 = 현재잔액':'前日残高 + 本日入金 − 本日支出 = 現在残高',
+'계좌별 자금 현황':'口座別資金現況','오늘 입금 내역':'本日の入金内訳','오늘 지출 내역':'本日の支出内訳',
+'법인운영 상태점검':'法人運営状態チェック','법인운영 점검':'法人運営チェック','채권 / 채무 현황':'債権 / 債務現況',
+'월별 입금·지출':'月別入金・支出','파랑=입금 · 주황=지출':'青=入金 · 橙=支出','클릭 시 이 계좌 원장으로':'クリックでこの口座の元帳へ',
+'보유자금 합계':'保有資金合計','매출채권 (미수)':'売掛金(未収)','자산−부채':'資産−負債','✅ 보통~양호':'✅ 普通~良好','⚠️ 자금 유의':'⚠️ 資金注意',
+'보유자금 (현금·예금)':'保有資金(現金・預金)','보증금 (敷金)':'保証金(敷金)','재고자산':'在庫資産','자산 합계':'資産合計','부채 합계':'負債合計','외부차입':'外部借入',
+'매출채권':'売掛金','매입채무':'買掛金','미지급금':'未払金','총매출/매입':'総売上/仕入','총수금/지불':'総集金/支払','이월':'繰越',
+'수금(입금)':'集金(入金)','빠른 입력':'クイック入力','(금액에서 Enter로 바로 등록, 연속 입력 가능)':'(金額欄でEnter登録・連続入力可)',
+'전체 월':'全月','전체 계좌':'全口座','전체 연도':'全年度','전체 분류':'全分類','내용 검색':'内容検索',
+'매출일보 · 미수채권':'売上日報・未収金','매입일보 · 미지급금':'買入日報・未払金',
+'미수채권 (전체)':'未収金(全体)','미지급금 (전체)':'未払金(全体)','미수 건수':'未収件数','미지급 건수':'未払件数',
+'총매출':'総売上','총수금':'総集金','총매입':'総仕入','총지불':'総支払','미수만':'未収のみ','미지급만':'未払のみ',
+'거래처/제품 검색':'取引先/製品検索','제품/CI 검색':'製品/CI検索','1년+':'1年+','6–12개월':'6–12ヶ月','3–6개월':'3–6ヶ月','0–3개월':'0–3ヶ月','1년 이상':'1年以上',
+'수금/지불':'集金/支払','본사송금':'本社送金','완료':'完了','기기':'機器','소모품':'消耗品','기타':'その他',
+'＋수금':'＋集金','＋지불':'＋支払','수금 내역':'集金内訳','지불 내역':'支払内訳','잔액 자동계산':'残高自動計算',
+'선수금(차기)':'前受金(次期)','구내역 정산':'旧内訳精算','(일자없음)':'(日付なし)','아직 없음':'まだありません',
+'본사자산':'本社資産','법인자산':'法人資産','데모현황':'デモ現況','기준정보':'基準情報','제품/시리얼/위치 검색':'製品/シリアル/場所検索',
+'데모 거래처':'デモ取引先','입고일':'入庫日','비고':'備考','위치':'場所',
+'계좌 · 기초잔액':'口座・期首残高','(2026년 기초)':'(2026年期首)','고정 항목':'固定項目','자본금 내역':'資本金内訳','차입금 내역':'借入金内訳','분류기준':'分類基準',
+'기초잔액 (2026)':'期首残高 (2026)','은행':'銀行','계좌번호':'口座番号','입금일':'入金日','차입금':'借入金','상환액':'償還額',
+'2025 이월채권':'2025繰越売掛金','2025 이월채무':'2025繰越買掛金','자본금 총액':'資本金総額','본사 차입금 잔액':'本社借入金残高','제품명2':'製品名2',
+'입금 없음':'入金なし','지출 없음':'支出なし','필터로 좁혀주세요':'フィルタで絞ってください',
+'거래처':'取引先','제품명':'製品名','제품분류':'製品分類','제품':'製品','분류':'分類','수량':'数量','단가':'単価','금액 (JPY)':'金額 (JPY)','금액(JPY)':'金額(JPY)','금액':'金額',
+'상세/수정':'詳細/編集','수정':'編集','등록':'登録','삭제':'削除','취소':'キャンセル','저장':'保存','추가':'追加','매출':'売上','매입':'買入',
+'(본사 직접송금)':'(本社直接送金)','오늘 입금':'本日の入金','오늘 지출':'本日の支出','오늘':'本日','전일':'前日','일자':'日付','내용':'内容','구분':'区分',
+'잔액':'残高','합계':'合計','수금':'集金','지불':'支払','지출':'支出','입금':'入金','예금':'預金','현금':'現金','기준':'基準','표시':'表示','건':'件'
+};
+var _jaKeys=Object.keys(JA).sort(function(a,b){return b.length-a.length;});
+function _jaText(s){ for(var i=0;i<_jaKeys.length;i++){ var k=_jaKeys[i]; if(s.indexOf(k)>=0)s=s.split(k).join(JA[k]); } return s; }
+function _jaAllow(el){
+  if(!el.closest)return false;
+  var td=el.closest('td');
+  if(!td)return true;
+  if(el.closest('th,button,label,.fx-badge,.fx-mini,.fx-tab,option'))return true;
+  var tr=td.parentElement;
+  if(tr&&(tr.className||'').indexOf('tsum')>=0)return true;
+  if(td.hasAttribute('colspan'))return true;
+  return false;
+}
+function _jaRoots(){
+  var r=[].slice.call(document.querySelectorAll('.finpage'));
+  var pt=document.getElementById('pageTitle'),ps=document.getElementById('pageSubtitle');
+  var act=document.querySelector('.page.active');
+  if(act&&act.id.indexOf('page-fin-')===0){ if(pt)r.push(pt); if(ps)r.push(ps); }
+  return r;
+}
+var _jaBusy=false;
+function _jaFix(){
+  if(typeof lang==='undefined'||lang!=='jp'||_jaBusy)return;
+  _jaBusy=true;
+  try{
+    _jaRoots().forEach(function(el){
+      var w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null);
+      var n;
+      while(n=w.nextNode()){
+        var v=n.nodeValue;
+        if(v&&/[가-힣]/.test(v)&&_jaAllow(n.parentElement)){
+          if(n._ko===undefined)n._ko=v;
+          var nv=_jaText(v);
+          if(nv!==v)n.nodeValue=nv;
+        }
+      }
+      if(el.querySelectorAll)[].forEach.call(el.querySelectorAll('input[placeholder],[title]'),function(e2){
+        if(e2.placeholder&&/[가-힣]/.test(e2.placeholder)){ if(!e2.dataset.koPh)e2.dataset.koPh=e2.placeholder; e2.placeholder=_jaText(e2.placeholder); }
+        var ti=e2.getAttribute('title');
+        if(ti&&/[가-힣]/.test(ti)){ if(!e2.dataset.koTi)e2.dataset.koTi=ti; e2.setAttribute('title',_jaText(ti)); }
+      });
+    });
+  }finally{_jaBusy=false;}
+}
+function _koRestore(){
+  _jaBusy=true;
+  try{
+    _jaRoots().forEach(function(el){
+      var w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null);
+      var n;
+      while(n=w.nextNode()){ if(n._ko!==undefined&&n.nodeValue!==n._ko)n.nodeValue=n._ko; }
+      if(el.querySelectorAll)[].forEach.call(el.querySelectorAll('input[placeholder],[title]'),function(e2){
+        if(e2.dataset.koPh)e2.placeholder=e2.dataset.koPh;
+        if(e2.dataset.koTi)e2.setAttribute('title',e2.dataset.koTi);
+      });
+    });
+  }finally{_jaBusy=false;}
+}
+function relang(){
+  if(typeof lang!=='undefined'&&lang==='jp')_jaFix(); else _koRestore();
+  var act=document.querySelector('.page.active');
+  if(act&&act.id.indexOf('page-fin-')===0)onPage(act.id.replace('page-',''));
+}
+var _jaObs=new MutationObserver(function(){
+  if(typeof lang!=='undefined'&&lang==='jp'&&!_jaBusy){ clearTimeout(window._jaT); window._jaT=setTimeout(_jaFix,60); }
+});
+if(document.body)_jaObs.observe(document.body,{childList:true,subtree:true});
 function cfgSet(k,v){ DB.settings[k]=Number(v)||0; saveDB(); }
 function cfgAcc(i,k,v){ DB.settings.accounts[i][k]=(k==='opening')?(Number(v)||0):v; saveDB(); }
 function closeModal(){ $('fxmodal').classList.remove('on'); _mCtx=null; }
 document.addEventListener('click',function(e){ if(e.target&&e.target.id==='fxmodal')closeModal(); });
 setTimeout(function(){ var act=document.querySelector('.page.active'); if(act&&act.id.indexOf('page-fin-')===0)onPage(act.id.replace('page-','')); },400);
-return {onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
+return {relang:relang,onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
   openEntry:openEntry,saveEntry:saveEntry,delEntry:delEntry,
   openDaily:openDaily,saveDaily:saveDaily,delDaily:delDaily,
   addCol:addCol,delCol:delCol,mCalc:mCalc,renderCols:renderCols,prod2Cat:prod2Cat,
