@@ -7529,16 +7529,16 @@ function openDaily(id){
   var cl1=kind==='sales'?'거래처':'CI';
   $('fxmTitle').textContent=(isNew?'등록':'상세/수정')+' — '+(kind==='sales'?'매출':'매입');
   $('fxmBody').innerHTML=
-    '<div class="f2"><div class="frow"><label>'+(kind==='sales'?jt('수주일','受注日'):jt('매입일','仕入日'))+'</label><input type="date" id="fxmDate" value="'+esc(x.date)+'"></div>'+
-    '<div class="frow"><label>'+cl1+'</label><input type="text" id="fxmClient" list="fxClientList" value="'+esc(x.client)+'"></div></div>'+(kind==='sales'?'<div style="margin-bottom:10px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:9px 12px"><label style="font-size:12.5px;color:#0f766e;font-weight:700">🧾 '+jt('매출기준 (매출인식일)','売上基準 (売上認識日)')+'</label> <span class="fx-mini">'+jt('비우면 수주일로 인식 · 미승인기기만 선적일','空欄なら受注日で認識・未承認機器のみ出荷日')+'</span><input type="date" id="fxmRecog" value="'+esc(x.recog||'')+'" style="width:100%;padding:8px 11px;border:1px solid #5eead4;border-radius:8px;font-size:13px;margin-top:5px"></div>':'')+
+    '<div class="f2"><div class="frow"><label>'+(kind==='sales'?jt('수주일','受注日'):jt('매입일','仕入日'))+'</label><input type="date" id="fxmDate" value="'+esc(x.date)+'" onchange="FIN.mRecogInfo()"></div>'+
+    '<div class="frow"><label>'+cl1+'</label><input type="text" id="fxmClient" list="fxClientList" value="'+esc(x.client)+'"></div></div>'+(kind==='sales'?'<div style="margin-bottom:10px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:9px 12px"><label style="font-size:12.5px;color:#0f766e;font-weight:700">🧾 '+jt('매출기준 (매출인식일)','売上基準 (売上認識日)')+'</label> <span class="fx-mini">'+jt('미승인기기(본사송금〇): 선적일 입력해야 매출인식 · 그 외: 비우면 수주일','未承認機器: 出荷日入力で認識 · その他: 空欄なら受注日')+'</span><input type="date" id="fxmRecog" value="'+esc(x.recog||'')+'" oninput="FIN.mRecogInfo()" style="width:100%;padding:8px 11px;border:1px solid #5eead4;border-radius:8px;font-size:13px;margin-top:5px"></div>':'')+
     '<div class="frow"><label>제품명</label><input type="text" id="fxmProd" value="'+esc(x.product)+'"></div>'+
     '<div class="f2"><div class="frow"><label>S/N · PI</label><input type="text" id="fxmSn" value="'+esc(x.sn)+'"></div>'+
     '<div class="frow"><label>제품분류</label><select id="fxmProd2" onchange="FIN.prod2Cat(this.value)">'+clsSel+'</select></div></div>'+
-    '<div class="f2"><div class="frow"><label>분류</label><select id="fxmCat"><option'+(x.cat==='기기'?' selected':'')+'>기기</option><option'+(x.cat==='소모품'?' selected':'')+'>소모품</option><option'+(x.cat==='기타'?' selected':'')+'>기타</option></select></div>'+
-    '<div class="frow"><label>본사송금 〇</label><select id="fxmHq"><option value=""'+(!x.hqRemit?' selected':'')+'>—</option><option value="1"'+(x.hqRemit?' selected':'')+'>〇 (본사 직접송금)</option></select></div></div>'+
+    '<div class="f2"><div class="frow"><label>분류</label><select id="fxmCat" onchange="FIN.mTax()"><option'+(x.cat==='기기'?' selected':'')+'>기기</option><option'+(x.cat==='소모품'?' selected':'')+'>소모품</option><option'+(x.cat==='기타'?' selected':'')+'>기타</option></select></div>'+
+    '<div class="frow"><label>본사송금 〇</label><select id="fxmHq" onchange="FIN.mRecogInfo()"><option value=""'+(!x.hqRemit?' selected':'')+'>—</option><option value="1"'+(x.hqRemit?' selected':'')+'>〇 (본사 직접송금)</option></select></div></div>'+
     '<div class="f2"><div class="frow"><label>수량</label><input type="number" id="fxmQty" value="'+esc(x.qty||1)+'" oninput="FIN.mCalc()"></div>'+
     '<div class="frow"><label>단가 (JPY)</label><input type="number" id="fxmUnit" value="'+esc(x.unit)+'" oninput="FIN.mCalc()"></div></div>'+
-    '<div class="frow"><label>금액 (JPY)</label><input type="number" id="fxmTotal" value="'+esc(x.total)+'" oninput="FIN.renderCols()"></div>'+
+    '<div class="f2"><div class="frow"><label>'+jt('매출액','売上額')+' <span class="fx-mini">'+jt('(세전)','(税抜)')+'</span></label><input type="number" id="fxmNet" value="'+esc(x.net!=null?x.net:x.total)+'" oninput="FIN.mTax()"></div>'+'<div class="frow"><label>'+jt('총매출','総売上')+' <span class="fx-mini">'+jt('(세포함)','(税込)')+'</span></label><input type="number" id="fxmTotal" value="'+esc(x.total)+'" oninput="FIN.renderCols()"></div></div>'+'<div id="fxmRecogInfo" style="font-size:12.5px;margin:2px 0 10px;padding:8px 12px;border-radius:8px"></div>'+
     '<div style="border-top:1px solid #e2e8f0;margin:14px 0 10px;padding-top:12px"><b style="font-size:13.5px">'+(kind==='sales'?'💰 수금 내역':'💸 지불 내역')+'</b> <span class="fx-mini">잔액 자동계산</span></div>'+
     '<div id="fxmCols"></div>'+
     '<div style="display:flex;gap:8px;margin-top:8px"><input type="date" id="fxmColDate" value="'+tdy()+'" style="padding:7px;border:1px solid #cbd5e1;border-radius:7px">'+
@@ -7549,10 +7549,28 @@ function openDaily(id){
     (isNew?'':'<button class="fx-btn red" onclick="FIN.delDaily()">삭제</button>')+
     '<span style="flex:1"></span><button class="fx-btn gray" onclick="FIN.closeModal()">취소</button><button class="fx-btn green" onclick="FIN.saveDaily()">저장</button>';
   $('fxmodal').classList.add('on');
-  renderCols();
+  renderCols(); mRecogInfo();
 }
-function prod2Cat(v){ var c=(DB.classes||[]).find(function(x){return x.name===v;}); if(c)$('fxmCat').value=c.cat; }
-function mCalc(){ var q=Number($('fxmQty').value)||1, u=Number($('fxmUnit').value)||0; if(u)$('fxmTotal').value=Math.round(q*u); renderCols(); }
+function prod2Cat(v){ var c=(DB.classes||[]).find(function(x){return x.name===v;}); if(c)$('fxmCat').value=c.cat; mTax(); }
+function mTax(){
+  var net=Number($('fxmNet')?$('fxmNet').value:0)||0;
+  var cat=$('fxmCat')?$('fxmCat').value:'';
+  if($('fxmTotal')) $('fxmTotal').value=(cat==='소모품')?Math.round(net*1.1):net;
+  renderCols(); mRecogInfo();
+}
+function mRecogInfo(){
+  var el=$('fxmRecogInfo'); if(!el)return;
+  var hq=!!($('fxmHq')&&$('fxmHq').value);
+  var M=$('fxmRecog')?$('fxmRecog').value:'';
+  var dt=$('fxmDate')?$('fxmDate').value:'';
+  var recog=hq?M:(M||dt);
+  if(hq&&!M){ el.style.cssText='font-size:12.5px;margin:2px 0 10px;padding:8px 12px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c';
+    el.innerHTML='⚠️ '+jt('미승인기기 · 선적일(매출기준) 미입력 → 미선적: 매출 인식 안 됨','未承認機器・出荷日未入力 → 売上未認識'); }
+  else if(recog){ el.style.cssText='font-size:12.5px;margin:2px 0 10px;padding:8px 12px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d';
+    el.innerHTML='✅ '+jt('매출인식일','売上認識日')+': <b>'+esc(recog)+'</b> <span class="fx-mini">'+(hq?jt('(선적일 기준)','(出荷日)'):(M?jt('(매출기준 지정)','(売上基準)'):jt('(수주일)','(受注日)')))+'</span>'; }
+  else { el.style.cssText='font-size:12.5px;margin:2px 0 10px;padding:8px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b'; el.innerHTML=jt('일자를 입력하세요','日付を入力'); }
+}
+function mCalc(){ var q=Number($('fxmQty').value)||1, u=Number($('fxmUnit').value)||0; if(u)$('fxmNet').value=Math.round(q*u); mTax(); }
 function renderCols(){
   var cols=_mCtx.cols;
   $('fxmCols').innerHTML=cols.map(function(c,i){
@@ -7579,7 +7597,9 @@ async function saveDaily(){
   var k=_mCtx.kind, id=_mCtx.id;
   var e={date:$('fxmDate').value,client:$('fxmClient').value.trim(),product:$('fxmProd').value.trim(),
     sn:$('fxmSn').value.trim(),prod2:$('fxmProd2').value,cat:$('fxmCat').value,hqRemit:!!$('fxmHq').value,
-    qty:Number($('fxmQty').value)||1,unit:Number($('fxmUnit').value)||0,recog:(document.getElementById('fxmRecog')?document.getElementById('fxmRecog').value:''),
+    qty:Number($('fxmQty').value)||1,unit:Number($('fxmUnit').value)||0,
+    recog:(!!$('fxmHq').value ? ($('fxmRecog')?$('fxmRecog').value:'') : (($('fxmRecog')&&$('fxmRecog').value)||$('fxmDate').value)),
+    net:Math.round(Number(($('fxmNet')?$('fxmNet').value:0))||0),
     total:Math.round(Number($('fxmTotal').value)||0),collections:_mCtx.cols,_at:tdy()};
   if(!e.date||!e.product||!e.total){ alert(jt('일자·제품명·금액은 필수입니다','日付・製品名・金額は必須です')); return; }
   if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
@@ -7880,7 +7900,7 @@ setTimeout(function(){ var act=document.querySelector('.page.active'); if(act&&a
 return {reload:function(){_loaded=false;DB=null;},relang:relang,onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
   openEntry:openEntry,saveEntry:saveEntry,delEntry:delEntry,
   openDaily:openDaily,saveDaily:saveDaily,delDaily:delDaily,
-  addCol:addCol,delCol:delCol,mCalc:mCalc,renderCols:renderCols,prod2Cat:prod2Cat,
+  addCol:addCol,delCol:delCol,mCalc:mCalc,mTax:mTax,mRecogInfo:mRecogInfo,renderCols:renderCols,prod2Cat:prod2Cat,
   openAsset:openAsset,saveAsset:saveAsset,delAsset:delAsset,
   renderLedger:renderLedger,renderDaily:renderDaily,renderAssets:renderAssets,renderReport:renderReport,
   cfgSet:cfgSet,cfgAcc:cfgAcc,closeModal:closeModal};
