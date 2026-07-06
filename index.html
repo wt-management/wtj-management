@@ -595,8 +595,10 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
-    <div class="nav-item" onclick="showPage('inventory')"><span class="nav-icon">📦</span><span id="navInv">재고관리</span></div>
+    <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
+
+    <div class="nav-item" onclick="showPage('consumable-trend')"><span class="nav-icon">📦</span><span id="navConsTrend">소모품 트렌드</span></div>
+    
 
 
 
@@ -616,11 +618,13 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-item" onclick="showPage('consumable-trend')"><span class="nav-icon">📦</span><span id="navConsTrend">소모품 트렌드</span></div>
+    
 
 
 
-    <div class="nav-item" onclick="showPage('customer-analysis')"><span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span></div>
+    <div class="nav-item" onclick="showPage('customer-analysis')"><span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span></div>
+
+    <div class="nav-item" onclick="showPage('inventory')"><span class="nav-icon">📦</span><span id="navInv">재고관리</span></div>
 
 
 
@@ -7917,7 +7921,7 @@ function goInput(mode){
   showPage('fin-daily');
   load().then(function(ok){ if(!ok)return; setDay('sales');
     if(mode==='collect'){ var oc=$('fxDOnly'); if(oc)oc.checked=true; renderDaily(); toast(jt('수금할 매출 건을 클릭 → ＋수금','集金する売上を選択 → ＋集金')); }
-    else { setTimeout(function(){ openDaily(null); },130); }
+    else { renderDaily(); toast(jt('＋등록 버튼으로 새 매출을 입력하세요','＋登録で新規売上を入力')); }
   });
 }
 return {goInput:goInput,reload:function(){_loaded=false;DB=null;},relang:relang,onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
