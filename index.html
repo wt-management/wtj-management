@@ -56,7 +56,7 @@ body{font-family:'Pretendard','Pretendard Variable','Segoe UI','Noto Sans JP',sa
 
 .edit-btn,.del-btn{border:none;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:12px}
 
-.edit-btn{background:#e0e7ff;color:#3730a3}
+.edit-btn{background:#e0e7ff;color:#3730a3;white-space:nowrap}
 
 .edit-btn:hover{background:#c7d2fe}
 
@@ -220,7 +220,7 @@ tbody tr.total-row{background:#f1f5f9;font-weight:700}
 
 /* Form */
 
-.form-card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:960px}
+.form-card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:1240px}
 
 .form-title{font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px}
 
@@ -485,6 +485,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 #fxmodal .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:1100px){.finpage .fx-kgrid{grid-template-columns:repeat(2,1fr)}.finpage .fx-acct-grid{grid-template-columns:repeat(2,1fr)}.finpage .fx-grid2{grid-template-columns:1fr}}
 
+#outstandingList td,#outstandingList th{white-space:nowrap}
+#outstandingList td:nth-child(3){white-space:normal;min-width:220px}
 </style>
 
 </head>
@@ -1542,6 +1544,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
               </select>
 
               <input class="filter-input" type="text" id="orderSearchFilter" onkeyup="filterOrders()" placeholder="병원명 / 제품 검색...">
+              <button class="filter-input" onclick="csvOrders()" style="cursor:pointer;white-space:nowrap;background:#f8fafc">⬇ CSV</button>
 
               <select class="filter-input" id="orderCatFilter" onchange="filterOrders()">
 
@@ -1658,6 +1661,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
               </select>
 
               <input class="filter-input" type="text" id="paySearchFilter" onkeyup="filterPayments()" placeholder="거래처/내용 검색...">
+              <button class="filter-input" onclick="csvPayments()" style="cursor:pointer;white-space:nowrap;background:#f8fafc">⬇ CSV</button>
 
             </div>
 
@@ -1995,7 +1999,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
           <div id="outstandingLoader" style="display:none;text-align:center;padding:12px;color:#94a3b8;font-size:13px">로딩 중...</div>
 
-          <div id="outstandingList" style="max-height:220px;overflow-y:auto;display:none">
+          <div id="outstandingList" style="max-height:360px;overflow:auto;display:none">
 
             <table class="data-table" style="width:100%;font-size:12px">
 
@@ -2136,6 +2140,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
             <div style="display:flex;gap:8px;flex-wrap:wrap">
 
               <input class="filter-input" type="text" id="osSearchFilter" oninput="filterOutstandingPage()" placeholder="거래처명 / 제품명 검색...">
+              <button class="filter-input" onclick="csvOutstanding()" style="cursor:pointer;white-space:nowrap;background:#f8fafc">⬇ CSV</button>
 
               <select class="filter-input" id="osCatFilter" onchange="filterOutstandingPage()">
 
@@ -4842,6 +4847,34 @@ function loadOrdersList(){
 
 }
 
+function wtjCsvDL(name,rows){
+  var csv='﻿'+rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(',');}).join('\r\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=name+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+function csvOrders(){
+  var data=window._lastOrdersView||[];
+  var paidMap={}; allPayments.forEach(function(p){ var r=p.orderRef||''; if(r)paidMap[r]=(paidMap[r]||0)+(p.amount||0); });
+  var rows=[['수주 현황'],['수주일','거래처','클리닉','제품','분류','수량','단가','수주금액(M)','입금완료','미수']];
+  data.forEach(function(o){ var paid=paidMap[o.stableId]||0;
+    rows.push([o.date,o.facility||'',o.clinic||'',o.product||'',o.category||'',o.qty||1,o.unitPrice||'',o.amount||0,paid,(o.amount||0)-paid]); });
+  wtjCsvDL('수주현황',rows);
+}
+function csvPayments(){
+  var data=window._lastPaysView||[];
+  var om={}; allOrders.forEach(function(o){ if(o.stableId)om[o.stableId]=o; });
+  var rows=[['입금 현황'],['입금일','거래처/내용','금액(엔)','관련 제품','수주일']];
+  data.forEach(function(p){ var o=om[p.orderRef||'']||{};
+    rows.push([p.date,p.description||'',p.amount||0,o.product||'',o.date||'']); });
+  wtjCsvDL('입금현황',rows);
+}
+function csvOutstanding(){
+  var rows=[['미수금 상세'],['수주일','거래처','클리닉','제품','분류','수량','수주금액','입금액','미수금','경과일']];
+  ((_osData&&_osData.rows)||[]).forEach(function(r){
+    rows.push([r.orderDate,r.facility||'',r.clinic||'',r.product||'',r.category||'',r.qty||1,r.orderAmount||0,r.paidAmount||0,r.outstanding||0,r.elapsed||'']); });
+  wtjCsvDL('미수금상세',rows);
+}
 function filterOrders(){
 
   var year=document.getElementById('orderYearFilter').value;
@@ -4874,7 +4907,7 @@ function filterOrders(){
 
 }
 
-function renderOrders(data){
+function renderOrders(data){ window._lastOrdersView=data;
 
   data=data.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
 
@@ -5012,7 +5045,7 @@ function filterPayments(){
 
 }
 
-function renderPayments(data){
+function renderPayments(data){ window._lastPaysView=data;
 
   data=data.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
 
@@ -6048,6 +6081,7 @@ function selectOrder(stableId,facility,product,remaining){
   document.getElementById('outstandingList').style.display='none';
 
   document.getElementById('payOrderSearch').value='';
+  document.getElementById('inPayAmount').focus();
 
 }
 
