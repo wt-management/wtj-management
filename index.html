@@ -595,8 +595,10 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
-
+    <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
+
+
+
     <div class="nav-item" onclick="showPage('consumable-trend')"><span class="nav-icon">📦</span><span id="navConsTrend">소모품 트렌드</span></div>
     
 
@@ -622,8 +624,10 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-item" onclick="showPage('customer-analysis')"><span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span></div>
-
+    <div class="nav-item" onclick="showPage('customer-analysis')"><span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span></div>
+
+
+
     <div class="nav-item" onclick="showPage('inventory')"><span class="nav-icon">📦</span><span id="navInv">재고관리</span></div>
 
 
@@ -7514,11 +7518,11 @@ function renderDaily(){
   }).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
   var tTot=rows.reduce(function(a,x){return a+(x.total||0);},0);
   var tOut=rows.reduce(function(a,x){return a+Math.max(0,outst(x));},0);
-  var allOut=DB[kind].reduce(function(a,x){return a+Math.max(0,outst(x));},0);
+  var allOut=DB[kind].reduce(function(a,x){return a+(_isCommRow(x)?0:Math.max(0,outst(x)));},0);
   var y=String(new Date().getFullYear());
-  var ySale=DB[kind].reduce(function(a,x){return a+(('recog' in x?(x.recog||''):(x.date||'')).slice(0,4)===y?((x.net!=null?x.net:x.total)||0):0);},0);
-  var yCol=0; DB[kind].forEach(function(x){ (x.collections||[]).forEach(function(c){ if(!c.adv&&((c.yr&&String(c.yr)===y)||(!c.yr&&(c.date||'').slice(0,4)===y)))yCol+=c.amount||0; }); });
-  var cnt=DB[kind].filter(function(x){return outst(x)>=1;}).length;
+  var ySale=DB[kind].reduce(function(a,x){return a+((!_isCommRow(x)&&('recog' in x?(x.recog||''):(x.date||'')).slice(0,4)===y)?((x.net!=null?x.net:x.total)||0):0);},0);
+  var yCol=0; DB[kind].forEach(function(x){ if(_isCommRow(x))return; (x.collections||[]).forEach(function(c){ if((c.date||'').slice(0,4)===y)yCol+=c.amount||0; }); });
+  var cnt=DB[kind].filter(function(x){return !_isCommRow(x)&&outst(x)>=1;}).length;
   var lbl=kind==='sales'?['총매출','총수금','미수채권','미수 건수']:['총매입','총지불','미지급금','미지급 건수'];
   $('fxDKpi').innerHTML=
     '<div class="fx-kpi blue"><div class="kl">'+y+' '+lbl[0]+'</div><div class="kv">'+fmtS(ySale)+'</div></div>'+
