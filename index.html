@@ -640,7 +640,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-label" style="margin-top:8px" id="navGroupFin"><span id="navGroupFinTxt">자금일보</span> <span style="background:#3b82f6;color:#fff;border-radius:8px;font-size:9px;padding:1px 6px;margin-left:4px">NEW</span></div>
+    <div class="nav-label" style="margin-top:8px" id="navGroupFin"><span id="navGroupFinTxt">자금일보</span></div>
 
 
 
@@ -2649,6 +2649,8 @@ async function _bootApp() {
   var _nowM = String(new Date().getMonth()+1).padStart(2,'0');
   var _toEl = document.getElementById('dash-to-sel');
   if (_toEl) _toEl.value = _nowM;
+
+  var _esToEl = document.getElementById('esTo'); if (_esToEl) _esToEl.value = _nowM;
   await new Promise(function(resolve) { loadData(function() { resolve(); }); });
   var dl = document.getElementById('facilityList');
   if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
