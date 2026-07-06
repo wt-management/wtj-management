@@ -2662,6 +2662,7 @@ function _applyLoginUI() {
   var roU = document.getElementById('role-opt-uploader');
   var roM = document.getElementById('role-opt-master');
   if(_isMaster) { if(roU) roU.style.display=''; if(roM) roM.style.display=''; }
+  try{ applyMenuRoles(); }catch(e){}
 
   // GitHub 토큰 자동설정 제거(보안 2026-07-03): 하드코딩 PAT가 공개소스에 노출되어 폐기.
   // 데이터 저장은 Supabase(wtj_data)로 일원화됨. GitHub data.json 업로드가 필요하면
@@ -2670,6 +2671,44 @@ function _applyLoginUI() {
 }
 
 
+
+var MENU_ROLES = {
+  'dashboard':['sales','finance'], 'exec-summary':['finance'], 'budget-actual':['sales','finance'],
+  'consumable-trend':['sales'], 'orders-list':['sales'], 'order-input':['sales'],
+  'customer-analysis':['sales'], 'inventory':['sales'],
+  'payments-list':['finance'], 'payment-input':['finance'], 'outstanding':['finance'],
+  'fin-report':['finance'], 'fin-ledger':['finance'], 'fin-daily':['finance'], 'fin-assets':['finance'],
+  'excel-upload':['finance']
+};
+function _navKey(item){
+  var oc=item.getAttribute('onclick')||'';
+  var m=oc.match(/showPage\('([^']+)'\)/); if(m)return m[1];
+  if(oc.indexOf("goInput('new')")>=0)return 'order-input';
+  if(oc.indexOf("goInput('collect')")>=0)return 'payment-input';
+  return null;
+}
+function _hideEmptyNavLabels(){
+  var sec=document.querySelector('.nav-section'); if(!sec)return;
+  var kids=sec.children, curLabel=null, anyVis=false, i;
+  for(i=0;i<kids.length;i++){ var el=kids[i];
+    if(el.classList.contains('nav-label')){ if(curLabel)curLabel.style.display=anyVis?'':'none'; curLabel=el; anyVis=false; }
+    else if(el.classList.contains('nav-item')){ if(el.style.display!=='none')anyVis=true; }
+  }
+  if(curLabel)curLabel.style.display=anyVis?'':'none';
+}
+function applyMenuRoles(){
+  var role=_currentUser?_currentUser.role:'';
+  if(role!=='sales'&&role!=='finance'){ return; }  // master/admin/일반/업로더 = 전체 표시(관리자그룹 별도)
+  var items=document.querySelectorAll('.nav-section .nav-item');
+  for(var i=0;i<items.length;i++){ var it=items[i];
+    if(it.closest('#nav-admin-group')) continue;   // 관리자 그룹은 별도 로직
+    var k=_navKey(it); if(!k) continue;
+    var allowed=MENU_ROLES[k];
+    if(!allowed){ it.style.display=''; continue; }
+    it.style.display = allowed.indexOf(role)>=0 ? '' : 'none';
+  }
+  _hideEmptyNavLabels();
+}
 
 async function _bootApp() {
   var _nav=(performance.getEntriesByType('navigation')[0]||{}).type;   // reload=새로고침 / navigate=신규진입
@@ -2732,7 +2771,7 @@ function renderUserMgmt(members) {
       ? '<span style="background:#ecfdf5;color:#065f46;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">업로더</span>'
       : m.role === 'admin'
       ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">관리자</span>'
-      : '<span style="background:#f0f9ff;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">일반</span>';
+      : m.role === 'sales' ? '<span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">영업</span>' : m.role === 'finance' ? '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">재무</span>' : '<span style="background:#f0f9ff;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">일반</span>';
 
     var statusLabel = m.is_active
 
@@ -2837,11 +2876,11 @@ async function toggleMemberActive(id, current) {
 async function toggleMemberRole(id, current, isSelf) {
   var _myRole = _currentUser && _currentUser.role;
   var roles = _myRole === 'master'
-    ? ['general','admin','uploader','master']
-    : ['general','admin'];
+    ? ['general','sales','finance','admin','uploader','master']
+    : ['general','sales','finance','admin'];
   var idx = roles.indexOf(current);
   var newRole = roles[(idx+1) % roles.length];
-  var labels = {general:'일반', admin:'관리자', uploader:'업로더', master:'마스터'};
+  var labels = {general:'일반', sales:'영업', finance:'재무', admin:'관리자', uploader:'업로더', master:'마스터'};
   if (!confirm('"' + labels[current] + '" → "' + labels[newRole] + '" 으로 변경하시겠습니까?')) return;
   await _sb.from('wtj_members').update({role: newRole}).eq('id', id);
   loadUserMgmt();
