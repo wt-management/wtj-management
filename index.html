@@ -2397,6 +2397,25 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
           <div class="alert alert-success" id="euSuccess" style="margin-top:12px"></div>
 
           <div class="alert alert-error" id="euError" style="margin-top:12px"></div>
+          <div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">
+            <div class="form-title">📒 매출일보 갱신 <span style="font-size:12px;font-weight:500;color:#0d9488">(자금일보 · 연결매출)</span></div>
+            <div class="form-sub">「③매출일보」 시트가 있는 엑셀(일일현황보고서)을 올리면 매출일보 데이터가 갱신됩니다. 기준: 매출인식일(매출기준)·세전 매출액·수수료 제외·미선적 미승인기기 제외.</div>
+            <div id="finDrop" onclick="document.getElementById('finFile').click()" ondragover="event.preventDefault();this.style.borderColor='#0d9488'" ondragleave="this.style.borderColor='#5eead4'" ondrop="handleFinDrop(event)" style="border:2px dashed #5eead4;background:#f0fdfa;border-radius:12px;padding:28px;text-align:center;cursor:pointer;margin:16px 0">
+              <div style="font-size:32px">📒</div>
+              <div id="finDropLabel" style="font-weight:600;color:#0f766e;margin-top:6px">매출일보 엑셀을 드래그하거나 클릭</div>
+              <div style="font-size:12px;color:#94a3b8;margin-top:2px">.xlsx (③매출일보 시트 포함)</div>
+              <input type="file" id="finFile" accept=".xlsx" style="display:none" onchange="handleFinFile(this)">
+            </div>
+            <div id="finPreview" style="display:none">
+              <div id="finStats" style="background:#fff;border:1px solid #99f6e4;border-radius:10px;padding:16px 18px;margin-bottom:12px"></div>
+              <div style="display:flex;gap:10px;justify-content:flex-end">
+                <button class="btn btn-secondary" onclick="resetFinUpload()">취소</button>
+                <button class="btn btn-primary" id="btnFinCommit" onclick="commitFinSales()" style="background:#0d9488">이 내용으로 매출일보 갱신</button>
+              </div>
+              <div class="alert alert-success" id="finSuccess" style="margin-top:12px"></div>
+              <div class="alert alert-error" id="finError" style="margin-top:12px"></div>
+            </div>
+          </div>
 
         </div>
 
@@ -6001,6 +6020,102 @@ function applyFilter(){
 
 
 
+var _finParsed=null;
+function _fnum(v){ if(v==null)return 0; var n=parseFloat(String(v).replace(/,/g,'')); return isNaN(n)?0:n; }
+function _finIsComm(s){ var x=((s.prod2||'')+' '+(s.client||'')+' '+(s.product||'')).toLowerCase(); return s.prod2==='Commission'||/수수료|commissi?on/.test(x); }
+function parseFinSales(wb){
+  var sn=null; for(var k=0;k<wb.SheetNames.length;k++){ if(wb.SheetNames[k].indexOf('매출일보')>=0){sn=wb.SheetNames[k];break;} }
+  if(!sn) sn=wb.SheetNames[0];
+  var ws=wb.Sheets[sn];
+  var _rf=XLSX.utils.decode_range(ws['!ref']||'A1'); if(_rf.e.c>62)_rf.e.c=62;   // 팬텀 컬럼 방지(63열로 제한)
+  var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true,cellDates:false,range:_rf});
+  var sales=[],i=0;
+  for(var ri=5;ri<rows.length;ri++){
+    var r=rows[ri]; if(!r||!r[1]) continue;
+    var b=toDateStr(r[1]); var prod=String(r[5]||'').trim();
+    if(!b||!prod||prod==='0') continue;
+    var Mval=toDateStr(r[12]); var hq=String(r[8]||'').trim()==='〇';
+    var recog=hq?Mval:(Mval||b);
+    var qty=parseInt(r[7])||1; var unit=_fnum(r[11]);
+    var total=_fnum(r[14])||qty*unit; var net=_fnum(r[13]);
+    var cols=[];
+    for(var Y=2019;Y<=2027;Y++){
+      var cs=17+(2027-Y)*5;
+      for(var si=0;si<3;si+=2){
+        var di=cs+si, ai=di+1;
+        if(ai>=r.length) continue;
+        var pd=toDateStr(r[di]), pa=_fnum(r[ai]);
+        if(pa>0){ var c={date:pd,amount:Math.round(pa),yr:Y}; if(Y===2027)c.adv=true; cols.push(c); }
+      }
+    }
+    var Ocache=_fnum(r[15]);
+    var colsum=cols.reduce(function(a,c){return a+(c.adv?0:c.amount);},0);
+    if(Ocache>0&&Math.abs(Ocache-colsum)>1) cols.push({date:'',amount:Math.round(Ocache-colsum),yr:0,legacy:true});
+    cols.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+    i++;
+    sales.push({id:'S'+i,date:b,recog:recog,client:String(r[4]||'').trim(),product:prod,sn:String(r[6]||'').trim(),
+      qty:qty,hqRemit:hq,prod2:String(r[10]||'').trim(),cat:String(r[9]||'').trim()||'기타',
+      unit:Math.round(unit*100)/100,net:Math.round(net*100)/100,total:Math.round(total*100)/100,collections:cols});
+  }
+  return sales;
+}
+function previewFinSales(sales){
+  var byM={},t16=0,tall=0,unship=0;
+  sales.forEach(function(x){
+    if(x.hqRemit&&!x.recog)unship++;
+    if(_finIsComm(x))return;
+    var d=x.recog||''; if(d.slice(0,4)!=='2026')return;
+    var m=d.slice(0,7); byM[m]=(byM[m]||0)+x.net;
+    if(parseInt(d.slice(5,7),10)<=6)t16+=x.net;
+    tall+=x.net;
+  });
+  var mk=Object.keys(byM).sort();
+  var rowsHtml=mk.map(function(m){return '<tr><td style="padding:2px 12px 2px 0">'+m+'</td><td style="padding:2px 0;text-align:right;font-variant-numeric:tabular-nums">¥'+Math.round(byM[m]).toLocaleString()+'</td></tr>';}).join('');
+  document.getElementById('finStats').innerHTML=
+    '<div style="font-weight:700;margin-bottom:8px">📊 미리보기 — 숫자 확인 후 갱신하세요</div>'+
+    '<div style="font-size:13px;line-height:1.8">매출일보 <b>'+sales.length+'</b>건 · 미선적 미승인기기 <b>'+unship+'</b>건 제외<br>'+
+    '<b style="color:#0d9488;font-size:15px">2026 1~6월 연결매출: ¥'+Math.round(t16).toLocaleString()+' ('+(t16/1e8).toFixed(3)+'억)</b><br>'+
+    '2026 연간: ¥'+Math.round(tall).toLocaleString()+' ('+(tall/1e8).toFixed(3)+'억) <span style="color:#94a3b8">· 매출기준·세전·수수료제외</span></div>'+
+    '<table style="margin-top:10px;font-size:12px;color:#475569"><tbody>'+rowsHtml+'</tbody></table>';
+}
+function handleFinFile(input){
+  var f=input.files[0]; if(!f)return;
+  document.getElementById('finDropLabel').textContent='📄 '+f.name;
+  var rd=new FileReader();
+  rd.onload=function(e){
+    try{
+      var wb=XLSX.read(e.target.result,{type:'binary',cellDates:false});
+      _finParsed=parseFinSales(wb);
+      if(!_finParsed.length){ alert('매출일보 데이터를 찾지 못했습니다. ③매출일보 시트가 포함된 파일인지 확인하세요.'); return; }
+      previewFinSales(_finParsed);
+      document.getElementById('finPreview').style.display='block';
+      document.getElementById('finSuccess').style.display='none';
+      document.getElementById('finError').style.display='none';
+    }catch(err){ alert('파싱 오류: '+err.message); }
+  };
+  rd.readAsBinaryString(f);
+}
+function handleFinDrop(e){ e.preventDefault(); document.getElementById('finDrop').style.borderColor='#5eead4'; var f=e.dataTransfer.files[0]; if(!f)return; document.getElementById('finFile').files=e.dataTransfer.files; handleFinFile({files:[f]}); }
+function resetFinUpload(){ _finParsed=null; document.getElementById('finPreview').style.display='none'; document.getElementById('finDropLabel').textContent='매출일보 엑셀을 드래그하거나 클릭'; document.getElementById('finFile').value=''; }
+async function commitFinSales(){
+  if(!_finParsed||!_finParsed.length)return;
+  if(!confirm('매출일보 '+_finParsed.length+'건으로 갱신할까요? 기존 매출일보 데이터는 대체됩니다.'))return;
+  var btn=document.getElementById('btnFinCommit'); btn.disabled=true; btn.textContent='저장 중...';
+  var fe=document.getElementById('finError'), fs=document.getElementById('finSuccess'); fe.style.display='none'; fs.style.display='none';
+  try{
+    var r=await _sb.from('wtj_data').select('data').eq('key','finance').single();
+    var blob=(r.data&&r.data.data)||{};
+    blob.sales=_finParsed;
+    blob.salesBasis='매출기준(recog=M열, 미승인미선적 제외) · 세전 매출액(N)';
+    blob.salesUpdatedAt=new Date().toISOString();
+    var w=await _sb.from('wtj_data').upsert({key:'finance',data:blob},{onConflict:'key'});
+    if(w.error)throw new Error(w.error.message);
+    _consolSales=null;                 // 연결매출 캐시 무효화
+    if(window.FIN&&FIN.reload)FIN.reload();
+    fs.textContent='✅ 매출일보 '+_finParsed.length+'건 갱신 완료. 대시보드·임원요약·자금일보에 반영됩니다.'; fs.style.display='block';
+  }catch(err){ fe.textContent='❌ 저장 실패: '+err.message; fe.style.display='block'; }
+  btn.disabled=false; btn.textContent='이 내용으로 매출일보 갱신';
+}
 function submitUpload(){
 
   var btn=document.getElementById('btnUpload');
@@ -7762,7 +7877,7 @@ function cfgAcc(i,k,v){ DB.settings.accounts[i][k]=(k==='opening')?(Number(v)||0
 function closeModal(){ $('fxmodal').classList.remove('on'); _mCtx=null; }
 document.addEventListener('click',function(e){ if(e.target&&e.target.id==='fxmodal')closeModal(); });
 setTimeout(function(){ var act=document.querySelector('.page.active'); if(act&&act.id.indexOf('page-fin-')===0)onPage(act.id.replace('page-','')); },400);
-return {relang:relang,onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
+return {reload:function(){_loaded=false;DB=null;},relang:relang,onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
   openEntry:openEntry,saveEntry:saveEntry,delEntry:delEntry,
   openDaily:openDaily,saveDaily:saveDaily,delDaily:delDaily,
   addCol:addCol,delCol:delCol,mCalc:mCalc,renderCols:renderCols,prod2Cat:prod2Cat,
