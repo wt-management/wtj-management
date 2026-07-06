@@ -525,76 +525,44 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
   <div class="nav-section">
 
-    <div class="nav-label" id="navGroupKr1">보고 / 조회</div>
-
-    <div class="nav-item active" onclick="showPage('dashboard')">
-
-      <span class="nav-icon">📊</span><span id="navDash">대시보드</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('exec-summary')">
-
-      <span class="nav-icon">📈</span><span id="navExec">임원 요약</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('consumable-trend')">
-
-      <span class="nav-icon">📦</span><span id="navConsTrend">소모품 트렌드</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('orders-list')">
-
-      <span class="nav-icon">📋</span><span id="navOrdersList">수주 현황</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('payments-list')">
-
-      <span class="nav-icon">💰</span><span id="navPayList">입금 현황</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('budget-actual')">
-
-      <span class="nav-icon">🎯</span><span id="navBA">목표 vs 실적</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('outstanding')">
-
-      <span class="nav-icon">⚠️</span><span id="navOutstanding">미수금 현황</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('customer-analysis')">
-
-      <span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span>
-
-    </div>
-
-    <div class="nav-label" style="margin-top:8px" id="navGroupKr2">데이터 입력</div>
-
-    <div id="nav-excel-upload" class="nav-item" style="display:none" onclick="showPage('excel-upload')">
-
-      <span class="nav-icon">📤</span><span id="navExcelUpload">엑셀 업로드</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('order-input')">
-
-      <span class="nav-icon">✏️</span><span id="navOrderIn">수주 입력</span>
-
-    </div>
-
-    <div class="nav-item" onclick="showPage('payment-input')">
-
-      <span class="nav-icon">💳</span><span id="navPayIn">입금 입력</span>
-
-    </div>
-
+    <div class="nav-label" id="navGroupKr1">경영 요약</div>
+
+    <div class="nav-item active" onclick="showPage('exec-summary')"><span class="nav-icon">📈</span><span id="navExec">임원 요약</span></div>
+
+    <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
+
+    <div class="nav-item" onclick="showPage('budget-actual')"><span class="nav-icon">🎯</span><span id="navBA">목표 vs 실적</span></div>
+
+    <div class="nav-label" style="margin-top:8px" id="navGroupSales">영업 · 수주</div>
+
+    <div class="nav-item" onclick="showPage('orders-list')"><span class="nav-icon">📋</span><span id="navOrdersList">수주 현황</span></div>
+
+    <div class="nav-item" onclick="showPage('order-input')"><span class="nav-icon">✏️</span><span id="navOrderIn">수주 입력</span></div>
+
+    <div class="nav-item" onclick="showPage('consumable-trend')"><span class="nav-icon">📦</span><span id="navConsTrend">소모품 트렌드</span></div>
+
+    <div class="nav-item" onclick="showPage('customer-analysis')"><span class="nav-icon">🔍</span><span id="navCustAnalysis">거래처 분석</span></div>
+
+    <div class="nav-label" style="margin-top:8px" id="navGroupPay">수금 · 채권</div>
+
+    <div class="nav-item" onclick="showPage('payments-list')"><span class="nav-icon">💰</span><span id="navPayList">입금 현황</span></div>
+
+    <div class="nav-item" onclick="showPage('payment-input')"><span class="nav-icon">💳</span><span id="navPayIn">입금 입력</span></div>
+
+    <div class="nav-item" onclick="showPage('outstanding')"><span class="nav-icon">⚠️</span><span id="navOutstanding">미수금 현황</span></div>
+
+    <div class="nav-label" style="margin-top:8px" id="navGroupFin">자금일보 <span style="background:#3b82f6;color:#fff;border-radius:8px;font-size:9px;padding:1px 6px;margin-left:4px">NEW</span></div>
+
+    <div class="nav-item" onclick="location.href='finance.html#page=report'"><span class="nav-icon">📒</span><span>자금현황 보고서</span></div>
+
+    <div class="nav-item" onclick="location.href='finance.html#page=receipts'"><span class="nav-icon">🏦</span><span>입금·지출 원장</span></div>
+
+    <div class="nav-item" onclick="location.href='finance.html#page=sales'"><span class="nav-icon">🧾</span><span>매출·매입 일보</span></div>
+
+    <div class="nav-label" style="margin-top:8px" id="navGroupKr2">관리</div>
+
+    <div id="nav-excel-upload" class="nav-item" style="display:none" onclick="showPage('excel-upload')"><span class="nav-icon">📤</span><span id="navExcelUpload">엑셀 업로드</span></div>
+
     <!-- 관리자 전용 -->
     <div id="nav-admin-group" style="display:none">
       <div class="nav-label" style="margin-top:8px">관리자</div>
@@ -3290,7 +3258,7 @@ var T = {
 
     sideTitle:'일본법인<br>매출현황',sideSubtitle:'',
 
-    navGroupKr1:'보고 / 조회',navGroupKr2:'데이터 입력',
+    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupKr2:'관리',
 
     navDash:'대시보드',navExec:'임원 요약',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
@@ -3412,7 +3380,7 @@ var T = {
 
     sideTitle:'日本法人<br>管理システム',sideSubtitle:'',
 
-    navGroupKr1:'報告 / 照会',navGroupKr2:'データ入力',
+    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupKr2:'管理',
 
     navDash:'ダッシュボード',navExec:'役員サマリー',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
