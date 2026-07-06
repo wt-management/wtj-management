@@ -4436,7 +4436,7 @@ function consolCalc(year){
   var nowM=(new Date()).getMonth()+1, py=String(Number(year)-1);
   _consolSales.forEach(function(x){
     if(_isCommRow(x))return;
-    var d=x.recog||x.date||'', v=(x.net!=null?x.net:x.total)||0, yy=d.slice(0,4), mi=parseInt(d.slice(5,7),10)-1;
+    var d=('recog' in x?(x.recog||''):(x.date||'')), v=(x.net!=null?x.net:x.total)||0, yy=d.slice(0,4), mi=parseInt(d.slice(5,7),10)-1;
     if(yy===String(year)){ tot+=v; if(mi>=0&&mi<12)m[mi]+=v; }
     else if(yy===py){ prev+=v; if(mi>=0&&mi<12)pm[mi]+=v; if(mi+1<=nowM)prevCum+=v; }
   });
@@ -7364,7 +7364,7 @@ function renderDaily(){
   var kind=_day;
   var yr=$('fxDYear').value, cat=$('fxDCat').value, only=$('fxDOnly').checked, q=($('fxDSearch').value||'').toLowerCase();
   var rows=DB[kind].filter(function(x){
-    if(yr&&((x.recog||x.date)||'').slice(0,4)!==yr)return false;
+    if(yr&&('recog' in x?(x.recog||''):(x.date||'')).slice(0,4)!==yr)return false;
     if(cat&&x.cat!==cat)return false;
     if(only&&outst(x)<1)return false;
     if(_agf){
@@ -7381,7 +7381,7 @@ function renderDaily(){
   var tOut=rows.reduce(function(a,x){return a+Math.max(0,outst(x));},0);
   var allOut=DB[kind].reduce(function(a,x){return a+Math.max(0,outst(x));},0);
   var y=String(new Date().getFullYear());
-  var ySale=DB[kind].reduce(function(a,x){return a+(((x.recog||x.date)||'').slice(0,4)===y?((x.net!=null?x.net:x.total)||0):0);},0);
+  var ySale=DB[kind].reduce(function(a,x){return a+(('recog' in x?(x.recog||''):(x.date||'')).slice(0,4)===y?((x.net!=null?x.net:x.total)||0):0);},0);
   var yCol=0; DB[kind].forEach(function(x){ (x.collections||[]).forEach(function(c){ if(!c.adv&&((c.yr&&String(c.yr)===y)||(!c.yr&&(c.date||'').slice(0,4)===y)))yCol+=c.amount||0; }); });
   var cnt=DB[kind].filter(function(x){return outst(x)>=1;}).length;
   var lbl=kind==='sales'?['총매출','총수금','미수채권','미수 건수']:['총매입','총지불','미지급금','미지급 건수'];
