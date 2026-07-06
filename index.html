@@ -937,6 +937,8 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
         </div>
 
+        <div id="dashConsolStrip" class="finpage" style="margin-bottom:16px"></div>
+
 
 
         <!-- ① 이달 vs 누계 — 2패널 -->
@@ -2228,6 +2230,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
     </div>
   </div>
   <div id="esHero"></div>
+  <div id="esConsolStrip" class="finpage" style="margin-bottom:14px"></div>
   <div id="esKpi" class="esk"></div>
   <div class="essec"><div class="esst">📦 품목별 실적 <span style="font-weight:400;color:#94a3b8;font-size:11px">(제품 / 소모품 · 전년 대비 · 클릭 시 내역)</span></div><div id="esProd" class="esdual"></div></div>
   <div class="essec"><div class="esst">🏥 거래처 · 클리닉</div><div id="esConc" style="margin-bottom:12px"></div><div id="esClinic" class="esdual"></div></div>
@@ -4041,6 +4044,7 @@ function _amt(j){ return '¥'+fmt(Math.round(j||0)); }
 function _bar(val,maxAbs,col){ var w=maxAbs>0?Math.min(100,Math.abs(val)/maxAbs*100):0; return '<div class="esbar"><div style="height:100%;width:'+w+'%;background:'+col+'"></div></div>'; }
 function loadExecSummary(){ if(_data){renderExecSummary();}else{loadData(renderExecSummary);} }
 function renderExecSummary(){
+  try{ renderConsolStrip('esConsolStrip', document.getElementById('esYear').value, parseInt(document.getElementById('esFrom').value,10), parseInt(document.getElementById('esTo').value,10)); }catch(e){}
   var jp=lang==='jp';
   var year=document.getElementById('esYear')?document.getElementById('esYear').value:'2026';
   var prev=String(parseInt(year)-1);
@@ -4395,7 +4399,52 @@ function _wtjOutstandingWithManual(os){
 
 }
 
+// ─── 연결 매출 (매출인식·수주기준, 수수료 제외 / 출처: 자금일보 매출일보) ───
+var _consolSales=null;
+function _isCommRow(x){ return (x.prod2==='Commission')||/수수료|commissi?on/i.test((x.client||'')+' '+(x.product||'')); }
+function loadConsolSales(cb){
+  if(_consolSales){cb(_consolSales);return;}
+  _sb.from('wtj_data').select('sales:data->sales').eq('key','finance').single().then(function(r){
+    if(r.error||!r.data||!r.data.sales){cb(null);return;}
+    _consolSales=r.data.sales; cb(_consolSales);
+  });
+}
+function consolCalc(year){
+  var m=[],i; for(i=0;i<12;i++)m.push(0);
+  var tot=0,prev=0,prevCum=0;
+  var nowM=(new Date()).getMonth()+1;
+  _consolSales.forEach(function(x){
+    if(_isCommRow(x))return;
+    var d=x.date||''; var v=x.total||0;
+    if(d.slice(0,4)===String(year)){ tot+=v; var mi=parseInt(d.slice(5,7),10)-1; if(mi>=0&&mi<12)m[mi]+=v; }
+    else if(d.slice(0,4)===String(Number(year)-1)){ prev+=v; if(parseInt(d.slice(5,7),10)<=nowM)prevCum+=v; }
+  });
+  return {monthly:m,total:tot,prevTotal:prev,prevCum:prevCum};
+}
+function renderConsolStrip(targetId,year,fromM,toM){
+  loadConsolSales(function(s){
+    var el=document.getElementById(targetId);
+    if(!el)return;
+    if(!s){el.innerHTML='';return;}
+    var c=consolCalc(year);
+    var sum=0,i; for(i=(fromM||1)-1;i<(toM||12);i++)sum+=c.monthly[i];
+    var thisM=c.monthly[(new Date()).getMonth()];
+    var yoy=c.prevCum>0?Math.round((c.total-c.prevCum)/c.prevCum*1000)/10:null;
+    var krw=(typeof _jpyRate!=='undefined'&&_jpyRate>0)?'<span style="font-size:12px;opacity:.75;margin-left:8px">≈ ₩'+Math.round(sum*_jpyRate/100).toLocaleString()+'</span>':'';
+    function oku(v){ return Math.abs(v)>=1e8 ? (v/1e8).toFixed(2)+'억' : Math.round(v/1e4).toLocaleString()+'만'; }
+    el.innerHTML='<div class="clk" onclick="showPage(\'fin-daily\')" style="background:linear-gradient(135deg,#0f766e,#115e59);border-radius:14px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:20px;flex-wrap:wrap;cursor:pointer">'+
+      '<div><div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#99f6e4;margin-bottom:4px">🧾 연결 매출 <span style="font-weight:400">(매출인식 · 수주기준, 수수료 제외)</span></div>'+
+      '<div style="font-size:26px;font-weight:900;line-height:1.1">¥'+sum.toLocaleString()+krw+'</div></div>'+
+      '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-left:auto;text-align:right">'+
+      '<div><div style="font-size:10.5px;color:#99f6e4">이달</div><div style="font-size:15px;font-weight:800">¥'+oku(thisM)+'</div></div>'+
+      '<div><div style="font-size:10.5px;color:#99f6e4">연간 누계</div><div style="font-size:15px;font-weight:800">¥'+oku(c.total)+'</div></div>'+
+      '<div><div style="font-size:10.5px;color:#99f6e4">전년 동기</div><div style="font-size:15px;font-weight:800">¥'+oku(c.prevCum)+(yoy!==null?' <span style="color:'+(yoy>=0?'#6ee7b7':'#fca5a5')+'">'+(yoy>=0?'+':'')+yoy+'%</span>':'')+'</div></div>'+
+      '</div>'+
+      '<div style="flex-basis:100%;font-size:10.5px;color:#5eead4;margin-top:2px">소모품=수주일 · 미승인기기=출고일 · 출처: 자금일보 매출일보 (클릭 시 상세)</div></div>';
+  });
+}
 function renderDashboard(d){
+  try{ renderConsolStrip('dashConsolStrip', document.getElementById('dash-year-sel').value, parseInt(document.getElementById('dash-from-sel').value,10), parseInt(document.getElementById('dash-to-sel').value,10)); }catch(e){}
 
   d=_wtjDashWithManual(d);
 
@@ -7544,6 +7593,7 @@ function csvAssets(){
 }
 function jt(ko,ja){ return (typeof lang!=='undefined'&&lang==='jp')?ja:ko; }
 var JA={
+'연결 매출':'連結売上','(매출인식 · 수주기준, 수수료 제외)':'(売上認識・受注基準、手数料除く)','소모품=수주일 · 미승인기기=출고일 · 출처: 자금일보 매출일보 (클릭 시 상세)':'消耗品=受注日 · 未承認機器=出荷日 · 出典: 資金日報 売上日報 (クリックで詳細)','이달':'今月','연간 누계':'年間累計','전년 동기':'前年同期',
 '자금현황 보고서':'資金現況報告書','계좌 잔액·입출금·자산/부채 점검 (資金現況) — 기준일 선택 시 해당일로 재계산':'口座残高・入出金・資産/負債チェック — 基準日を選ぶとその日で再計算',
 '예금·현금 입출금 내역 (集金額/支出額) — 행 클릭 시 수정':'普通預金・小口現金の入出金明細 — 行クリックで編集',
 '미수채권·미지급금 자동계산 (売上/買入日報) — 행 클릭 시 수금/지불 관리':'未収金・未払金を自動計算 — 行クリックで集金/支払を管理',
