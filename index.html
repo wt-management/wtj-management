@@ -4427,7 +4427,7 @@ function consolCalc(year){
   var nowM=(new Date()).getMonth()+1, py=String(Number(year)-1);
   _consolSales.forEach(function(x){
     if(_isCommRow(x))return;
-    var d=x.date||'', v=x.total||0, yy=d.slice(0,4), mi=parseInt(d.slice(5,7),10)-1;
+    var d=x.recog||x.date||'', v=x.total||0, yy=d.slice(0,4), mi=parseInt(d.slice(5,7),10)-1;
     if(yy===String(year)){ tot+=v; if(mi>=0&&mi<12)m[mi]+=v; }
     else if(yy===py){ prev+=v; if(mi>=0&&mi<12)pm[mi]+=v; if(mi+1<=nowM)prevCum+=v; }
   });
