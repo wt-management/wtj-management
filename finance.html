@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원텍 일본법인 · 자금일보</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{color-scheme:light}
+body{font-family:'Pretendard','Segoe UI','Noto Sans JP',sans-serif;background:#f1f5f9;color:#1e293b;-webkit-font-smoothing:antialiased}
+.hide{display:none!important}
+/* 로그인 */
+#login{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a,#1e3a5f);display:flex;align-items:center;justify-content:center;z-index:2000}
+.login-box{background:#fff;border-radius:16px;padding:36px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.login-box h2{font-size:18px;margin-bottom:4px}
+.login-box p{font-size:12px;color:#64748b;margin-bottom:20px}
+.login-box input{width:100%;padding:11px 13px;border:1px solid #cbd5e1;border-radius:9px;font-size:14px;margin-bottom:10px}
+.login-box button{width:100%;padding:12px;background:#0f172a;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer}
+#loginMsg{font-size:12px;color:#dc2626;margin-top:8px;min-height:16px}
+/* 레이아웃 */
+.sidebar{position:fixed;left:0;top:0;width:220px;height:100vh;background:#0f172a;color:#e2e8f0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:22px 20px 14px;border-bottom:1px solid #1e293b}
+.sb-logo h2{font-size:15px;font-weight:700;color:#fff}
+.sb-logo span{font-size:11px;color:#64748b}
+.nav-wrap{flex:1;overflow-y:auto;padding:12px 0}
+.nav-label{font-size:10px;font-weight:700;color:#475569;padding:10px 20px 4px;text-transform:uppercase;letter-spacing:.05em}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 20px;cursor:pointer;color:#94a3b8;font-size:13px;font-weight:500;border-left:3px solid transparent}
+.nav-item:hover{background:#1e293b;color:#e2e8f0}
+.nav-item.active{background:#1e3a5f;color:#60a5fa;border-left-color:#3b82f6}
+.nav-back{padding:10px 20px;border-top:1px solid #1e293b;font-size:12px;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:8px}
+.nav-back:hover{color:#e2e8f0}
+.main{margin-left:220px;min-height:100vh;padding:24px 28px 60px}
+#hamb{display:none;position:fixed;top:12px;left:12px;z-index:1600;background:#0f172a;color:#fff;border:none;border-radius:8px;width:40px;height:40px;font-size:18px;cursor:pointer}
+#sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90}
+.ptitle{font-size:20px;font-weight:800;color:#0f172a}
+.psub{font-size:12.5px;color:#64748b;margin:4px 0 18px}
+.page{display:none}
+.page.active{display:block}
+/* 카드/표 */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:0;overflow:hidden}
+.card-pad{padding:18px 20px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-top:3px solid #cbd5e1}
+.kpi .kl{font-size:12px;color:#64748b;font-weight:600}
+.kpi .kv{font-size:21px;font-weight:800;margin-top:5px;color:#0f172a;line-height:1.15}
+.kpi .ks{font-size:11px;color:#94a3b8;margin-top:5px}
+.kpi.blue{border-color:#3b82f6}.kpi.blue .kv{color:#2563eb}
+.kpi.green{border-color:#10b981}.kpi.green .kv{color:#059669}
+.kpi.red{border-color:#ef4444}.kpi.red .kv{color:#dc2626}
+.kpi.violet{border-color:#8b5cf6}.kpi.violet .kv{color:#7c3aed}
+.kpi.amber{border-color:#f59e0b}.kpi.amber .kv{color:#d97706}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;color:#475569;font-weight:700;text-align:left;padding:9px 12px;border-bottom:2px solid #e2e8f0;font-size:12px;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+tr:hover td{background:#f8fafc}
+tr.clk{cursor:pointer}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.tsum td{background:#f8fafc;font-weight:800;border-top:2px solid #e2e8f0}
+.sec{margin-bottom:22px}
+.st{font-size:14.5px;font-weight:800;color:#0f172a;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filters input,.filters select{padding:8px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;background:#fff}
+.btn{padding:8px 14px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;background:#0f172a;color:#fff}
+.btn.green{background:#059669}.btn.gray{background:#e2e8f0;color:#334155}.btn.red{background:#fee2e2;color:#b91c1c}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:6px}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-ok{background:#d1fae5;color:#065f46}.b-warn{background:#fef3c7;color:#92400e}.b-bad{background:#fee2e2;color:#991b1b}.b-info{background:#e0e7ff;color:#3730a3}.b-gray{background:#f1f5f9;color:#64748b}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:22px;font-size:13px;font-weight:800}
+/* 모달 */
+#modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+#modal.on{display:flex}
+.mbox{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+.mhead{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;background:#fff;z-index:5}
+.mhead h3{font-size:16px;font-weight:800}
+.mclose{background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer}
+.mbody{padding:18px 22px}
+.frow{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin-bottom:10px}
+.frow label{font-size:12.5px;color:#475569;font-weight:600}
+.frow input,.frow select,.frow textarea{padding:8px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;width:100%}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px 20px}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab{padding:8px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#e2e8f0;color:#475569}
+.tab.active{background:#0f172a;color:#fff}
+.mini{font-size:11px;color:#94a3b8}
+.bar-wrap{display:flex;align-items:flex-end;gap:6px;height:120px;padding:6px 4px 0}
+.acct-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.acct{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #3b82f6}
+.acct .ab{font-size:11px;color:#64748b;font-weight:700}
+.acct .an{font-size:10.5px;color:#94a3b8}
+.acct .av{font-size:16.5px;font-weight:800;margin-top:6px}
+.acct .ad{font-size:11px;margin-top:5px}
+@media(max-width:1100px){.kgrid{grid-template-columns:repeat(2,1fr)}.acct-grid{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:900px){.sidebar{left:-240px;transition:left .2s}.sidebar.open{left:0}#hamb{display:block}.main{margin-left:0;padding:60px 14px 40px}#sbov.on{display:block}}
+@media print{.sidebar,#hamb,.filters,.btn,#pfab{display:none!important}.main{margin-left:0}}
+#pfab{position:fixed;right:22px;bottom:22px;width:48px;height:48px;border-radius:50%;background:#0f172a;color:#fff;border:none;font-size:19px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.3);z-index:500}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-box">
+    <h2>🏦 일본법인 자금일보</h2>
+    <p>WONTECH JAPAN · 日日現況報告</p>
+    <input type="email" id="lEmail" placeholder="이메일">
+    <input type="password" id="lPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">로그인</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <button id="hamb" onclick="toggleSb()">☰</button><div id="sbov" onclick="toggleSb()"></div>
+  <aside class="sidebar">
+    <div class="sb-logo"><h2>WONTECH JAPAN</h2><span>자금일보 · 資金日報</span></div>
+    <div class="nav-wrap">
+      <div class="nav-label">자금일보</div>
+      <div class="nav-item active" data-p="report" onclick="showPage('report')">📒 자금현황 보고서</div>
+      <div class="nav-item" data-p="receipts" onclick="showPage('receipts')">💰 수금(입금) 원장</div>
+      <div class="nav-item" data-p="expenses" onclick="showPage('expenses')">💸 지출 원장</div>
+      <div class="nav-label">채권 / 채무</div>
+      <div class="nav-item" data-p="sales" onclick="showPage('sales')">🧾 매출일보 · 미수채권</div>
+      <div class="nav-item" data-p="purchases" onclick="showPage('purchases')">📥 매입일보 · 미지급금</div>
+      <div class="nav-label">자산 / 기준</div>
+      <div class="nav-item" data-p="assets" onclick="showPage('assets')">🏥 자산 · 장비</div>
+      <div class="nav-item" data-p="config" onclick="showPage('config')">⚙️ 기준정보</div>
+    </div>
+    <div class="nav-back" onclick="location.href='index.html'">← 매출관리로 이동</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ═══ 자금현황 보고서 ═══ -->
+    <div class="page active" id="page-report">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div><div class="ptitle">📒 자금현황 보고서 <span class="mini">(資金現況)</span></div>
+        <div class="psub">계좌 잔액·입출금·자산/부채 점검 — 기준일 선택 시 해당일 시점으로 재계산</div></div>
+        <div class="filters" style="margin:0"><label class="mini">기준일</label><input type="date" id="rptDate" onchange="renderReport()"></div>
+      </div>
+      <div class="kgrid" id="rptKpi"></div>
+      <div class="sec"><div class="st">🏦 계좌별 자금 현황 <span class="mini">전일잔액 + 오늘입금 − 오늘지출 = 현재잔액</span></div>
+        <div class="acct-grid" id="acctGrid"></div></div>
+      <div class="sec grid2">
+        <div><div class="st">📥 오늘 입금 내역</div><div class="card"><div style="overflow-x:auto;max-height:320px;overflow-y:auto"><table><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="todayIn"></tbody></table></div></div></div>
+        <div><div class="st">📤 오늘 지출 내역</div><div class="card"><div style="overflow-x:auto;max-height:320px;overflow-y:auto"><table><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="todayOut"></tbody></table></div></div></div>
+      </div>
+      <div class="sec grid2">
+        <div><div class="st">🧮 법인운영 점검 <span class="mini">자산 − 부채</span></div><div class="card"><div style="overflow-x:auto"><table id="checkTbl"></table></div></div></div>
+        <div><div class="st">📊 채권 / 채무 현황</div><div class="card"><div style="overflow-x:auto"><table id="arTbl"></table></div></div>
+          <div style="margin-top:14px" class="card card-pad"><div class="st" style="margin-bottom:8px">월별 입금·지출 (<span id="chartYear"></span>년)</div><div class="bar-wrap" id="mChart"></div><div class="mini" style="text-align:center;margin-top:6px">파랑=입금 · 주황=지출</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 수금/지출 원장 ═══ -->
+    <div class="page" id="page-receipts">
+      <div class="ptitle">💰 수금(입금) 원장 <span class="mini">集金額</span></div>
+      <div class="psub">예금·현금 입금 내역 — 행 클릭 시 수정/삭제</div>
+      <div class="filters">
+        <select id="rYear" onchange="renderLedger('receipts')"></select>
+        <select id="rMonth" onchange="renderLedger('receipts')"></select>
+        <select id="rAcc" onchange="renderLedger('receipts')"></select>
+        <input type="text" id="rSearch" placeholder="내용 검색" oninput="renderLedger('receipts')" style="min-width:180px">
+        <span style="flex:1"></span>
+        <button class="btn green" onclick="openEntry('receipts',null)">＋ 입금 등록</button>
+      </div>
+      <div class="card"><div style="overflow-x:auto"><table><thead id="rHead"></thead><tbody id="rBody"></tbody></table></div></div>
+      <div id="rFoot" class="mini" style="padding:10px 4px"></div>
+    </div>
+
+    <div class="page" id="page-expenses">
+      <div class="ptitle">💸 지출 원장 <span class="mini">支出額</span></div>
+      <div class="psub">예금·현금 지출 내역 — 행 클릭 시 수정/삭제</div>
+      <div class="filters">
+        <select id="eYear" onchange="renderLedger('expenses')"></select>
+        <select id="eMonth" onchange="renderLedger('expenses')"></select>
+        <select id="eAcc" onchange="renderLedger('expenses')"></select>
+        <input type="text" id="eSearch" placeholder="내용 검색" oninput="renderLedger('expenses')" style="min-width:180px">
+        <span style="flex:1"></span>
+        <button class="btn green" onclick="openEntry('expenses',null)">＋ 지출 등록</button>
+      </div>
+      <div class="card"><div style="overflow-x:auto"><table><thead id="eHead"></thead><tbody id="eBody"></tbody></table></div></div>
+      <div id="eFoot" class="mini" style="padding:10px 4px"></div>
+    </div>
+
+    <!-- ═══ 매출일보/매입일보 ═══ -->
+    <div class="page" id="page-sales">
+      <div class="ptitle">🧾 매출일보 · 미수채권 <span class="mini">売上日報 / 未収金</span></div>
+      <div class="psub">건별 매출과 수금 내역 — 미수·경과기간(aging) 자동계산, 행 클릭 시 수금 관리</div>
+      <div class="kgrid" id="sKpi" style="grid-template-columns:repeat(4,1fr)"></div>
+      <div class="filters">
+        <select id="sYear" onchange="renderDaily('sales')"></select>
+        <select id="sCat" onchange="renderDaily('sales')"><option value="">전체 분류</option><option>기기</option><option>소모품</option><option>기타</option></select>
+        <label style="font-size:13px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="sOnlyOut" onchange="renderDaily('sales')">미수만</label>
+        <input type="text" id="sSearch" placeholder="거래처/제품 검색" oninput="renderDaily('sales')" style="min-width:200px">
+        <span style="flex:1"></span>
+        <button class="btn green" onclick="openDaily('sales',null)">＋ 매출 등록</button>
+      </div>
+      <div class="card"><div style="overflow-x:auto"><table><thead id="sHead"></thead><tbody id="sBody"></tbody></table></div></div>
+      <div id="sFoot" class="mini" style="padding:10px 4px"></div>
+    </div>
+
+    <div class="page" id="page-purchases">
+      <div class="ptitle">📥 매입일보 · 미지급금 <span class="mini">買入日報 / 未払金</span></div>
+      <div class="psub">한국 본사 매입과 지불 내역 — 미지급 자동계산, 행 클릭 시 지불 관리</div>
+      <div class="kgrid" id="pKpi" style="grid-template-columns:repeat(4,1fr)"></div>
+      <div class="filters">
+        <select id="pYear" onchange="renderDaily('purchases')"></select>
+        <select id="pCat" onchange="renderDaily('purchases')"><option value="">전체 분류</option><option>기기</option><option>소모품</option><option>기타</option></select>
+        <label style="font-size:13px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="pOnlyOut" onchange="renderDaily('purchases')">미지급만</label>
+        <input type="text" id="pSearch" placeholder="제품/CI 검색" oninput="renderDaily('purchases')" style="min-width:200px">
+        <span style="flex:1"></span>
+        <button class="btn green" onclick="openDaily('purchases',null)">＋ 매입 등록</button>
+      </div>
+      <div class="card"><div style="overflow-x:auto"><table><thead id="pHead"></thead><tbody id="pBody"></tbody></table></div></div>
+      <div id="pFoot" class="mini" style="padding:10px 4px"></div>
+    </div>
+
+    <!-- ═══ 자산/장비 ═══ -->
+    <div class="page" id="page-assets">
+      <div class="ptitle">🏥 자산 · 장비</div>
+      <div class="psub">본사자산 / 일본법인 자산 / 데모장비 현황</div>
+      <div class="tabs">
+        <div class="tab active" id="tabHQ" onclick="setAssetTab('HQ')">본사자산 (<span id="cntHQ"></span>)</div>
+        <div class="tab" id="tabJP" onclick="setAssetTab('JP')">법인자산 (<span id="cntJP"></span>)</div>
+        <div class="tab" id="tabDemo" onclick="setAssetTab('Demo')">데모현황 (<span id="cntDemo"></span>)</div>
+      </div>
+      <div class="filters">
+        <input type="text" id="aSearch" placeholder="제품/시리얼/위치 검색" oninput="renderAssets()" style="min-width:220px">
+        <span style="flex:1"></span>
+        <button class="btn green" onclick="openAsset(null)">＋ 등록</button>
+      </div>
+      <div class="card"><div style="overflow-x:auto"><table><thead id="aHead"></thead><tbody id="aBody"></tbody></table></div></div>
+      <div id="aFoot" class="mini" style="padding:10px 4px"></div>
+    </div>
+
+    <!-- ═══ 기준정보 ═══ -->
+    <div class="page" id="page-config">
+      <div class="ptitle">⚙️ 기준정보</div>
+      <div class="psub">계좌·이월금·자본금·차입금·분류기준 — 보고서 계산의 기초값</div>
+      <div class="grid2">
+        <div class="sec"><div class="st">🏦 계좌 · 기초잔액 <span class="mini">(2026년 기초)</span></div>
+          <div class="card"><div style="overflow-x:auto"><table id="cfgAcc"></table></div></div></div>
+        <div class="sec"><div class="st">📌 고정 항목</div>
+          <div class="card card-pad" id="cfgFix"></div></div>
+        <div class="sec"><div class="st">💼 자본금 내역 <span class="mini">資本金</span></div>
+          <div class="card"><div style="overflow-x:auto"><table id="cfgCap"></table></div></div></div>
+        <div class="sec"><div class="st">🏛 차입금 내역 <span class="mini">本社借入</span></div>
+          <div class="card"><div style="overflow-x:auto"><table id="cfgLoan"></table></div></div></div>
+        <div class="sec"><div class="st">🏷 분류기준 <span class="mini">제품명2 → 기기/소모품/기타</span></div>
+          <div class="card"><div style="overflow-x:auto;max-height:340px;overflow-y:auto"><table id="cfgCls"></table></div></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- 모달 -->
+<div id="modal"><div class="mbox">
+  <div class="mhead"><h3 id="mTitle"></h3><button class="mclose" onclick="closeModal()">✕</button></div>
+  <div class="mbody" id="mBody"></div>
+  <div class="mfoot" id="mFoot"></div>
+</div></div>
+
+<button id="pfab" onclick="window.print()" title="인쇄/PDF">🖨</button>
+
+<script>
+var SUPABASE_URL='https://mhfacbsittfdkknwybhc.supabase.co';
+var SUPABASE_KEY='sb_publishable_aPMOOWAlyJlMcP1ZM_gpPA_jlrcvCRd';
+var _sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+var DB=null, CURUSER='', _assetTab='HQ', _mCtx=null;
+
+function fmt(n){ n=Math.round(n||0); return '¥'+n.toLocaleString('ko-KR'); }
+function fmtS(n){ var a=Math.abs(n||0); if(a>=1e8)return '¥'+(n/1e8).toFixed(2)+'억'; if(a>=1e4)return '¥'+Math.round(n/1e4).toLocaleString()+'만'; return fmt(n); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function today(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function uid(p){ return p+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36); }
+function toggleSb(){ var s=document.querySelector('.sidebar'),o=document.getElementById('sbov'); var on=s.classList.toggle('open'); if(o)o.classList.toggle('on',on); }
+
+/* ── 인증/로드 ── */
+async function doLogin(){
+  var r=await _sb.auth.signInWithPassword({email:document.getElementById('lEmail').value.trim(),password:document.getElementById('lPw').value});
+  if(r.error){ document.getElementById('loginMsg').textContent='로그인 실패: '+r.error.message; return; }
+  boot(r.data.user);
+}
+async function init(){
+  var s=(await _sb.auth.getSession()).data.session;
+  if(s&&s.user) boot(s.user);
+}
+async function boot(user){
+  CURUSER=(user&&user.email)||'';
+  var r=await _sb.from('wtj_data').select('data').eq('key','finance').single();
+  if(r.error||!r.data){ document.getElementById('loginMsg').textContent='데이터 로드 실패'; return; }
+  DB=r.data.data;
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').classList.remove('hide');
+  buildFilters();
+  document.getElementById('rptDate').value=DB.asOf&&DB.asOf>=today()?DB.asOf:today();
+  var p=sessionStorage.getItem('fin_page');
+  var h=(location.hash.match(/page=([a-z]+)/)||[])[1];
+  showPage(h||p||'report');
+}
+async function saveDB(){
+  DB.updatedAt=new Date().toISOString(); DB.updatedBy=CURUSER;
+  var r=await _sb.from('wtj_data').upsert({key:'finance',data:DB},{onConflict:'key'});
+  if(r.error){ alert('저장 실패: '+r.error.message); return false; }
+  return true;
+}
+
+/* ── 페이지 ── */
+function showPage(p){
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.p===p);});
+  var el=document.getElementById('page-'+p); if(!el){p='report';el=document.getElementById('page-report');}
+  el.classList.add('active');
+  sessionStorage.setItem('fin_page',p);
+  document.querySelector('.sidebar').classList.remove('open'); var o=document.getElementById('sbov'); if(o)o.classList.remove('on');
+  if(p==='report')renderReport();
+  else if(p==='receipts')renderLedger('receipts');
+  else if(p==='expenses')renderLedger('expenses');
+  else if(p==='sales')renderDaily('sales');
+  else if(p==='purchases')renderDaily('purchases');
+  else if(p==='assets')renderAssets();
+  else if(p==='config')renderConfig();
+}
+
+/* ── 공통 계산 ── */
+function outst(x){ return (x.total||0)-(x.collections||[]).reduce(function(a,c){return a+(c.adv?0:(c.amount||0));},0); }
+function colSum(x,pred){ return (x.collections||[]).reduce(function(a,c){return a+((pred(c)&&!c.adv)?(c.amount||0):0);},0); }
+function accLabel(no){ if(!no)return '현금'; var a=(DB.settings.accounts||[]).find(function(x){return x.no===no;}); return a?(a.bank+' '+a.no):no; }
+function agingOf(d,base){
+  if(!d)return '';
+  var days=Math.floor((new Date(base)-new Date(d))/864e5);
+  if(days<=90)return '<span class="badge b-ok">0–3개월</span>';
+  if(days<=180)return '<span class="badge b-info">3–6개월</span>';
+  if(days<=365)return '<span class="badge b-warn">6–12개월</span>';
+  return '<span class="badge b-bad">1년 이상</span>';
+}
+
+/* ── 보고서 ── */
+function ledgerSum(rows,accNo,method,from,to){
+  var s=0;
+  for(var i=0;i<rows.length;i++){ var x=rows[i];
+    if(x.method!==method)continue;
+    if(method==='bank'&&x.accNo!==accNo)continue;
+    if(x.date<from||x.date>to)continue;
+    s+=x.amount||0; }
+  return s;
+}
+function renderReport(){
+  var D=document.getElementById('rptDate').value||today();
+  var yr=D.slice(0,4), y0=yr+'-01-01';
+  document.getElementById('chartYear').textContent=yr;
+  var S=DB.settings, accs=S.accounts||[];
+  // 계좌별
+  var rows=[], totBal=0, totIn=0, totOut=0, totPrev=0;
+  accs.forEach(function(a){
+    var open=(yr==='2026')?(a.opening||0):(a.opening||0); // 연도이월은 2026 기준(추후 롤오버)
+    var inC=ledgerSum(DB.receipts,a.no,'bank',y0,D), outC=ledgerSum(DB.expenses,a.no,'bank',y0,D);
+    var inT=ledgerSum(DB.receipts,a.no,'bank',D,D), outT=ledgerSum(DB.expenses,a.no,'bank',D,D);
+    var bal=open+inC-outC;
+    rows.push({label:a.bank,no:a.no,bal:bal,inT:inT,outT:outT,prev:bal-inT+outT});
+    totBal+=bal; totIn+=inT; totOut+=outT; totPrev+=bal-inT+outT;
+  });
+  var cOpen=S.cashOpening||0;
+  var cIn=ledgerSum(DB.receipts,'','cash',y0,D), cOut=ledgerSum(DB.expenses,'','cash',y0,D);
+  var cInT=ledgerSum(DB.receipts,'','cash',D,D), cOutT=ledgerSum(DB.expenses,'','cash',D,D);
+  var cBal=cOpen+cIn-cOut;
+  rows.push({label:'현금',no:'小口現金',bal:cBal,inT:cInT,outT:cOutT,prev:cBal-cInT+cOutT});
+  totBal+=cBal; totIn+=cInT; totOut+=cOutT; totPrev+=cBal-cInT+cOutT;
+  document.getElementById('acctGrid').innerHTML=rows.map(function(r){
+    return '<div class="acct"><div class="ab">'+esc(r.label)+'</div><div class="an">'+esc(r.no)+'</div><div class="av">'+fmt(r.bal)+'</div>'+
+      '<div class="ad" style="color:#64748b">전일 '+fmtS(r.prev)+(r.inT?' <span style="color:#059669">＋'+fmtS(r.inT)+'</span>':'')+(r.outT?' <span style="color:#dc2626">−'+fmtS(r.outT)+'</span>':'')+'</div></div>';
+  }).join('');
+  // 자산/부채
+  function catO(list,cat){ var s=0; list.forEach(function(x){ if(x.cat===cat)s+=outst(x); }); return s; }
+  var rMach=catO(DB.sales,'기기'), rCons=catO(DB.sales,'소모품'), rEtc=catO(DB.sales,'기타');
+  var pMach=catO(DB.purchases,'기기'), pCons=catO(DB.purchases,'소모품'), pEtc=catO(DB.purchases,'기타');
+  var recv=rMach+rCons+rEtc, pay=pMach+pCons+pEtc;
+  var asset=totBal+(S.deposit||0)+recv+(S.inventoryValue||0);
+  var debt=pay+0;
+  var net=asset-debt;
+  // KPI
+  document.getElementById('rptKpi').innerHTML=
+    '<div class="kpi blue"><div class="kl">보유자금 합계 <span class="mini">現金·預金</span></div><div class="kv">'+fmt(totBal)+'</div><div class="ks">'+D+' 기준</div></div>'+
+    '<div class="kpi green"><div class="kl">오늘 입금</div><div class="kv">'+fmt(totIn)+'</div><div class="ks">지출 '+fmt(totOut)+'</div></div>'+
+    '<div class="kpi amber"><div class="kl">매출채권 (미수)</div><div class="kv">'+fmt(recv)+'</div><div class="ks">기기 '+fmtS(rMach)+' · 소모품 '+fmtS(rCons)+' · 기타 '+fmtS(rEtc)+'</div></div>'+
+    '<div class="kpi '+(net>=0?'violet':'red')+'"><div class="kl">법인운영 점검 <span class="mini">자산−부채</span></div><div class="kv">'+fmt(net)+'</div><div class="ks">'+(net>=0?'✅ 보통~양호':'⚠️ 자금 유의')+'</div></div>';
+  // 오늘 내역
+  function tl(rows,method){ return rows.filter(function(x){return x.date===D;}); }
+  var tin=DB.receipts.filter(function(x){return x.date===D;});
+  var tout=DB.expenses.filter(function(x){return x.date===D;});
+  document.getElementById('todayIn').innerHTML=tin.map(function(x){return '<tr><td><span class="badge '+(x.method==='cash'?'b-warn':'b-info')+'">'+(x.method==='cash'?'현금':'예금')+'</span> <span class="mini">'+esc(x.method==='bank'?x.accNo:'')+'</span></td><td style="white-space:normal">'+esc(x.desc)+'</td><td class="num" style="color:#059669;font-weight:700">'+fmt(x.amount)+'</td></tr>';}).join('')||'<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px">입금 없음</td></tr>';
+  document.getElementById('todayOut').innerHTML=tout.map(function(x){return '<tr><td><span class="badge '+(x.method==='cash'?'b-warn':'b-info')+'">'+(x.method==='cash'?'현금':'예금')+'</span> <span class="mini">'+esc(x.method==='bank'?x.accNo:'')+'</span></td><td style="white-space:normal">'+esc(x.desc)+'</td><td class="num" style="color:#dc2626;font-weight:700">'+fmt(x.amount)+'</td></tr>';}).join('')||'<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px">지출 없음</td></tr>';
+  // 점검표
+  document.getElementById('checkTbl').innerHTML=
+    '<tr><th colspan="2">①자산 (資産)</th><th class="num">금액</th></tr>'+
+    '<tr class="clk" onclick="showPage(\'report\')"><td rowspan="4" style="font-weight:700;color:#2563eb">자산</td><td>보유자금 (현금·예금)</td><td class="num">'+fmt(totBal)+'</td></tr>'+
+    '<tr><td>보증금 (敷金)</td><td class="num">'+fmt(S.deposit)+'</td></tr>'+
+    '<tr class="clk" onclick="showPage(\'sales\')"><td>매출채권 (売掛金) →</td><td class="num">'+fmt(recv)+'</td></tr>'+
+    '<tr><td>재고자산</td><td class="num">'+fmt(S.inventoryValue)+'</td></tr>'+
+    '<tr class="tsum"><td colspan="2">자산 합계</td><td class="num">'+fmt(asset)+'</td></tr>'+
+    '<tr><th colspan="2">②부채 (負債)</th><th class="num"></th></tr>'+
+    '<tr class="clk" onclick="showPage(\'purchases\')"><td rowspan="2" style="font-weight:700;color:#dc2626">부채</td><td>매입채무 (買掛金) →</td><td class="num">'+fmt(pay)+'</td></tr>'+
+    '<tr><td>외부차입</td><td class="num">'+fmt(0)+'</td></tr>'+
+    '<tr class="tsum"><td colspan="2">부채 합계</td><td class="num">'+fmt(debt)+'</td></tr>'+
+    '<tr class="tsum" style="background:'+(net>=0?'#ecfdf5':'#fef2f2')+'"><td colspan="2" style="font-weight:800">법인운영 상태점검 [①−②]</td><td class="num" style="font-weight:800;color:'+(net>=0?'#059669':'#dc2626')+'">'+fmt(net)+'</td></tr>';
+  // 채권/채무 현황
+  function sum26(list,dateBased){ var s=0; list.forEach(function(x){ if(x.date&&x.date.slice(0,4)===yr)s+=x.total||0; }); return s; }
+  function col26(list){ var s=0; list.forEach(function(x){ (x.collections||[]).forEach(function(c){ if(!c.adv&&((c.yr&&String(c.yr)===yr)||(!c.yr&&c.date&&c.date.slice(0,4)===yr)))s+=c.amount||0; }); }); return s; }
+  var tSale=sum26(DB.sales), tCol=col26(DB.sales), tBuy=sum26(DB.purchases), tPay=col26(DB.purchases);
+  document.getElementById('arTbl').innerHTML=
+    '<tr><th>구분</th><th class="num">'+(yr-1)+' 이월</th><th class="num">'+yr+' 총매출/매입</th><th class="num">'+yr+' 총수금/지불</th><th class="num">잔액</th></tr>'+
+    '<tr class="clk" onclick="showPage(\'sales\')"><td>매출채권 (売掛金)</td><td class="num">'+fmtS(S.carryReceivable)+'</td><td class="num">'+fmtS(tSale)+'</td><td class="num">'+fmtS(tCol)+'</td><td class="num" style="font-weight:800;color:#d97706">'+fmt(recv)+'</td></tr>'+
+    '<tr class="clk" onclick="showPage(\'purchases\')"><td>미지급금 (買掛金)</td><td class="num">'+fmtS(S.carryPayable)+'</td><td class="num">'+fmtS(tBuy)+'</td><td class="num">'+fmtS(tPay)+'</td><td class="num" style="font-weight:800;color:#dc2626">'+fmt(pay)+'</td></tr>';
+  // 월별 차트
+  var mi=[],mo=[];
+  for(var m=1;m<=12;m++){ var mm=yr+'-'+String(m).padStart(2,'0');
+    mi.push(DB.receipts.reduce(function(a,x){return a+((x.date||'').slice(0,7)===mm?x.amount:0);},0));
+    mo.push(DB.expenses.reduce(function(a,x){return a+((x.date||'').slice(0,7)===mm?x.amount:0);},0)); }
+  var mx=Math.max.apply(null,mi.concat(mo,[1]));
+  document.getElementById('mChart').innerHTML=mi.map(function(v,i){
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="'+(i+1)+'월 입금 '+fmt(v)+' / 지출 '+fmt(mo[i])+'">'+
+      '<div style="display:flex;gap:2px;align-items:flex-end;height:95px">'+
+      '<div style="width:9px;background:#3b82f6;border-radius:3px 3px 0 0;height:'+Math.max(2,v/mx*95)+'px"></div>'+
+      '<div style="width:9px;background:#f59e0b;border-radius:3px 3px 0 0;height:'+Math.max(2,mo[i]/mx*95)+'px"></div></div>'+
+      '<div class="mini">'+(i+1)+'</div></div>';
+  }).join('');
+}
+
+/* ── 원장 (수금/지출) ── */
+function buildFilters(){
+  var yrs={}; DB.receipts.concat(DB.expenses).forEach(function(x){ if(x.date)yrs[x.date.slice(0,4)]=1; });
+  var yopts=Object.keys(yrs).sort().reverse().map(function(y){return '<option>'+y+'</option>';}).join('');
+  var mopts='<option value="">전체 월</option>'; for(var m=1;m<=12;m++)mopts+='<option value="'+String(m).padStart(2,'0')+'">'+m+'월</option>';
+  var aopts='<option value="">전체 계좌</option>'+(DB.settings.accounts||[]).map(function(a){return '<option value="'+esc(a.no)+'">'+esc(a.bank+' '+a.no)+'</option>';}).join('')+'<option value="cash">현금</option>';
+  ['r','e'].forEach(function(p){
+    document.getElementById(p+'Year').innerHTML=yopts;
+    document.getElementById(p+'Month').innerHTML=mopts;
+    document.getElementById(p+'Acc').innerHTML=aopts;
+  });
+  var syrs={}; DB.sales.concat(DB.purchases).forEach(function(x){ if(x.date)syrs[x.date.slice(0,4)]=1; });
+  var sy=Object.keys(syrs).sort().reverse().map(function(y){return '<option>'+y+'</option>';}).join('');
+  document.getElementById('sYear').innerHTML='<option value="">전체 연도</option>'+sy;
+  document.getElementById('pYear').innerHTML='<option value="">전체 연도</option>'+sy;
+  document.getElementById('sYear').value=String(new Date().getFullYear());
+  document.getElementById('pYear').value=String(new Date().getFullYear());
+}
+function renderLedger(kind){
+  var p=kind==='receipts'?'r':'e';
+  var yr=document.getElementById(p+'Year').value, mo=document.getElementById(p+'Month').value;
+  var acc=document.getElementById(p+'Acc').value, q=(document.getElementById(p+'Search').value||'').toLowerCase();
+  var rows=DB[kind].filter(function(x){
+    if(yr&&(x.date||'').slice(0,4)!==yr)return false;
+    if(mo&&(x.date||'').slice(5,7)!==mo)return false;
+    if(acc==='cash'&&x.method!=='cash')return false;
+    if(acc&&acc!=='cash'&&x.accNo!==acc)return false;
+    if(q&&(x.desc||'').toLowerCase().indexOf(q)<0)return false;
+    return true;
+  }).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  var tot=rows.reduce(function(a,x){return a+(x.amount||0);},0);
+  document.getElementById(p+'Head').innerHTML='<tr><th>일자</th><th>구분</th><th>내용</th><th class="num">금액 (JPY)</th><th></th></tr>';
+  document.getElementById(p+'Body').innerHTML=
+    '<tr class="tsum"><td colspan="3">합계 ('+rows.length.toLocaleString()+'건)</td><td class="num">'+fmt(tot)+'</td><td></td></tr>'+
+    rows.slice(0,500).map(function(x){
+      return '<tr class="clk" onclick="openEntry(\''+kind+'\',\''+x.id+'\')"><td>'+esc(x.date)+'</td>'+
+        '<td><span class="badge '+(x.method==='cash'?'b-warn':'b-info')+'">'+(x.method==='cash'?'현금':'예금')+'</span> <span class="mini">'+esc(x.method==='bank'?x.accNo:'')+'</span></td>'+
+        '<td style="white-space:normal;max-width:480px">'+esc(x.desc)+'</td><td class="num" style="font-weight:700">'+fmt(x.amount)+'</td>'+
+        '<td><button class="btn sm red" onclick="event.stopPropagation();delEntry(\''+kind+'\',\''+x.id+'\')">삭제</button></td></tr>';
+    }).join('');
+  document.getElementById(p+'Foot').textContent='표시 '+Math.min(rows.length,500)+' / '+rows.length+'건'+(rows.length>500?' (상위 500건만 표시 — 필터로 좁혀주세요)':'');
+}
+function openEntry(kind,id){
+  var x=id?DB[kind].find(function(v){return v.id===id;}):{date:today(),accNo:(DB.settings.accounts[0]||{}).no||'',desc:'',amount:'',method:'bank'};
+  if(!x)return;
+  _mCtx={kind:kind,id:id};
+  var accSel=(DB.settings.accounts||[]).map(function(a){return '<option value="'+esc(a.no)+'"'+(a.no===x.accNo?' selected':'')+'>'+esc(a.bank+' '+a.no)+'</option>';}).join('');
+  document.getElementById('mTitle').textContent=(id?'수정':'등록')+' — '+(kind==='receipts'?'수금(입금)':'지출');
+  document.getElementById('mBody').innerHTML=
+    '<div class="frow"><label>일자</label><input type="date" id="mDate" value="'+esc(x.date)+'"></div>'+
+    '<div class="frow"><label>구분</label><div class="f2"><select id="mMethod" onchange="document.getElementById(\'mAccWrap\').style.display=this.value===\'bank\'?\'\':\'none\'"><option value="bank"'+(x.method==='bank'?' selected':'')+'>예금</option><option value="cash"'+(x.method==='cash'?' selected':'')+'>현금</option></select>'+
+    '<span id="mAccWrap" style="display:'+(x.method==='bank'?'':'none')+'"><select id="mAcc">'+accSel+'</select></span></div></div>'+
+    '<div class="frow"><label>내용</label><input type="text" id="mDesc" value="'+esc(x.desc)+'" placeholder="예: OligiokissFullSet(○○ Clinic) 未"></div>'+
+    '<div class="frow"><label>금액 (JPY)</label><input type="number" id="mAmt" value="'+esc(x.amount)+'"></div>';
+  document.getElementById('mFoot').innerHTML='<button class="btn gray" onclick="closeModal()">취소</button><button class="btn green" onclick="saveEntry()">저장</button>';
+  document.getElementById('modal').classList.add('on');
+}
+async function saveEntry(){
+  var k=_mCtx.kind, id=_mCtx.id;
+  var method=document.getElementById('mMethod').value;
+  var e={date:document.getElementById('mDate').value,method:method,
+    accNo:method==='bank'?document.getElementById('mAcc').value:'',
+    desc:document.getElementById('mDesc').value.trim(),
+    amount:Math.round(Number(document.getElementById('mAmt').value)||0),
+    _by:CURUSER,_at:today()};
+  if(!e.date||!e.amount){ alert('일자와 금액을 입력하세요'); return; }
+  if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
+  else{ e.id=uid(k[0].toUpperCase()); DB[k].push(e); }
+  if(await saveDB()){ closeModal(); renderLedger(k); }
+}
+async function delEntry(kind,id){
+  if(!confirm('이 항목을 삭제할까요?'))return;
+  DB[kind]=DB[kind].filter(function(v){return v.id!==id;});
+  if(await saveDB())renderLedger(kind);
+}
+
+/* ── 매출/매입 일보 ── */
+function renderDaily(kind){
+  var p=kind==='sales'?'s':'p';
+  var yr=document.getElementById(p+'Year').value, cat=document.getElementById(p+'Cat').value;
+  var only=document.getElementById(p+'OnlyOut').checked, q=(document.getElementById(p+'Search').value||'').toLowerCase();
+  var base=today();
+  var rows=DB[kind].filter(function(x){
+    if(yr&&(x.date||'').slice(0,4)!==yr)return false;
+    if(cat&&x.cat!==cat)return false;
+    if(only&&outst(x)<1)return false;
+    if(q&&((x.client||'')+' '+(x.product||'')).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  }).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  var tTot=rows.reduce(function(a,x){return a+(x.total||0);},0);
+  var tOut=rows.reduce(function(a,x){return a+Math.max(0,outst(x));},0);
+  // KPI (전체 기준)
+  var allOut=DB[kind].reduce(function(a,x){return a+Math.max(0,outst(x));},0);
+  var y=String(new Date().getFullYear());
+  var ySale=DB[kind].reduce(function(a,x){return a+((x.date||'').slice(0,4)===y?(x.total||0):0);},0);
+  var yCol=0; DB[kind].forEach(function(x){ (x.collections||[]).forEach(function(c){ if(!c.adv&&((c.yr&&String(c.yr)===y)||(!c.yr&&(c.date||'').slice(0,4)===y)))yCol+=c.amount||0; }); });
+  var cnt=DB[kind].filter(function(x){return outst(x)>=1;}).length;
+  var lbl=kind==='sales'?['총매출','총수금','미수채권','미수 건수']:['총매입','총지불','미지급금','미지급 건수'];
+  document.getElementById(p+'Kpi').innerHTML=
+    '<div class="kpi blue"><div class="kl">'+y+' '+lbl[0]+'</div><div class="kv">'+fmtS(ySale)+'</div></div>'+
+    '<div class="kpi green"><div class="kl">'+y+' '+lbl[1]+'</div><div class="kv">'+fmtS(yCol)+'</div></div>'+
+    '<div class="kpi amber"><div class="kl">'+lbl[2]+' (전체)</div><div class="kv">'+fmt(allOut)+'</div></div>'+
+    '<div class="kpi red"><div class="kl">'+lbl[3]+'</div><div class="kv">'+cnt+'건</div></div>';
+  var cl1=kind==='sales'?'거래처':'CI';
+  document.getElementById(p+'Head').innerHTML='<tr><th>일자</th><th>'+cl1+'</th><th>제품</th><th>분류</th><th class="num">수량</th><th class="num">금액</th><th class="num">수금/지불</th><th class="num">잔액</th><th>Aging</th><th>본사송금</th></tr>';
+  document.getElementById(p+'Body').innerHTML=
+    '<tr class="tsum"><td colspan="5">합계 ('+rows.length.toLocaleString()+'건)</td><td class="num">'+fmt(tTot)+'</td><td></td><td class="num">'+fmt(tOut)+'</td><td colspan="2"></td></tr>'+
+    rows.slice(0,400).map(function(x){
+      var o=outst(x), paid=(x.total||0)-o;
+      return '<tr class="clk" onclick="openDaily(\''+kind+'\',\''+x.id+'\')"><td>'+esc(x.date)+'</td><td>'+esc(x.client||'-')+'</td>'+
+        '<td style="white-space:normal;max-width:330px">'+esc(x.product)+'</td>'+
+        '<td><span class="badge '+(x.cat==='기기'?'b-info':x.cat==='소모품'?'b-ok':'b-gray')+'">'+esc(x.cat||'-')+'</span></td>'+
+        '<td class="num">'+(x.qty||1)+'</td><td class="num">'+fmt(x.total)+'</td><td class="num" style="color:#059669">'+fmt(paid)+'</td>'+
+        '<td class="num" style="font-weight:800;color:'+(o>=1?'#dc2626':'#cbd5e1')+'">'+fmt(o)+'</td>'+
+        '<td>'+(o>=1?agingOf(x.date,today()):'<span class="badge b-ok">완료</span>')+'</td><td>'+(x.hqRemit?'〇':'')+'</td></tr>';
+    }).join('');
+  document.getElementById(p+'Foot').textContent='표시 '+Math.min(rows.length,400)+' / '+rows.length+'건'+(rows.length>400?' (상위 400건 — 필터로 좁혀주세요)':'');
+}
+function openDaily(kind,id){
+  var isNew=!id;
+  var x=id?DB[kind].find(function(v){return v.id===id;}):{date:today(),client:'',product:'',sn:'',qty:1,unit:'',total:'',prod2:'',cat:'',hqRemit:false,collections:[]};
+  if(!x)return;
+  _mCtx={kind:kind,id:id,cols:JSON.parse(JSON.stringify(x.collections||[]))};
+  var clsSel='<option value="">— 선택 —</option>'+(DB.classes||[]).map(function(c){return '<option value="'+esc(c.name)+'"'+(c.name===x.prod2?' selected':'')+'>'+esc(c.name)+' ('+c.cat+')</option>';}).join('');
+  var cl1=kind==='sales'?'거래처':'CI';
+  document.getElementById('mTitle').textContent=(isNew?'등록':'상세/수정')+' — '+(kind==='sales'?'매출':'매입');
+  document.getElementById('mBody').innerHTML=
+    '<div class="f2"><div class="frow"><label>일자</label><input type="date" id="mDate" value="'+esc(x.date)+'"></div>'+
+    '<div class="frow"><label>'+cl1+'</label><input type="text" id="mClient" value="'+esc(x.client)+'"></div></div>'+
+    '<div class="frow"><label>제품명</label><input type="text" id="mProd" value="'+esc(x.product)+'" placeholder="예: OligiokissFullSet(○○ CLINIC)未"></div>'+
+    '<div class="f2"><div class="frow"><label>S/N · PI</label><input type="text" id="mSn" value="'+esc(x.sn)+'"></div>'+
+    '<div class="frow"><label>제품분류</label><select id="mProd2" onchange="var c=(DB.classes||[]).find(function(v){return v.name===this.value;}.bind(this))||{};document.getElementById(\'mCat\').value=c.cat||\'기타\'">'+clsSel+'</select></div></div>'+
+    '<div class="f2"><div class="frow"><label>분류</label><select id="mCat"><option'+(x.cat==='기기'?' selected':'')+'>기기</option><option'+(x.cat==='소모품'?' selected':'')+'>소모품</option><option'+(x.cat==='기타'?' selected':'')+'>기타</option></select></div>'+
+    '<div class="frow"><label>본사송금 〇</label><select id="mHq"><option value=""'+(!x.hqRemit?' selected':'')+'>—</option><option value="1"'+(x.hqRemit?' selected':'')+'>〇 (본사 직접송금)</option></select></div></div>'+
+    '<div class="f2"><div class="frow"><label>수량</label><input type="number" id="mQty" value="'+esc(x.qty||1)+'" oninput="mCalcTotal()"></div>'+
+    '<div class="frow"><label>단가 (JPY)</label><input type="number" id="mUnit" value="'+esc(x.unit)+'" oninput="mCalcTotal()"></div></div>'+
+    '<div class="frow"><label>금액 (JPY)</label><input type="number" id="mTotal" value="'+esc(x.total)+'"></div>'+
+    '<div style="border-top:1px solid #e2e8f0;margin:14px 0 10px;padding-top:12px"><b style="font-size:13.5px">'+(kind==='sales'?'💰 수금 내역':'💸 지불 내역')+'</b> <span class="mini">잔액이 자동 계산됩니다</span></div>'+
+    '<div id="mCols"></div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><input type="date" id="mColDate" value="'+today()+'" style="padding:7px;border:1px solid #cbd5e1;border-radius:7px">'+
+    '<input type="number" id="mColAmt" placeholder="금액" style="flex:1;padding:7px;border:1px solid #cbd5e1;border-radius:7px">'+
+    '<button class="btn sm green" onclick="addCol()">＋ 추가</button></div>'+
+    '<div id="mOutst" style="margin-top:12px;font-size:14px;font-weight:800"></div>';
+  document.getElementById('mFoot').innerHTML=
+    (isNew?'':'<button class="btn red" onclick="delDaily()">삭제</button>')+
+    '<span style="flex:1"></span><button class="btn gray" onclick="closeModal()">취소</button><button class="btn green" onclick="saveDaily()">저장</button>';
+  document.getElementById('modal').classList.add('on');
+  renderCols();
+}
+function mCalcTotal(){
+  var q=Number(document.getElementById('mQty').value)||1, u=Number(document.getElementById('mUnit').value)||0;
+  if(u)document.getElementById('mTotal').value=Math.round(q*u);
+  renderCols();
+}
+function renderCols(){
+  var cols=_mCtx.cols;
+  document.getElementById('mCols').innerHTML=cols.map(function(c,i){
+    return '<div style="display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed #e2e8f0;font-size:13px">'+
+      '<span style="min-width:90px">'+esc(c.date||'(일자없음)')+'</span>'+
+      '<span style="flex:1;font-weight:700;color:#059669">'+fmt(c.amount)+'</span>'+
+      (c.adv?'<span class="badge b-warn">선수금(차기)</span>':'')+(c.legacy?'<span class="badge b-gray">구내역 정산</span>':'')+
+      '<button class="btn sm red" onclick="_mCtx.cols.splice('+i+',1);renderCols()">✕</button></div>';
+  }).join('')||'<div class="mini" style="padding:6px 0">아직 없음</div>';
+  var tot=Number(document.getElementById('mTotal').value)||0;
+  var paid=cols.reduce(function(a,c){return a+(c.adv?0:(c.amount||0));},0);
+  var o=tot-paid;
+  document.getElementById('mOutst').innerHTML='잔액: <span style="color:'+(o>=1?'#dc2626':'#059669')+'">'+fmt(o)+'</span>'+(o<1?' ✅ 완료':'');
+}
+function addCol(){
+  var d=document.getElementById('mColDate').value, a=Math.round(Number(document.getElementById('mColAmt').value)||0);
+  if(!a){ alert('금액을 입력하세요'); return; }
+  _mCtx.cols.push({date:d,amount:a,yr:d?Number(d.slice(0,4)):0});
+  document.getElementById('mColAmt').value='';
+  renderCols();
+}
+async function saveDaily(){
+  var k=_mCtx.kind, id=_mCtx.id;
+  var e={date:document.getElementById('mDate').value,client:document.getElementById('mClient').value.trim(),
+    product:document.getElementById('mProd').value.trim(),sn:document.getElementById('mSn').value.trim(),
+    prod2:document.getElementById('mProd2').value,cat:document.getElementById('mCat').value,
+    hqRemit:!!document.getElementById('mHq').value,
+    qty:Number(document.getElementById('mQty').value)||1,unit:Number(document.getElementById('mUnit').value)||0,
+    total:Math.round(Number(document.getElementById('mTotal').value)||0),
+    collections:_mCtx.cols,_by:CURUSER,_at:today()};
+  if(!e.date||!e.product||!e.total){ alert('일자·제품명·금액은 필수입니다'); return; }
+  if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
+  else{ e.id=uid(k[0].toUpperCase()); DB[k].push(e); }
+  if(await saveDB()){ closeModal(); renderDaily(k); }
+}
+async function delDaily(){
+  if(!confirm('이 항목을 삭제할까요? (수금/지불 내역 포함)'))return;
+  var k=_mCtx.kind;
+  DB[k]=DB[k].filter(function(v){return v.id!==_mCtx.id;});
+  if(await saveDB()){ closeModal(); renderDaily(k); }
+}
+
+/* ── 자산/장비 ── */
+function setAssetTab(t){ _assetTab=t; document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');}); document.getElementById('tab'+t).classList.add('active'); renderAssets(); }
+function assetList(){ return _assetTab==='HQ'?DB.assetsHQ:_assetTab==='JP'?DB.assetsJP:DB.demo; }
+function renderAssets(){
+  document.getElementById('cntHQ').textContent=DB.assetsHQ.length;
+  document.getElementById('cntJP').textContent=DB.assetsJP.length;
+  document.getElementById('cntDemo').textContent=DB.demo.length;
+  var q=(document.getElementById('aSearch').value||'').toLowerCase();
+  var list=assetList().filter(function(x){ return !q||JSON.stringify(x).toLowerCase().indexOf(q)>=0; });
+  if(_assetTab==='Demo'){
+    document.getElementById('aHead').innerHTML='<tr><th>제품</th><th>S/N</th><th class="num">수량</th><th>입고일</th><th>데모 거래처</th><th>Rank</th><th>비고</th><th></th></tr>';
+    document.getElementById('aBody').innerHTML=list.map(function(x){
+      return '<tr class="clk" onclick="openAsset(\''+x.id+'\')"><td>'+esc(x.product)+'</td><td>'+esc(x.sn)+'</td><td class="num">'+(x.qty||1)+'</td><td>'+esc(x.inDate||'-')+'</td><td>'+esc(x.client||'-')+'</td>'+
+      '<td>'+(x.rank?'<span class="badge '+(x.rank==='A'?'b-ok':x.rank==='C'?'b-gray':'b-warn')+'">'+esc(x.rank)+'</span>':'')+'</td><td style="white-space:normal">'+esc(x.note||'')+'</td>'+
+      '<td><button class="btn sm red" onclick="event.stopPropagation();delAsset(\''+x.id+'\')">삭제</button></td></tr>';}).join('');
+  }else{
+    var tot=list.reduce(function(a,x){return a+(x.amount||0);},0);
+    document.getElementById('aHead').innerHTML='<tr><th>Product No.</th><th>제품</th><th>S/N</th><th class="num">수량</th><th class="num">금액</th><th>위치</th><th></th></tr>';
+    document.getElementById('aBody').innerHTML=
+      '<tr class="tsum"><td colspan="4">합계 ('+list.length+'대)</td><td class="num">'+fmt(tot)+'</td><td colspan="2"></td></tr>'+
+      list.map(function(x){
+      return '<tr class="clk" onclick="openAsset(\''+x.id+'\')"><td class="mini">'+esc(x.prodNo||'')+'</td><td>'+esc(x.product)+'</td><td>'+esc(x.sn)+'</td><td class="num">'+(x.qty||1)+'</td><td class="num">'+(x.amount?fmt(x.amount):'-')+'</td><td>'+esc(x.location||'-')+'</td>'+
+      '<td><button class="btn sm red" onclick="event.stopPropagation();delAsset(\''+x.id+'\')">삭제</button></td></tr>';}).join('');
+  }
+  document.getElementById('aFoot').textContent='총 '+list.length+'건';
+}
+function openAsset(id){
+  var list=assetList();
+  var x=id?list.find(function(v){return v.id===id;}):(_assetTab==='Demo'?{product:'',sn:'',qty:1,inDate:'',client:'WTJ',rank:'',note:''}:{prodNo:'',product:'',sn:'',qty:1,amount:'',location:''});
+  if(!x)return;
+  _mCtx={id:id};
+  document.getElementById('mTitle').textContent=(id?'수정':'등록')+' — '+(_assetTab==='HQ'?'본사자산':_assetTab==='JP'?'법인자산':'데모장비');
+  if(_assetTab==='Demo'){
+    document.getElementById('mBody').innerHTML=
+      '<div class="f2"><div class="frow"><label>제품</label><input id="aProd" value="'+esc(x.product)+'"></div><div class="frow"><label>S/N</label><input id="aSn" value="'+esc(x.sn)+'"></div></div>'+
+      '<div class="f2"><div class="frow"><label>수량</label><input type="number" id="aQty" value="'+esc(x.qty||1)+'"></div><div class="frow"><label>입고일</label><input type="date" id="aIn" value="'+esc(x.inDate)+'"></div></div>'+
+      '<div class="f2"><div class="frow"><label>데모 거래처</label><input id="aClient" value="'+esc(x.client)+'"></div><div class="frow"><label>Rank</label><input id="aRank" value="'+esc(x.rank)+'" placeholder="A/B/C/반납희망"></div></div>'+
+      '<div class="frow"><label>비고</label><input id="aNote" value="'+esc(x.note)+'"></div>';
+  }else{
+    document.getElementById('mBody').innerHTML=
+      '<div class="f2"><div class="frow"><label>Product No.</label><input id="aPno" value="'+esc(x.prodNo)+'"></div><div class="frow"><label>제품</label><input id="aProd" value="'+esc(x.product)+'"></div></div>'+
+      '<div class="f2"><div class="frow"><label>S/N</label><input id="aSn" value="'+esc(x.sn)+'"></div><div class="frow"><label>수량</label><input type="number" id="aQty" value="'+esc(x.qty||1)+'"></div></div>'+
+      '<div class="f2"><div class="frow"><label>금액</label><input type="number" id="aAmt" value="'+esc(x.amount)+'"></div><div class="frow"><label>위치</label><input id="aLoc" value="'+esc(x.location)+'"></div></div>';
+  }
+  document.getElementById('mFoot').innerHTML='<button class="btn gray" onclick="closeModal()">취소</button><button class="btn green" onclick="saveAsset()">저장</button>';
+  document.getElementById('modal').classList.add('on');
+}
+async function saveAsset(){
+  var list=assetList(), id=_mCtx.id;
+  var e;
+  if(_assetTab==='Demo'){
+    e={product:val('aProd'),sn:val('aSn'),qty:Number(val('aQty'))||1,inDate:val('aIn'),client:val('aClient'),rank:val('aRank'),note:val('aNote')};
+  }else{
+    e={prodNo:val('aPno'),product:val('aProd'),sn:val('aSn'),qty:Number(val('aQty'))||1,amount:Math.round(Number(val('aAmt'))||0),location:val('aLoc')};
+  }
+  if(!e.product){ alert('제품명을 입력하세요'); return; }
+  if(id){ var i=list.findIndex(function(v){return v.id===id;}); e.id=id; list[i]=e; }
+  else{ e.id=uid('A'); list.push(e); }
+  if(await saveDB()){ closeModal(); renderAssets(); }
+}
+async function delAsset(id){
+  if(!confirm('삭제할까요?'))return;
+  if(_assetTab==='HQ')DB.assetsHQ=DB.assetsHQ.filter(function(v){return v.id!==id;});
+  else if(_assetTab==='JP')DB.assetsJP=DB.assetsJP.filter(function(v){return v.id!==id;});
+  else DB.demo=DB.demo.filter(function(v){return v.id!==id;});
+  if(await saveDB())renderAssets();
+}
+function val(id){ return (document.getElementById(id).value||'').trim(); }
+
+/* ── 기준정보 ── */
+function renderConfig(){
+  var S=DB.settings;
+  document.getElementById('cfgAcc').innerHTML='<tr><th>은행</th><th>계좌번호</th><th class="num">기초잔액 (2026)</th></tr>'+
+    (S.accounts||[]).map(function(a,i){
+      return '<tr><td><input value="'+esc(a.bank)+'" onchange="DB.settings.accounts['+i+'].bank=this.value;saveDB()" style="border:1px solid #e2e8f0;border-radius:6px;padding:5px;width:110px"></td>'+
+      '<td><input value="'+esc(a.no)+'" onchange="DB.settings.accounts['+i+'].no=this.value;saveDB()" style="border:1px solid #e2e8f0;border-radius:6px;padding:5px;width:110px"></td>'+
+      '<td class="num"><input type="number" value="'+a.opening+'" onchange="DB.settings.accounts['+i+'].opening=Number(this.value)||0;saveDB()" style="border:1px solid #e2e8f0;border-radius:6px;padding:5px;width:140px;text-align:right"></td></tr>';
+    }).join('')+
+    '<tr><td>현금</td><td class="mini">小口現金</td><td class="num"><input type="number" value="'+(S.cashOpening||0)+'" onchange="DB.settings.cashOpening=Number(this.value)||0;saveDB()" style="border:1px solid #e2e8f0;border-radius:6px;padding:5px;width:140px;text-align:right"></td></tr>';
+  var fx=[['deposit','보증금 (敷金)'],['inventoryValue','재고자산'],['carryReceivable','2025 이월채권'],['carryPayable','2025 이월채무'],['capitalTarget','자본금 총액'],['hqLoan','본사 차입금 잔액']];
+  document.getElementById('cfgFix').innerHTML=fx.map(function(f){
+    return '<div class="frow" style="grid-template-columns:150px 1fr"><label>'+f[1]+'</label><input type="number" value="'+Math.round(S[f[0]]||0)+'" onchange="DB.settings.'+f[0]+'=Number(this.value)||0;saveDB();renderConfig()"></div>';
+  }).join('');
+  document.getElementById('cfgCap').innerHTML='<tr><th>입금일</th><th class="num">금액</th><th>비고</th></tr>'+
+    (S.capital||[]).map(function(c){return '<tr><td>'+esc(c.date)+'</td><td class="num">'+fmt(c.amount)+'</td><td>'+esc(c.note||'')+'</td></tr>';}).join('')+
+    '<tr class="tsum"><td>합계</td><td class="num">'+fmt((S.capital||[]).reduce(function(a,c){return a+c.amount;},0))+'</td><td></td></tr>';
+  document.getElementById('cfgLoan').innerHTML='<tr><th>입금일</th><th class="num">차입금</th><th class="num">상환액</th><th class="num">잔액</th></tr>'+
+    (S.loans||[]).map(function(c){return '<tr><td>'+esc(c.date)+'</td><td class="num">'+fmt(c.amount)+'</td><td class="num">'+fmt(c.repaid)+'</td><td class="num">'+fmt(c.balance)+'</td></tr>';}).join('')+
+    '<tr class="tsum"><td>합계</td><td class="num">'+fmt((S.loans||[]).reduce(function(a,c){return a+c.amount;},0))+'</td><td class="num">'+fmt((S.loans||[]).reduce(function(a,c){return a+c.repaid;},0))+'</td><td class="num">'+fmt((S.loans||[]).reduce(function(a,c){return a+c.balance;},0))+'</td></tr>';
+  document.getElementById('cfgCls').innerHTML='<tr><th>제품명2</th><th>구분</th></tr>'+
+    (DB.classes||[]).map(function(c){return '<tr><td>'+esc(c.name)+'</td><td><span class="badge '+(c.cat==='기기'?'b-info':c.cat==='소모품'?'b-ok':'b-gray')+'">'+esc(c.cat)+'</span></td></tr>';}).join('');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('on'); _mCtx=null; }
+document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this)closeModal(); });
+init();
+</script>
+</body>
+</html>
