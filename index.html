@@ -7355,7 +7355,7 @@ function renderDaily(){
   var kind=_day;
   var yr=$('fxDYear').value, cat=$('fxDCat').value, only=$('fxDOnly').checked, q=($('fxDSearch').value||'').toLowerCase();
   var rows=DB[kind].filter(function(x){
-    if(yr&&(x.date||'').slice(0,4)!==yr)return false;
+    if(yr&&((x.recog||x.date)||'').slice(0,4)!==yr)return false;
     if(cat&&x.cat!==cat)return false;
     if(only&&outst(x)<1)return false;
     if(_agf){
@@ -7372,7 +7372,7 @@ function renderDaily(){
   var tOut=rows.reduce(function(a,x){return a+Math.max(0,outst(x));},0);
   var allOut=DB[kind].reduce(function(a,x){return a+Math.max(0,outst(x));},0);
   var y=String(new Date().getFullYear());
-  var ySale=DB[kind].reduce(function(a,x){return a+((x.date||'').slice(0,4)===y?(x.total||0):0);},0);
+  var ySale=DB[kind].reduce(function(a,x){return a+(((x.recog||x.date)||'').slice(0,4)===y?(x.total||0):0);},0);
   var yCol=0; DB[kind].forEach(function(x){ (x.collections||[]).forEach(function(c){ if(!c.adv&&((c.yr&&String(c.yr)===y)||(!c.yr&&(c.date||'').slice(0,4)===y)))yCol+=c.amount||0; }); });
   var cnt=DB[kind].filter(function(x){return outst(x)>=1;}).length;
   var lbl=kind==='sales'?['총매출','총수금','미수채권','미수 건수']:['총매입','총지불','미지급금','미지급 건수'];
@@ -7387,7 +7387,7 @@ function renderDaily(){
     '<tr class="tsum"><td colspan="5">합계 ('+rows.length.toLocaleString()+'건)</td><td class="num">'+fmt(tTot)+'</td><td></td><td class="num">'+fmt(tOut)+'</td><td colspan="3"></td></tr>'+
     rows.slice(0,400).map(function(x){
       var o=outst(x), paid=(x.total||0)-o;
-      return '<tr class="clk" onclick="FIN.openDaily(\''+x.id+'\')"><td>'+esc(x.date)+'</td><td>'+esc(x.client||'-')+'</td>'+
+      return '<tr class="clk" onclick="FIN.openDaily(\''+x.id+'\')"><td>'+esc(x.date)+((x.recog&&x.recog!==x.date)?'<br><span class="fx-mini" style="color:#0d9488;font-weight:700">'+jt('매출 ','売上 ')+esc(x.recog)+'</span>':'')+'</td><td>'+esc(x.client||'-')+'</td>'+
         '<td style="white-space:normal;max-width:330px">'+esc(x.product)+'</td>'+
         '<td><span class="fx-badge '+(x.cat==='기기'?'fb-info':x.cat==='소모품'?'fb-ok':'fb-gray')+'">'+esc(x.cat||'-')+'</span></td>'+
         '<td class="num">'+(x.qty||1)+'</td><td class="num">'+fmt(x.total)+'</td><td class="num" style="color:#059669">'+fmt(paid)+'</td>'+
@@ -7405,8 +7405,8 @@ function openDaily(id){
   var cl1=kind==='sales'?'거래처':'CI';
   $('fxmTitle').textContent=(isNew?'등록':'상세/수정')+' — '+(kind==='sales'?'매출':'매입');
   $('fxmBody').innerHTML=
-    '<div class="f2"><div class="frow"><label>일자</label><input type="date" id="fxmDate" value="'+esc(x.date)+'"></div>'+
-    '<div class="frow"><label>'+cl1+'</label><input type="text" id="fxmClient" list="fxClientList" value="'+esc(x.client)+'"></div></div>'+
+    '<div class="f2"><div class="frow"><label>'+(kind==='sales'?jt('수주일','受注日'):jt('매입일','仕入日'))+'</label><input type="date" id="fxmDate" value="'+esc(x.date)+'"></div>'+
+    '<div class="frow"><label>'+cl1+'</label><input type="text" id="fxmClient" list="fxClientList" value="'+esc(x.client)+'"></div></div>'+(kind==='sales'?'<div style="margin-bottom:10px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:9px 12px"><label style="font-size:12.5px;color:#0f766e;font-weight:700">🧾 '+jt('매출기준 (매출인식일)','売上基準 (売上認識日)')+'</label> <span class="fx-mini">'+jt('비우면 수주일로 인식 · 미승인기기만 선적일','空欄なら受注日で認識・未承認機器のみ出荷日')+'</span><input type="date" id="fxmRecog" value="'+esc(x.recog||'')+'" style="width:100%;padding:8px 11px;border:1px solid #5eead4;border-radius:8px;font-size:13px;margin-top:5px"></div>':'')+
     '<div class="frow"><label>제품명</label><input type="text" id="fxmProd" value="'+esc(x.product)+'"></div>'+
     '<div class="f2"><div class="frow"><label>S/N · PI</label><input type="text" id="fxmSn" value="'+esc(x.sn)+'"></div>'+
     '<div class="frow"><label>제품분류</label><select id="fxmProd2" onchange="FIN.prod2Cat(this.value)">'+clsSel+'</select></div></div>'+
@@ -7455,7 +7455,7 @@ async function saveDaily(){
   var k=_mCtx.kind, id=_mCtx.id;
   var e={date:$('fxmDate').value,client:$('fxmClient').value.trim(),product:$('fxmProd').value.trim(),
     sn:$('fxmSn').value.trim(),prod2:$('fxmProd2').value,cat:$('fxmCat').value,hqRemit:!!$('fxmHq').value,
-    qty:Number($('fxmQty').value)||1,unit:Number($('fxmUnit').value)||0,
+    qty:Number($('fxmQty').value)||1,unit:Number($('fxmUnit').value)||0,recog:(document.getElementById('fxmRecog')?document.getElementById('fxmRecog').value:''),
     total:Math.round(Number($('fxmTotal').value)||0),collections:_mCtx.cols,_at:tdy()};
   if(!e.date||!e.product||!e.total){ alert(jt('일자·제품명·금액은 필수입니다','日付・製品名・金額は必須です')); return; }
   if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
