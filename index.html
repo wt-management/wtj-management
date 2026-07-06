@@ -4044,7 +4044,8 @@ function _amt(j){ return '¥'+fmt(Math.round(j||0)); }
 function _bar(val,maxAbs,col){ var w=maxAbs>0?Math.min(100,Math.abs(val)/maxAbs*100):0; return '<div class="esbar"><div style="height:100%;width:'+w+'%;background:'+col+'"></div></div>'; }
 function loadExecSummary(){ if(_data){renderExecSummary();}else{loadData(renderExecSummary);} }
 function renderExecSummary(){
-  try{ renderConsolStrip('esConsolStrip', document.getElementById('esYear').value, parseInt(document.getElementById('esFrom').value,10), parseInt(document.getElementById('esTo').value,10)); }catch(e){}
+  var _essD=document.getElementById('esConsolStrip'); if(_essD){_essD.innerHTML='';_essD.style.display='none';}
+  if(!_consolSales){ loadConsolSales(function(){ if(document.getElementById('page-exec-summary').classList.contains('active'))renderExecSummary(); }); }
   var jp=lang==='jp';
   var year=document.getElementById('esYear')?document.getElementById('esYear').value:'2026';
   var prev=String(parseInt(year)-1);
@@ -4066,6 +4067,8 @@ function renderExecSummary(){
   var coll=ord26>0?ord26paid/ord26*100:0;
   var yoyP=pay25>0?(pay26-pay25)/pay25*100:null, yoyO=ord25>0?(ord26-ord25)/ord25*100:null;
   var achv=tgt>0?pay26/tgt*100:0;
+  var cs26=0,cs25=0; if(_consolSales){ var _cc=consolCalc(year); for(var _mi=fM;_mi<=tM;_mi++){cs26+=_cc.monthly[_mi-1]||0; cs25+=_cc.prevMonthly[_mi-1]||0;} }
+  var yoyC=cs25>0?(cs26-cs25)/cs25*100:null; var achvC=tgt>0?cs26/tgt*100:0; var krwC=(_jpyRate>0)?fmtKRW(cs26*_jpyRate/100):'';
   var krw=(_jpyRate>0)?fmtKRW(pay26*_jpyRate/100):'';
   var perTxt=year+'년 '+fM+'~'+tM+'월';
   // 제품 성장
@@ -4076,17 +4079,26 @@ function renderExecSummary(){
   var topU=up[0], topD=dn[0];
   // 헤드라인
   function yb(v){if(v===null)return '';var c=v>=0?'#4ade80':'#f87171';return ' <span style="font-size:13px;font-weight:600;color:'+c+';background:rgba(255,255,255,.1);padding:3px 10px;border-radius:20px;margin-left:6px">'+(jp?'前年比':'전년比')+' '+(v>=0?'+':'')+v.toFixed(1)+'%</span>';}
-  document.getElementById('esHero').innerHTML='<div class="exh"><div class="h">'+perTxt+' · '+(jp?'入金基準売上':'수금기준 매출')+'</div>'+
-    '<div class="m">'+_amt(pay26)+' <span style="font-size:15px;opacity:.55;font-weight:500">'+krw+'</span>'+yb(yoyP)+'</div>'+
-    '<div class="s" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">'+(jp?'目標':'목표')+' '+achv.toFixed(0)+'% · '+(jp?'受注':'수주')+' '+_amt(ord26)+' · '+(jp?'未収':'미수')+' '+_amt(outTot)+(topU?' · '+(jp?'牽引':'견인')+' '+topU.k:'')+(topD?' · '+(jp?'不振':'부진')+' '+topD.k:'')+'</div></div>';
+  function _ybw(v){if(v===null||v===undefined)return '';var c=v>=0?'#4ade80':'#f87171';return ' <span style="font-size:12px;font-weight:600;color:'+c+';background:rgba(255,255,255,.12);padding:2px 9px;border-radius:20px;margin-left:5px">'+(jp?'前年比':'전년比')+' '+(v>=0?'+':'')+v.toFixed(1)+'%</span>';}
+  document.getElementById('esHero').innerHTML='<div class="exh" style="padding:0;display:flex;flex-wrap:wrap;overflow:hidden">'+
+    '<div class="clk" onclick="showPage(\'fin-daily\')" style="flex:1.35;min-width:300px;padding:22px 26px;background:linear-gradient(135deg,#0f766e,#115e59);cursor:pointer">'+
+      '<div class="h" style="opacity:.85;color:#99f6e4">'+perTxt+' · '+(jp?'連結売上(売上認識・受注基準)':'연결 매출 (매출인식·수주기준, 수수료 제외)')+'</div>'+
+      '<div class="m">'+_amt(cs26)+' <span style="font-size:14px;opacity:.6;font-weight:500">'+krwC+'</span>'+_ybw(yoyC)+'</div>'+
+      '<div class="s" style="font-weight:500;color:#d1fae5">'+(jp?'目標':'목표')+' '+achvC.toFixed(0)+'% · '+(jp?'未収':'미수')+' '+_amt(outTot)+(topU?' · '+(jp?'牽引':'견인')+' '+topU.k:'')+(topD?' · '+(jp?'不振':'부진')+' '+topD.k:'')+'</div>'+
+    '</div>'+
+    '<div class="clk" onclick="showPage(\'payments-list\')" style="flex:1;min-width:260px;padding:22px 26px;background:linear-gradient(135deg,#1e3a5f,#0f2038);border-left:1px solid rgba(255,255,255,.12);cursor:pointer">'+
+      '<div class="h" style="opacity:.75">'+(jp?'入金基準(実入金) 参考':'수금 기준 (실입금) · 참고')+'</div>'+
+      '<div class="m" style="font-size:26px">'+_amt(pay26)+' <span style="font-size:13px;opacity:.55;font-weight:500">'+krw+'</span>'+_ybw(yoyP)+'</div>'+
+      '<div class="s" style="font-weight:500">'+(jp?'回収率':'수금률')+' '+coll.toFixed(0)+'% · '+(jp?'受注(発生)':'수주(발생)')+' '+_amt(ord26)+'</div>'+
+    '</div></div>';
   // KPI (전년·올해·성장률)
   function card(l,v,prevTxt,g,bc){var gc=_rag(g);return '<div class="esc" style="border-left-color:'+bc+'"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="d">'+prevTxt+(g!==null&&g!==undefined?' <span style="color:'+gc+';font-weight:700">'+(g>=0?'+':'')+g.toFixed(1)+'%</span>':'')+'</div></div>';}
   document.getElementById('esKpi').innerHTML=
-    card((jp?'売上(入金)':'매출(수금)'),_amt(pay26),(jp?'前年 ':'전년 ')+_amt(pay25),yoyP,'#10b981')+
-    card((jp?'受注(発生)':'수주(발생)'),_amt(ord26),(jp?'前年 ':'전년 ')+_amt(ord25),yoyO,'#3b82f6')+
-    card((jp?'目標達成率':'목표 달성률'),achv.toFixed(0)+'%',(jp?'目標 ':'목표 ')+_amt(tgt),null,achv>=100?'#16a34a':(achv>=80?'#f59e0b':'#ef4444'))+
-    card((jp?'回収率':'수금률'),coll.toFixed(0)+'%',(jp?'未収 ':'미수 ')+_amt(outTot),null,'#8b5cf6')+
-    card((jp?'月平均売上':'월평균 매출'),_amt(pay26/nmon),nmon+(jp?'ヶ月平均':'개월 평균'),null,'#0ea5e9');
+    card((jp?'連結売上':'연결 매출'),_amt(cs26),(jp?'前年 ':'전년 ')+_amt(cs25),yoyC,'#0d9488')+
+    card((jp?'目標達成率':'목표 달성률'),achvC.toFixed(0)+'%',(jp?'目標 ':'목표 ')+_amt(tgt),null,achvC>=100?'#16a34a':(achvC>=80?'#f59e0b':'#ef4444'))+
+    card((jp?'月平均売上':'월평균 매출'),_amt(nmon>0?cs26/nmon:0),nmon+(jp?'ヶ月平均':'개월 평균'),null,'#0ea5e9')+
+    card((jp?'入金(参考)':'수금 (참고)'),_amt(pay26),(jp?'前年 ':'전년 ')+_amt(pay25),yoyP,'#3b82f6')+
+    card((jp?'未収債権':'미수채권'),_amt(outTot),(jp?'回収率 ':'수금률 ')+coll.toFixed(0)+'%',null,'#8b5cf6');
   // 제품별 실적 표 (전년/올해/성장률, 클릭)
   var prodCat={}; orders.forEach(function(o){if(inR(o.date,year)||inR(o.date,prev))prodCat[o.product||'-']=o.category;});
   function ptab(items){var th='<table class="estab"><thead><tr><th>'+(jp?'品目':'품목')+'</th><th class="num">'+(jp?'前年':'전년')+'</th><th class="num">'+(jp?'当年':'올해')+'</th><th class="num">'+(jp?'成長率':'성장률')+'</th></tr></thead><tbody>';return th+(items.length?items.map(function(x){var gc=_rag(x.g);return '<tr class="clk" onclick="openExecDrill(\'product\',\''+_dq(x.k)+'\')"><td>'+x.k+'</td><td class="num" style="color:#94a3b8">'+_amt(x.b)+'</td><td class="num" style="font-weight:700">'+_amt(x.a)+'</td><td class="num" style="color:'+gc+';font-weight:700">'+(x.g!==null?(x.g>=0?'+':'')+x.g.toFixed(1)+'%':(jp?'新規':'신규'))+'</td></tr>';}).join(''):'<tr><td colspan="4" style="color:#94a3b8;text-align:center;padding:12px">-</td></tr>')+'</tbody></table>';}
