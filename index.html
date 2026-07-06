@@ -768,6 +768,95 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
   <div class="content">
 
+    <!-- ═══ 자금일보 pages ═══ -->
+    <div class="page finpage" id="page-fin-report">
+      <div class="fx-filters" style="justify-content:flex-end"><label class="fx-mini">기준일</label><input type="date" id="fxRptDate" onchange="FIN.renderReport()"></div>
+      <div class="fx-kgrid" id="fxRptKpi"></div>
+      <div class="fx-sec"><div class="fx-st">🏦 계좌별 자금 현황 <span class="fx-mini">전일잔액 + 오늘입금 − 오늘지출 = 현재잔액</span></div>
+        <div class="fx-acct-grid" id="fxAcctGrid"></div></div>
+      <div class="fx-sec fx-grid2">
+        <div><div class="fx-st">📥 오늘 입금 내역</div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayIn"></tbody></table></div></div></div>
+        <div><div class="fx-st">📤 오늘 지출 내역</div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayOut"></tbody></table></div></div></div>
+      </div>
+      <div class="fx-sec fx-grid2">
+        <div><div class="fx-st">🧮 법인운영 점검 <span class="fx-mini">자산 − 부채</span></div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCheckTbl"></table></div></div></div>
+        <div><div class="fx-st">📊 채권 / 채무 현황</div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxArTbl"></table></div></div>
+          <div style="margin-top:14px" class="fx-card fx-pad"><div class="fx-st" style="margin-bottom:8px">월별 입금·지출 (<span id="fxChartYear"></span>년)</div><div class="fx-bar" id="fxMChart"></div><div class="fx-mini" style="text-align:center;margin-top:6px">파랑=입금 · 주황=지출</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page finpage" id="page-fin-ledger">
+      <div class="fx-tabs">
+        <div class="fx-tab active" id="fxLTabR" onclick="FIN.setLed('receipts')">💰 수금(입금)</div>
+        <div class="fx-tab" id="fxLTabE" onclick="FIN.setLed('expenses')">💸 지출</div>
+      </div>
+      <div class="fx-filters">
+        <select id="fxLYear" onchange="FIN.renderLedger()"></select>
+        <select id="fxLMonth" onchange="FIN.renderLedger()"></select>
+        <select id="fxLAcc" onchange="FIN.renderLedger()"></select>
+        <input type="text" id="fxLSearch" placeholder="내용 검색" oninput="FIN.renderLedger()" style="min-width:180px">
+        <span style="flex:1"></span>
+        <button class="fx-btn green" onclick="FIN.openEntry(null)">＋ 등록</button>
+      </div>
+      <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxLHead"></thead><tbody id="fxLBody"></tbody></table></div></div>
+      <div id="fxLFoot" class="fx-mini" style="padding:10px 4px"></div>
+    </div>
+
+    <div class="page finpage" id="page-fin-daily">
+      <div class="fx-tabs">
+        <div class="fx-tab active" id="fxDTabS" onclick="FIN.setDay('sales')">🧾 매출일보 · 미수채권</div>
+        <div class="fx-tab" id="fxDTabP" onclick="FIN.setDay('purchases')">📥 매입일보 · 미지급금</div>
+      </div>
+      <div class="fx-kgrid" id="fxDKpi"></div>
+      <div class="fx-filters">
+        <select id="fxDYear" onchange="FIN.renderDaily()"></select>
+        <select id="fxDCat" onchange="FIN.renderDaily()"><option value="">전체 분류</option><option>기기</option><option>소모품</option><option>기타</option></select>
+        <label style="font-size:13px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="fxDOnly" onchange="FIN.renderDaily()"><span id="fxDOnlyLbl">미수만</span></label>
+        <input type="text" id="fxDSearch" placeholder="거래처/제품 검색" oninput="FIN.renderDaily()" style="min-width:200px">
+        <span style="flex:1"></span>
+        <button class="fx-btn green" onclick="FIN.openDaily(null)">＋ 등록</button>
+      </div>
+      <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxDHead"></thead><tbody id="fxDBody"></tbody></table></div></div>
+      <div id="fxDFoot" class="fx-mini" style="padding:10px 4px"></div>
+    </div>
+
+    <div class="page finpage" id="page-fin-assets">
+      <div class="fx-tabs">
+        <div class="fx-tab active" id="fxATabHQ" onclick="FIN.setAsset('HQ')">본사자산 (<span id="fxCntHQ"></span>)</div>
+        <div class="fx-tab" id="fxATabJP" onclick="FIN.setAsset('JP')">법인자산 (<span id="fxCntJP"></span>)</div>
+        <div class="fx-tab" id="fxATabDemo" onclick="FIN.setAsset('Demo')">데모현황 (<span id="fxCntDemo"></span>)</div>
+        <div class="fx-tab" id="fxATabCfg" onclick="FIN.setAsset('Cfg')">⚙️ 기준정보</div>
+      </div>
+      <div id="fxAssetWrap">
+        <div class="fx-filters">
+          <input type="text" id="fxASearch" placeholder="제품/시리얼/위치 검색" oninput="FIN.renderAssets()" style="min-width:220px">
+          <span style="flex:1"></span>
+          <button class="fx-btn green" onclick="FIN.openAsset(null)">＋ 등록</button>
+        </div>
+        <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxAHead"></thead><tbody id="fxABody"></tbody></table></div></div>
+        <div id="fxAFoot" class="fx-mini" style="padding:10px 4px"></div>
+      </div>
+      <div id="fxCfgWrap" style="display:none">
+        <div class="fx-grid2">
+          <div class="fx-sec"><div class="fx-st">🏦 계좌 · 기초잔액 <span class="fx-mini">(2026년 기초)</span></div>
+            <div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCfgAcc"></table></div></div></div>
+          <div class="fx-sec"><div class="fx-st">📌 고정 항목</div><div class="fx-card fx-pad" id="fxCfgFix"></div></div>
+          <div class="fx-sec"><div class="fx-st">💼 자본금 내역</div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCfgCap"></table></div></div></div>
+          <div class="fx-sec"><div class="fx-st">🏛 차입금 내역</div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCfgLoan"></table></div></div></div>
+          <div class="fx-sec"><div class="fx-st">🏷 분류기준</div><div class="fx-card"><div style="overflow:auto;max-height:340px"><table class="fx" id="fxCfgCls"></table></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="fxmodal" class="finpage"><div class="mbx">
+      <div class="mhd"><h3 id="fxmTitle"></h3><button class="mcl" onclick="FIN.closeModal()">✕</button></div>
+      <div class="mbd" id="fxmBody"></div>
+      <div class="mft" id="fxmFoot"></div>
+    </div></div>
+
+    
+
 
 
     <!-- ═══ 대시보드 (입금기준) ═══ -->
@@ -6850,94 +6939,7 @@ document.addEventListener('click', function(e) {
 
 
 
-  <!-- ═══ 자금일보 pages ═══ -->
-    <div class="page finpage" id="page-fin-report">
-      <div class="fx-filters" style="justify-content:flex-end"><label class="fx-mini">기준일</label><input type="date" id="fxRptDate" onchange="FIN.renderReport()"></div>
-      <div class="fx-kgrid" id="fxRptKpi"></div>
-      <div class="fx-sec"><div class="fx-st">🏦 계좌별 자금 현황 <span class="fx-mini">전일잔액 + 오늘입금 − 오늘지출 = 현재잔액</span></div>
-        <div class="fx-acct-grid" id="fxAcctGrid"></div></div>
-      <div class="fx-sec fx-grid2">
-        <div><div class="fx-st">📥 오늘 입금 내역</div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayIn"></tbody></table></div></div></div>
-        <div><div class="fx-st">📤 오늘 지출 내역</div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayOut"></tbody></table></div></div></div>
-      </div>
-      <div class="fx-sec fx-grid2">
-        <div><div class="fx-st">🧮 법인운영 점검 <span class="fx-mini">자산 − 부채</span></div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCheckTbl"></table></div></div></div>
-        <div><div class="fx-st">📊 채권 / 채무 현황</div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxArTbl"></table></div></div>
-          <div style="margin-top:14px" class="fx-card fx-pad"><div class="fx-st" style="margin-bottom:8px">월별 입금·지출 (<span id="fxChartYear"></span>년)</div><div class="fx-bar" id="fxMChart"></div><div class="fx-mini" style="text-align:center;margin-top:6px">파랑=입금 · 주황=지출</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="page finpage" id="page-fin-ledger">
-      <div class="fx-tabs">
-        <div class="fx-tab active" id="fxLTabR" onclick="FIN.setLed('receipts')">💰 수금(입금)</div>
-        <div class="fx-tab" id="fxLTabE" onclick="FIN.setLed('expenses')">💸 지출</div>
-      </div>
-      <div class="fx-filters">
-        <select id="fxLYear" onchange="FIN.renderLedger()"></select>
-        <select id="fxLMonth" onchange="FIN.renderLedger()"></select>
-        <select id="fxLAcc" onchange="FIN.renderLedger()"></select>
-        <input type="text" id="fxLSearch" placeholder="내용 검색" oninput="FIN.renderLedger()" style="min-width:180px">
-        <span style="flex:1"></span>
-        <button class="fx-btn green" onclick="FIN.openEntry(null)">＋ 등록</button>
-      </div>
-      <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxLHead"></thead><tbody id="fxLBody"></tbody></table></div></div>
-      <div id="fxLFoot" class="fx-mini" style="padding:10px 4px"></div>
-    </div>
-
-    <div class="page finpage" id="page-fin-daily">
-      <div class="fx-tabs">
-        <div class="fx-tab active" id="fxDTabS" onclick="FIN.setDay('sales')">🧾 매출일보 · 미수채권</div>
-        <div class="fx-tab" id="fxDTabP" onclick="FIN.setDay('purchases')">📥 매입일보 · 미지급금</div>
-      </div>
-      <div class="fx-kgrid" id="fxDKpi"></div>
-      <div class="fx-filters">
-        <select id="fxDYear" onchange="FIN.renderDaily()"></select>
-        <select id="fxDCat" onchange="FIN.renderDaily()"><option value="">전체 분류</option><option>기기</option><option>소모품</option><option>기타</option></select>
-        <label style="font-size:13px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="fxDOnly" onchange="FIN.renderDaily()"><span id="fxDOnlyLbl">미수만</span></label>
-        <input type="text" id="fxDSearch" placeholder="거래처/제품 검색" oninput="FIN.renderDaily()" style="min-width:200px">
-        <span style="flex:1"></span>
-        <button class="fx-btn green" onclick="FIN.openDaily(null)">＋ 등록</button>
-      </div>
-      <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxDHead"></thead><tbody id="fxDBody"></tbody></table></div></div>
-      <div id="fxDFoot" class="fx-mini" style="padding:10px 4px"></div>
-    </div>
-
-    <div class="page finpage" id="page-fin-assets">
-      <div class="fx-tabs">
-        <div class="fx-tab active" id="fxATabHQ" onclick="FIN.setAsset('HQ')">본사자산 (<span id="fxCntHQ"></span>)</div>
-        <div class="fx-tab" id="fxATabJP" onclick="FIN.setAsset('JP')">법인자산 (<span id="fxCntJP"></span>)</div>
-        <div class="fx-tab" id="fxATabDemo" onclick="FIN.setAsset('Demo')">데모현황 (<span id="fxCntDemo"></span>)</div>
-        <div class="fx-tab" id="fxATabCfg" onclick="FIN.setAsset('Cfg')">⚙️ 기준정보</div>
-      </div>
-      <div id="fxAssetWrap">
-        <div class="fx-filters">
-          <input type="text" id="fxASearch" placeholder="제품/시리얼/위치 검색" oninput="FIN.renderAssets()" style="min-width:220px">
-          <span style="flex:1"></span>
-          <button class="fx-btn green" onclick="FIN.openAsset(null)">＋ 등록</button>
-        </div>
-        <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxAHead"></thead><tbody id="fxABody"></tbody></table></div></div>
-        <div id="fxAFoot" class="fx-mini" style="padding:10px 4px"></div>
-      </div>
-      <div id="fxCfgWrap" style="display:none">
-        <div class="fx-grid2">
-          <div class="fx-sec"><div class="fx-st">🏦 계좌 · 기초잔액 <span class="fx-mini">(2026년 기초)</span></div>
-            <div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCfgAcc"></table></div></div></div>
-          <div class="fx-sec"><div class="fx-st">📌 고정 항목</div><div class="fx-card fx-pad" id="fxCfgFix"></div></div>
-          <div class="fx-sec"><div class="fx-st">💼 자본금 내역</div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCfgCap"></table></div></div></div>
-          <div class="fx-sec"><div class="fx-st">🏛 차입금 내역</div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCfgLoan"></table></div></div></div>
-          <div class="fx-sec"><div class="fx-st">🏷 분류기준</div><div class="fx-card"><div style="overflow:auto;max-height:340px"><table class="fx" id="fxCfgCls"></table></div></div></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="fxmodal" class="finpage"><div class="mbx">
-      <div class="mhd"><h3 id="fxmTitle"></h3><button class="mcl" onclick="FIN.closeModal()">✕</button></div>
-      <div class="mbd" id="fxmBody"></div>
-      <div class="mft" id="fxmFoot"></div>
-    </div></div>
-
-    <div class="page" id="page-user-mgmt">
+  <div class="page" id="page-user-mgmt">
     <div class="content">
       <div id="um-loader" class="loader" style="display:none"><div class="spinner"></div><p style="margin-top:12px">불러오는 중...</p></div>
       <div id="um-content">
