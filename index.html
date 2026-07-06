@@ -771,13 +771,13 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
     <!-- ═══ 자금일보 pages ═══ -->
     <div class="page finpage" id="page-fin-report">
-      <div class="fx-filters" style="justify-content:flex-end"><label class="fx-mini">기준일</label><input type="date" id="fxRptDate" onchange="FIN.renderReport()"></div>
+      <div class="fx-filters" style="justify-content:flex-end"><label class="fx-mini">기준일</label><button class="fx-btn gray sm" onclick="FIN.rptShift(-1)">◀</button><input type="date" id="fxRptDate" onchange="FIN.renderReport()"><button class="fx-btn gray sm" onclick="FIN.rptShift(1)">▶</button><button class="fx-btn sm" onclick="FIN.rptToday()">오늘</button></div>
       <div class="fx-kgrid" id="fxRptKpi"></div>
       <div class="fx-sec"><div class="fx-st">🏦 계좌별 자금 현황 <span class="fx-mini">전일잔액 + 오늘입금 − 오늘지출 = 현재잔액</span></div>
         <div class="fx-acct-grid" id="fxAcctGrid"></div></div>
       <div class="fx-sec fx-grid2">
-        <div><div class="fx-st">📥 오늘 입금 내역</div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayIn"></tbody></table></div></div></div>
-        <div><div class="fx-st">📤 오늘 지출 내역</div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayOut"></tbody></table></div></div></div>
+        <div><div class="fx-st" style="display:flex;align-items:center">📥 오늘 입금 내역<span style="flex:1"></span><button class="fx-btn green sm" onclick="FIN.openEntry(null,'receipts')">＋ 입금 등록</button></div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayIn"></tbody></table></div></div></div>
+        <div><div class="fx-st" style="display:flex;align-items:center">📤 오늘 지출 내역<span style="flex:1"></span><button class="fx-btn green sm" onclick="FIN.openEntry(null,'expenses')">＋ 지출 등록</button></div><div class="fx-card"><div style="overflow:auto;max-height:320px"><table class="fx"><thead><tr><th>구분</th><th>내용</th><th class="num">금액</th></tr></thead><tbody id="fxTodayOut"></tbody></table></div></div></div>
       </div>
       <div class="fx-sec fx-grid2">
         <div><div class="fx-st">🧮 법인운영 점검 <span class="fx-mini">자산 − 부채</span></div><div class="fx-card"><div style="overflow-x:auto"><table class="fx" id="fxCheckTbl"></table></div></div></div>
@@ -798,7 +798,19 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
         <select id="fxLAcc" onchange="FIN.renderLedger()"></select>
         <input type="text" id="fxLSearch" placeholder="내용 검색" oninput="FIN.renderLedger()" style="min-width:180px">
         <span style="flex:1"></span>
+        <button class="fx-btn gray" onclick="FIN.csvLedger()">⬇ CSV</button>
         <button class="fx-btn green" onclick="FIN.openEntry(null)">＋ 등록</button>
+      </div>
+      <div class="fx-card fx-pad" style="margin-bottom:12px;border-left:4px solid #059669">
+        <div style="font-size:12.5px;font-weight:800;color:#059669;margin-bottom:8px">⚡ 빠른 입력 <span class="fx-mini">(금액에서 Enter로 바로 등록, 연속 입력 가능)</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="date" id="fxQDate" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">
+          <select id="fxQMethod" onchange="document.getElementById('fxQAcc').style.display=this.value==='bank'?'':'none'" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px"><option value="bank">예금</option><option value="cash">현금</option></select>
+          <select id="fxQAcc" style="padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px"></select>
+          <input type="text" id="fxQDesc" placeholder="내용" style="flex:1;min-width:200px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">
+          <input type="number" id="fxQAmt" placeholder="금액(JPY)" onkeydown="if(event.key==='Enter')FIN.quickAdd()" style="width:130px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">
+          <button class="fx-btn green" onclick="FIN.quickAdd()">등록</button>
+        </div>
       </div>
       <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxLHead"></thead><tbody id="fxLBody"></tbody></table></div></div>
       <div id="fxLFoot" class="fx-mini" style="padding:10px 4px"></div>
@@ -815,7 +827,13 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
         <select id="fxDCat" onchange="FIN.renderDaily()"><option value="">전체 분류</option><option>기기</option><option>소모품</option><option>기타</option></select>
         <label style="font-size:13px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="fxDOnly" onchange="FIN.renderDaily()"><span id="fxDOnlyLbl">미수만</span></label>
         <input type="text" id="fxDSearch" placeholder="거래처/제품 검색" oninput="FIN.renderDaily()" style="min-width:200px">
+        <span id="fxAgChips" style="display:inline-flex;gap:5px">
+          <button class="fx-btn gray sm" data-ag="12" onclick="FIN.setAgf('12')">🔴 1년+</button>
+          <button class="fx-btn gray sm" data-ag="6" onclick="FIN.setAgf('6')">🟠 6–12개월</button>
+          <button class="fx-btn gray sm" data-ag="3" onclick="FIN.setAgf('3')">🟡 3–6개월</button>
+        </span>
         <span style="flex:1"></span>
+        <button class="fx-btn gray" onclick="FIN.csvDaily()">⬇ CSV</button>
         <button class="fx-btn green" onclick="FIN.openDaily(null)">＋ 등록</button>
       </div>
       <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxDHead"></thead><tbody id="fxDBody"></tbody></table></div></div>
@@ -833,6 +851,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
         <div class="fx-filters">
           <input type="text" id="fxASearch" placeholder="제품/시리얼/위치 검색" oninput="FIN.renderAssets()" style="min-width:220px">
           <span style="flex:1"></span>
+          <button class="fx-btn gray" onclick="FIN.csvAssets()">⬇ CSV</button>
           <button class="fx-btn green" onclick="FIN.openAsset(null)">＋ 등록</button>
         </div>
         <div class="fx-card"><div style="overflow-x:auto"><table class="fx"><thead id="fxAHead"></thead><tbody id="fxABody"></tbody></table></div></div>
@@ -7042,6 +7061,12 @@ function buildFilters(){
   var syrs={}; DB.sales.concat(DB.purchases).forEach(function(x){ if(x.date)syrs[x.date.slice(0,4)]=1; });
   $('fxDYear').innerHTML='<option value="">전체 연도</option>'+Object.keys(syrs).sort().reverse().map(function(y){return '<option>'+y+'</option>';}).join('');
   $('fxDYear').value=String(new Date().getFullYear());
+  $('fxQDate').value=tdy();
+  $('fxQAcc').innerHTML=(DB.settings.accounts||[]).map(function(a){return '<option value="'+esc(a.no)+'">'+esc(a.bank+' '+a.no)+'</option>';}).join('');
+  var dl=document.getElementById('fxClientList');
+  if(!dl){ dl=document.createElement('datalist'); dl.id='fxClientList'; document.body.appendChild(dl); }
+  var cs={}; DB.sales.concat(DB.purchases).forEach(function(x){ if(x.client)cs[x.client]=1; });
+  dl.innerHTML=Object.keys(cs).sort().map(function(c){return '<option value="'+esc(c)+'">';}).join('');
 }
 /* ── 보고서 ── */
 function lsum(rows,accNo,method,from,to){
@@ -7061,16 +7086,16 @@ function renderReport(){
     var inC=lsum(DB.receipts,a.no,'bank',y0,D), outC=lsum(DB.expenses,a.no,'bank',y0,D);
     var inT=lsum(DB.receipts,a.no,'bank',D,D), outT=lsum(DB.expenses,a.no,'bank',D,D);
     var bal=(a.opening||0)+inC-outC;
-    rows.push({label:a.bank,no:a.no,bal:bal,inT:inT,outT:outT,prev:bal-inT+outT});
+    rows.push({label:a.bank,no:a.no,acc:a.no,bal:bal,inT:inT,outT:outT,prev:bal-inT+outT});
     totBal+=bal; totIn+=inT; totOut+=outT;
   });
   var cIn=lsum(DB.receipts,'','cash',y0,D), cOut=lsum(DB.expenses,'','cash',y0,D);
   var cInT=lsum(DB.receipts,'','cash',D,D), cOutT=lsum(DB.expenses,'','cash',D,D);
   var cBal=(S.cashOpening||0)+cIn-cOut;
-  rows.push({label:'현금',no:'小口現金',bal:cBal,inT:cInT,outT:cOutT,prev:cBal-cInT+cOutT});
+  rows.push({label:'현금',no:'小口現金',acc:'cash',bal:cBal,inT:cInT,outT:cOutT,prev:cBal-cInT+cOutT});
   totBal+=cBal; totIn+=cInT; totOut+=cOutT;
   $('fxAcctGrid').innerHTML=rows.map(function(r){
-    return '<div class="fx-acct"><div class="ab">'+esc(r.label)+'</div><div class="an">'+esc(r.no)+'</div><div class="av">'+fmt(r.bal)+'</div>'+
+    return '<div class="fx-acct clk" title="클릭 시 이 계좌 원장으로" onclick="FIN.goLedger(\''+esc(r.acc)+'\')"><div class="ab">'+esc(r.label)+'</div><div class="an">'+esc(r.no)+'</div><div class="av">'+fmt(r.bal)+'</div>'+
       '<div class="ad">전일 '+fmtS(r.prev)+(r.inT?' <span style="color:#059669">＋'+fmtS(r.inT)+'</span>':'')+(r.outT?' <span style="color:#dc2626">−'+fmtS(r.outT)+'</span>':'')+'</div></div>';
   }).join('');
   function catO(list,cat){ var s=0; list.forEach(function(x){ if(x.cat===cat)s+=outst(x); }); return s; }
@@ -7140,12 +7165,12 @@ function renderLedger(){
       return '<tr class="clk" onclick="FIN.openEntry(\''+x.id+'\')"><td>'+esc(x.date)+'</td>'+
         '<td><span class="fx-badge '+(x.method==='cash'?'fb-warn':'fb-info')+'">'+(x.method==='cash'?'현금':'예금')+'</span> <span class="fx-mini">'+esc(x.method==='bank'?x.accNo:'')+'</span></td>'+
         '<td style="white-space:normal;max-width:480px">'+esc(x.desc)+'</td><td class="num" style="font-weight:700">'+fmt(x.amount)+'</td>'+
-        '<td><button class="fx-btn sm red" onclick="event.stopPropagation();FIN.delEntry(\''+x.id+'\')">삭제</button></td></tr>';
+        '<td style="white-space:nowrap"><button class="fx-btn sm gray" title="오늘 날짜로 복제" onclick="event.stopPropagation();FIN.dupEntry(\''+x.id+'\')">⧉</button> <button class="fx-btn sm red" onclick="event.stopPropagation();FIN.delEntry(\''+x.id+'\')">삭제</button></td></tr>';
     }).join('');
   $('fxLFoot').textContent='표시 '+Math.min(rows.length,500)+' / '+rows.length+'건'+(rows.length>500?' (상위 500건 — 필터로 좁혀주세요)':'');
 }
-function openEntry(id){
-  var kind=_led;
+function openEntry(id,kindOpt){
+  var kind=kindOpt||_led; if(kindOpt)_led=kindOpt;
   var x=id?DB[kind].find(function(v){return v.id===id;}):{date:tdy(),accNo:(DB.settings.accounts[0]||{}).no||'',desc:'',amount:'',method:'bank'};
   if(!x)return;
   _mCtx={type:'entry',kind:kind,id:id};
@@ -7168,7 +7193,9 @@ async function saveEntry(){
   if(!e.date||!e.amount){ alert('일자와 금액을 입력하세요'); return; }
   if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
   else{ e.id=uid(k[0].toUpperCase()); DB[k].push(e); }
-  if(await saveDB()){ closeModal(); renderLedger(); }
+  if(await saveDB()){ closeModal(); toast('저장 완료 ✓');
+    var act=document.querySelector('.page.active');
+    if(act&&act.id==='page-fin-report')renderReport(); else renderLedger(); }
 }
 async function delEntry(id){
   if(!confirm('이 항목을 삭제할까요?'))return;
@@ -7187,6 +7214,13 @@ function renderDaily(){
     if(yr&&(x.date||'').slice(0,4)!==yr)return false;
     if(cat&&x.cat!==cat)return false;
     if(only&&outst(x)<1)return false;
+    if(_agf){
+      if(outst(x)<1)return false;
+      var dd=Math.floor((new Date(tdy())-new Date(x.date))/864e5);
+      if(_agf==='12'&&dd<=365)return false;
+      if(_agf==='6'&&(dd<=180||dd>365))return false;
+      if(_agf==='3'&&(dd<=90||dd>180))return false;
+    }
     if(q&&((x.client||'')+' '+(x.product||'')).toLowerCase().indexOf(q)<0)return false;
     return true;
   }).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
@@ -7204,9 +7238,9 @@ function renderDaily(){
     '<div class="fx-kpi amber"><div class="kl">'+lbl[2]+' (전체)</div><div class="kv">'+fmt(allOut)+'</div></div>'+
     '<div class="fx-kpi red"><div class="kl">'+lbl[3]+'</div><div class="kv">'+cnt+'건</div></div>';
   var cl1=kind==='sales'?'거래처':'CI';
-  $('fxDHead').innerHTML='<tr><th>일자</th><th>'+cl1+'</th><th>제품</th><th>분류</th><th class="num">수량</th><th class="num">금액</th><th class="num">수금/지불</th><th class="num">잔액</th><th>Aging</th><th>본사송금</th></tr>';
+  $('fxDHead').innerHTML='<tr><th>일자</th><th>'+cl1+'</th><th>제품</th><th>분류</th><th class="num">수량</th><th class="num">금액</th><th class="num">수금/지불</th><th class="num">잔액</th><th>Aging</th><th>본사송금</th><th style="width:96px">처리</th></tr>';
   $('fxDBody').innerHTML=
-    '<tr class="tsum"><td colspan="5">합계 ('+rows.length.toLocaleString()+'건)</td><td class="num">'+fmt(tTot)+'</td><td></td><td class="num">'+fmt(tOut)+'</td><td colspan="2"></td></tr>'+
+    '<tr class="tsum"><td colspan="5">합계 ('+rows.length.toLocaleString()+'건)</td><td class="num">'+fmt(tTot)+'</td><td></td><td class="num">'+fmt(tOut)+'</td><td colspan="3"></td></tr>'+
     rows.slice(0,400).map(function(x){
       var o=outst(x), paid=(x.total||0)-o;
       return '<tr class="clk" onclick="FIN.openDaily(\''+x.id+'\')"><td>'+esc(x.date)+'</td><td>'+esc(x.client||'-')+'</td>'+
@@ -7214,7 +7248,7 @@ function renderDaily(){
         '<td><span class="fx-badge '+(x.cat==='기기'?'fb-info':x.cat==='소모품'?'fb-ok':'fb-gray')+'">'+esc(x.cat||'-')+'</span></td>'+
         '<td class="num">'+(x.qty||1)+'</td><td class="num">'+fmt(x.total)+'</td><td class="num" style="color:#059669">'+fmt(paid)+'</td>'+
         '<td class="num" style="font-weight:800;color:'+(o>=1?'#dc2626':'#cbd5e1')+'">'+fmt(o)+'</td>'+
-        '<td>'+(o>=1?agingOf(x.date):'<span class="fx-badge fb-ok">완료</span>')+'</td><td>'+(x.hqRemit?'〇':'')+'</td></tr>';
+        '<td>'+(o>=1?agingOf(x.date):'<span class="fx-badge fb-ok">완료</span>')+'</td><td>'+(x.hqRemit?'〇':'')+'</td>'+'<td onclick="event.stopPropagation()">'+(o>=1?'<button class="fx-btn sm green" onclick="FIN.quickCollect(\''+x.id+'\')">＋'+(kind==='sales'?'수금':'지불')+'</button>':'')+'</td></tr>';
     }).join('');
   $('fxDFoot').textContent='표시 '+Math.min(rows.length,400)+' / '+rows.length+'건'+(rows.length>400?' (상위 400건 — 필터로 좁혀주세요)':'');
 }
@@ -7228,7 +7262,7 @@ function openDaily(id){
   $('fxmTitle').textContent=(isNew?'등록':'상세/수정')+' — '+(kind==='sales'?'매출':'매입');
   $('fxmBody').innerHTML=
     '<div class="f2"><div class="frow"><label>일자</label><input type="date" id="fxmDate" value="'+esc(x.date)+'"></div>'+
-    '<div class="frow"><label>'+cl1+'</label><input type="text" id="fxmClient" value="'+esc(x.client)+'"></div></div>'+
+    '<div class="frow"><label>'+cl1+'</label><input type="text" id="fxmClient" list="fxClientList" value="'+esc(x.client)+'"></div></div>'+
     '<div class="frow"><label>제품명</label><input type="text" id="fxmProd" value="'+esc(x.product)+'"></div>'+
     '<div class="f2"><div class="frow"><label>S/N · PI</label><input type="text" id="fxmSn" value="'+esc(x.sn)+'"></div>'+
     '<div class="frow"><label>제품분류</label><select id="fxmProd2" onchange="FIN.prod2Cat(this.value)">'+clsSel+'</select></div></div>'+
@@ -7282,7 +7316,7 @@ async function saveDaily(){
   if(!e.date||!e.product||!e.total){ alert('일자·제품명·금액은 필수입니다'); return; }
   if(id){ var i=DB[k].findIndex(function(v){return v.id===id;}); e.id=id; DB[k][i]=e; }
   else{ e.id=uid(k[0].toUpperCase()); DB[k].push(e); }
-  if(await saveDB()){ closeModal(); renderDaily(); }
+  if(await saveDB()){ closeModal(); toast('저장 완료 ✓'); renderDaily(); }
 }
 async function delDaily(){
   if(!confirm('이 항목을 삭제할까요? (수금/지불 내역 포함)'))return;
@@ -7383,12 +7417,98 @@ function renderConfig(){
   $('fxCfgCls').innerHTML='<tr><th>제품명2</th><th>구분</th></tr>'+
     (DB.classes||[]).map(function(c){return '<tr><td>'+esc(c.name)+'</td><td><span class="fx-badge '+(c.cat==='기기'?'fb-info':c.cat==='소모품'?'fb-ok':'fb-gray')+'">'+esc(c.cat)+'</span></td></tr>';}).join('');
 }
+var _agf='';
+function toast(msg){
+  var el=document.getElementById('fxToast');
+  if(!el){ el=document.createElement('div'); el.id='fxToast';
+    el.style.cssText='position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 22px;border-radius:24px;font-size:13.5px;font-weight:700;z-index:3000;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:opacity .3s;opacity:0;pointer-events:none';
+    document.body.appendChild(el); }
+  el.textContent=msg; el.style.opacity='1';
+  clearTimeout(el._t); el._t=setTimeout(function(){ el.style.opacity='0'; },1800);
+}
+function rptShift(d){
+  var el=$('fxRptDate'); var dt=new Date(el.value||tdy()); dt.setDate(dt.getDate()+d);
+  el.value=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+  renderReport();
+}
+function rptToday(){ $('fxRptDate').value=tdy(); renderReport(); }
+function goLedger(acc){
+  showPage('fin-ledger');
+  setTimeout(function(){ var s=$('fxLAcc'); if(s){ s.value=acc==='cash'?'cash':acc; renderLedger(); } },80);
+}
+async function quickAdd(){
+  var method=$('fxQMethod').value;
+  var e={date:$('fxQDate').value,method:method,accNo:method==='bank'?$('fxQAcc').value:'',
+    desc:$('fxQDesc').value.trim(),amount:Math.round(Number($('fxQAmt').value)||0),_at:tdy()};
+  if(!e.date||!e.amount){ alert('일자와 금액을 입력하세요'); return; }
+  e.id=uid(_led[0].toUpperCase());
+  DB[_led].push(e);
+  if(await saveDB()){ toast((_led==='receipts'?'입금':'지출')+' 등록 완료 ✓ '+fmt(e.amount));
+    $('fxQDesc').value=''; $('fxQAmt').value=''; $('fxQDesc').focus(); renderLedger(); }
+}
+function dupEntry(id){
+  var x=DB[_led].find(function(v){return v.id===id;}); if(!x)return;
+  openEntry(null);
+  $('fxmDate').value=tdy(); $('fxmMethod').value=x.method;
+  $('fxmAccWrap').style.display=x.method==='bank'?'':'none';
+  if(x.method==='bank')$('fxmAcc').value=x.accNo;
+  $('fxmDesc').value=x.desc; $('fxmAmt').value=x.amount;
+}
+async function quickCollect(id){
+  var kind=_day, x=DB[kind].find(function(v){return v.id===id;}); if(!x)return;
+  var o=outst(x); if(o<1)return;
+  if(!confirm((kind==='sales'?'수금':'지불')+' 처리: '+(x.client||x.product)+'\n잔액 '+fmt(o)+' 전액을 오늘('+tdy()+') 날짜로 처리할까요?'))return;
+  x.collections=x.collections||[];
+  x.collections.push({date:tdy(),amount:o,yr:Number(tdy().slice(0,4))});
+  x._at=tdy();
+  if(await saveDB()){ toast('처리 완료 ✓ '+fmt(o)); renderDaily(); }
+}
+function setAgf(v){
+  _agf=(_agf===v)?'':v;
+  document.querySelectorAll('#fxAgChips .fx-btn').forEach(function(b){
+    var on=b.dataset.ag===_agf;
+    b.style.background=on?'#0f172a':''; b.style.color=on?'#fff':'';
+  });
+  renderDaily();
+}
+function csvDL(name,rows){
+  var csv='﻿'+rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(',');}).join('\r\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=name+'_'+tdy()+'.csv'; a.click();
+}
+function csvLedger(){
+  var kind=_led;
+  var rows=[[kind==='receipts'?'수금(입금) 원장':'지출 원장'],['일자','구분','계좌','내용','금액(JPY)']];
+  DB[kind].slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');}).forEach(function(x){
+    rows.push([x.date,x.method==='cash'?'현금':'예금',x.accNo||'',x.desc,x.amount]);
+  });
+  csvDL(kind==='receipts'?'수금원장':'지출원장',rows); toast('CSV 다운로드 ✓');
+}
+function csvDaily(){
+  var kind=_day;
+  var rows=[[kind==='sales'?'매출일보·미수채권':'매입일보·미지급금'],['일자',kind==='sales'?'거래처':'CI','제품','분류','수량','단가','금액','수금/지불','잔액','본사송금','수금내역']];
+  DB[kind].slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');}).forEach(function(x){
+    var o=outst(x);
+    rows.push([x.date,x.client||'',x.product,x.cat||'',x.qty||1,x.unit||'',x.total,(x.total||0)-o,o,x.hqRemit?'〇':'',
+      (x.collections||[]).map(function(c){return (c.date||'')+' '+(c.amount||0)+(c.adv?'(선수금)':'');}).join(' / ')]);
+  });
+  csvDL(kind==='sales'?'매출일보':'매입일보',rows); toast('CSV 다운로드 ✓');
+}
+function csvAssets(){
+  var rows;
+  if(_asset==='Demo'){ rows=[['데모현황'],['제품','S/N','수량','입고일','데모거래처','Rank','비고']];
+    DB.demo.forEach(function(x){rows.push([x.product,x.sn,x.qty||1,x.inDate||'',x.client||'',x.rank||'',x.note||''])}); }
+  else{ var list=_asset==='HQ'?DB.assetsHQ:DB.assetsJP;
+    rows=[[_asset==='HQ'?'본사자산':'법인자산'],['Product No.','제품','S/N','수량','금액','위치']];
+    list.forEach(function(x){rows.push([x.prodNo||'',x.product,x.sn,x.qty||1,x.amount||'',x.location||''])}); }
+  csvDL('자산_'+_asset,rows); toast('CSV 다운로드 ✓');
+}
 function cfgSet(k,v){ DB.settings[k]=Number(v)||0; saveDB(); }
 function cfgAcc(i,k,v){ DB.settings.accounts[i][k]=(k==='opening')?(Number(v)||0):v; saveDB(); }
 function closeModal(){ $('fxmodal').classList.remove('on'); _mCtx=null; }
 document.addEventListener('click',function(e){ if(e.target&&e.target.id==='fxmodal')closeModal(); });
 setTimeout(function(){ var act=document.querySelector('.page.active'); if(act&&act.id.indexOf('page-fin-')===0)onPage(act.id.replace('page-','')); },400);
-return {onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,
+return {onPage:onPage,go:go,setLed:setLed,setDay:setDay,setAsset:setAsset,rptShift:rptShift,rptToday:rptToday,goLedger:goLedger,quickAdd:quickAdd,dupEntry:dupEntry,quickCollect:quickCollect,setAgf:setAgf,csvLedger:csvLedger,csvDaily:csvDaily,csvAssets:csvAssets,
   openEntry:openEntry,saveEntry:saveEntry,delEntry:delEntry,
   openDaily:openDaily,saveDaily:saveDaily,delDaily:delDaily,
   addCol:addCol,delCol:delCol,mCalc:mCalc,renderCols:renderCols,prod2Cat:prod2Cat,
