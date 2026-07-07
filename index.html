@@ -5201,11 +5201,19 @@ function renderCaList(){
   var jp=lang==='jp';
   var q=((document.getElementById('caSearch')||{}).value||'').toLowerCase();
   var yr=(document.getElementById('caYear')||{}).value;
-  var paid={}; (allPayments||[]).forEach(function(p){if(p.orderRef)paid[p.orderRef]=(paid[p.orderRef]||0)+(p.amount||0);});
-  var o2f={}; (allOrders||[]).forEach(function(o){o2f[o.stableId]=o.facility;});
   var fmap={};
-  (allOrders||[]).forEach(function(o){ if(yr && String(o.date||'').slice(0,4)!==yr) return; var f=o.facility||'-'; if(!fmap[f])fmap[f]={ord:0,pay:0,out:0,cnt:0,cl:{}}; fmap[f].ord+=(o.amount||0); fmap[f].cnt++; if(o.clinic)fmap[f].cl[o.clinic]=1; fmap[f].out+=Math.max(0,(o.amount||0)-(paid[o.stableId]||0)); });
-  (allPayments||[]).forEach(function(p){ if(yr && String(p.date||'').slice(0,4)!==yr) return; var f=o2f[p.orderRef]; if(f&&fmap[f])fmap[f].pay+=(p.amount||0); });
+  if(_consolSales){
+    _consolSales.forEach(function(x){ if(_isCommRow(x))return; var f=x.client||'-', recog=x.recog||'';
+      var net=(x.net!=null?x.net:x.total)||0, out=(x.total||0)-((x.collections||[]).reduce(function(a,c){return a+(c.adv?0:(c.amount||0));},0));
+      if(!yr||recog.slice(0,4)===yr){ if(!fmap[f])fmap[f]={ord:0,pay:0,out:0,cnt:0,cl:{}}; fmap[f].ord+=net; fmap[f].cnt++; fmap[f].out+=Math.max(0,out); }
+      (x.collections||[]).forEach(function(c){ if(!yr||(c.date||'').slice(0,4)===yr){ if(!fmap[f])fmap[f]={ord:0,pay:0,out:0,cnt:0,cl:{}}; fmap[f].pay+=c.amount||0; } });
+    });
+  } else {
+    var paid={}; (allPayments||[]).forEach(function(p){if(p.orderRef)paid[p.orderRef]=(paid[p.orderRef]||0)+(p.amount||0);});
+    var o2f={}; (allOrders||[]).forEach(function(o){o2f[o.stableId]=o.facility;});
+    (allOrders||[]).forEach(function(o){ if(yr && String(o.date||'').slice(0,4)!==yr) return; var f=o.facility||'-'; if(!fmap[f])fmap[f]={ord:0,pay:0,out:0,cnt:0,cl:{}}; fmap[f].ord+=(o.amount||0); fmap[f].cnt++; if(o.clinic)fmap[f].cl[o.clinic]=1; fmap[f].out+=Math.max(0,(o.amount||0)-(paid[o.stableId]||0)); });
+    (allPayments||[]).forEach(function(p){ if(yr && String(p.date||'').slice(0,4)!==yr) return; var f=o2f[p.orderRef]; if(f&&fmap[f])fmap[f].pay+=(p.amount||0); });
+  }
   var arr=Object.keys(fmap).filter(function(f){return !q||f.toLowerCase().indexOf(q)>=0;}).map(function(f){return {f:f,d:fmap[f]};}).sort(function(a,b){return b.d.ord-a.d.ord;});
   document.getElementById('caListHead').innerHTML='<tr><th>'+(jp?'取引先':'거래처')+'</th><th class="num">'+(jp?'クリニック':'클리닉')+'</th><th class="num">'+(jp?'受注':'수주')+'</th><th class="num">'+(jp?'入金':'수금')+'</th><th class="num">'+(jp?'未収':'미수')+'</th><th class="num">'+(jp?'件数':'건수')+'</th></tr>';
   document.getElementById('caListBody').innerHTML=arr.map(function(x){return '<tr class="clk" onclick="selectCa(\''+_dq(x.f)+'\')"><td>'+x.f+'</td><td class="num">'+Object.keys(x.d.cl).length+'</td><td class="num" style="font-weight:700">¥'+fmt(Math.round(x.d.ord))+'</td><td class="num">¥'+fmt(Math.round(x.d.pay))+'</td><td class="num" style="color:'+(x.d.out>0?'#ef4444':'#cbd5e1')+'">¥'+fmt(Math.round(x.d.out))+'</td><td class="num">'+x.d.cnt+'</td></tr>';}).join('')||'<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:18px">'+(jp?'データなし':'데이터 없음')+'</td></tr>';
@@ -5216,19 +5224,31 @@ function renderCaDetail(fac){
   var jp=lang==='jp';
   var yr=(document.getElementById('caYear')||{}).value;
   document.getElementById('caDetailName').textContent='🔍 '+fac;
-  var orders=(allOrders||[]).filter(function(o){return o.facility===fac && (!yr||String(o.date||'').slice(0,4)===yr);});
-  var oids={}; orders.forEach(function(o){oids[o.stableId]=o;});
-  var paysFac=(allPayments||[]).filter(function(p){return p.orderRef&&oids[p.orderRef];});
-  var paidMap={}; paysFac.forEach(function(p){paidMap[p.orderRef]=(paidMap[p.orderRef]||0)+(p.amount||0);});
-  var totOrd=orders.reduce(function(s,o){return s+(o.amount||0);},0);
-  var totPay=paysFac.filter(function(p){return !yr||String(p.date||'').slice(0,4)===yr;}).reduce(function(s,p){return s+(p.amount||0);},0);
-  var outst=orders.reduce(function(s,o){return s+Math.max(0,(o.amount||0)-(paidMap[o.stableId]||0));},0);
-  var ds=orders.map(function(o){return o.date;}).filter(Boolean).sort();
-  var kpi=[{l:(jp?'受注額':'수주액'),v:'¥'+fmt(Math.round(totOrd)),bc:'#3b82f6'},{l:(jp?'入金額':'수금액'),v:'¥'+fmt(Math.round(totPay)),bc:'#10b981'},{l:(jp?'未収金':'미수금'),v:'¥'+fmt(Math.round(outst)),bc:'#ef4444'},{l:(jp?'取引件数':'거래 건수'),v:orders.length+(jp?'件':'건'),bc:'#8b5cf6'},{l:(jp?'初取引':'첫 거래'),v:ds[0]||'-',bc:'#0ea5e9'},{l:(jp?'最近取引':'최근 거래'),v:ds[ds.length-1]||'-',bc:'#0ea5e9'}];
+  var totOrd,totPay,outst,ds,_cnt,mo={},paidMap={},orders;
+  if(_consolSales){
+    var sales=_consolSales.filter(function(x){return !_isCommRow(x)&&x.client===fac&&(!yr||(x.recog||'').slice(0,4)===yr);});
+    totOrd=0;outst=0;totPay=0;_cnt=sales.length;var _ds=[]; orders=sales.map(function(x){var _p=(x.collections||[]).reduce(function(a,c){return a+(c.adv?0:(c.amount||0));},0);return {stableId:x.id,product:x.product||'-',qty:x.qty||0,amount:(x.net!=null?x.net:x.total)||0,date:x.recog||x.date||'',clinic:'',category:x.cat||'',_paid:_p};}); paidMap={}; orders.forEach(function(o){paidMap[o.stableId]=o._paid;});
+    sales.forEach(function(x){ var recog=x.recog||x.date||''; _ds.push(recog);
+      var net=(x.net!=null?x.net:x.total)||0; totOrd+=net;
+      var out=(x.total||0)-((x.collections||[]).reduce(function(a,c){return a+(c.adv?0:(c.amount||0));},0)); outst+=Math.max(0,out);
+      var m=recog.slice(0,7); if(m){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].ord+=net;mo[m].cnt++;}
+    });
+    ds=_ds.filter(Boolean).sort();
+    _consolSales.forEach(function(x){ if(_isCommRow(x)||x.client!==fac)return; (x.collections||[]).forEach(function(c){ if(!yr||(c.date||'').slice(0,4)===yr){ totPay+=c.amount||0; var cm=(c.date||'').slice(0,7); if(cm){mo[cm]=mo[cm]||{ord:0,pay:0,cnt:0};mo[cm].pay+=c.amount||0;} } }); });
+  } else {
+    var orders=(allOrders||[]).filter(function(o){return o.facility===fac && (!yr||String(o.date||'').slice(0,4)===yr);});
+    var oids={}; orders.forEach(function(o){oids[o.stableId]=o;});
+    var paysFac=(allPayments||[]).filter(function(p){return p.orderRef&&oids[p.orderRef];});
+    var paidMap={}; paysFac.forEach(function(p){paidMap[p.orderRef]=(paidMap[p.orderRef]||0)+(p.amount||0);});
+    totOrd=orders.reduce(function(s,o){return s+(o.amount||0);},0);
+    totPay=paysFac.filter(function(p){return !yr||String(p.date||'').slice(0,4)===yr;}).reduce(function(s,p){return s+(p.amount||0);},0);
+    outst=orders.reduce(function(s,o){return s+Math.max(0,(o.amount||0)-(paidMap[o.stableId]||0));},0);
+    ds=orders.map(function(o){return o.date;}).filter(Boolean).sort(); _cnt=orders.length;
+    orders.forEach(function(o){var m=String(o.date||'').slice(0,7);if(m){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].ord+=(o.amount||0);mo[m].cnt++;}});
+    paysFac.forEach(function(p){var m=String(p.date||'').slice(0,7);if(m&&(!yr||m.slice(0,4)===yr)){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].pay+=(p.amount||0);}});
+  }
+  var kpi=[{l:(jp?'受注額':'수주액'),v:'¥'+fmt(Math.round(totOrd)),bc:'#3b82f6'},{l:(jp?'入金額':'수금액'),v:'¥'+fmt(Math.round(totPay)),bc:'#10b981'},{l:(jp?'未収金':'미수금'),v:'¥'+fmt(Math.round(outst)),bc:'#ef4444'},{l:(jp?'取引件数':'거래 건수'),v:_cnt+(jp?'件':'건'),bc:'#8b5cf6'},{l:(jp?'初取引':'첫 거래'),v:ds[0]||'-',bc:'#0ea5e9'},{l:(jp?'最近取引':'최근 거래'),v:ds[ds.length-1]||'-',bc:'#0ea5e9'}];
   document.getElementById('caKpi').innerHTML=kpi.map(function(k){return '<div class="esc" style="border-left-color:'+k.bc+'"><div class="l">'+k.l+'</div><div class="v" style="font-size:15px">'+k.v+'</div></div>';}).join('');
-  var mo={};
-  orders.forEach(function(o){var m=String(o.date||'').slice(0,7);if(m){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].ord+=(o.amount||0);mo[m].cnt++;}});
-  paysFac.forEach(function(p){var m=String(p.date||'').slice(0,7);if(m&&(!yr||m.slice(0,4)===yr)){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].pay+=(p.amount||0);}});
   var mks=Object.keys(mo).sort().reverse();
   document.getElementById('caMonthHead').innerHTML='<tr><th>'+(jp?'年月':'연월')+'</th><th class="num">'+(jp?'受注':'수주')+'</th><th class="num">'+(jp?'入金':'수금')+'</th><th class="num">'+(jp?'件数':'건수')+'</th></tr>';
   document.getElementById('caMonthBody').innerHTML=mks.map(function(m){return '<tr class="clk" onclick="openDrill({facility:\''+_dq(fac)+'\',ym:\''+m+'\',title:\''+_dq(fac)+' · '+m+'\'})"><td>'+m+'</td><td class="num">¥'+fmt(Math.round(mo[m].ord))+'</td><td class="num">¥'+fmt(Math.round(mo[m].pay))+'</td><td class="num">'+mo[m].cnt+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:14px">-</td></tr>';
@@ -6455,7 +6475,31 @@ var _ctDetails={};
 
 var _ctData=null;
 
+function _buildCtFromSales(){
+  if(!_consolSales) return null;
+  var y=String(new Date().getFullYear()), thisM=y+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  var pAmt={},pQty={},pCnt={},fAmt={},details={},focus={},totA=0,totM=0;
+  function fk(p){ var s=(p||'').toLowerCase(); if(/tightan\s*cartridge/.test(s))return 'Tightan Cartridge'; if(/oligiokiss\s*tip/.test(s))return 'OligioKiss Tip'; return null; }
+  _consolSales.forEach(function(x){
+    if(_isCommRow(x)||x.cat!=='소모품') return;
+    var recog=x.recog||''; if(recog.slice(0,4)!==y) return;
+    var amt=(x.net!=null?x.net:x.total)||0, prod=x.prod2||x.product||'-', fac=x.client||'-';
+    pAmt[prod]=(pAmt[prod]||0)+amt; pQty[prod]=(pQty[prod]||0)+(x.qty||0); pCnt[prod]=(pCnt[prod]||0)+1;
+    fAmt[fac]=(fAmt[fac]||0)+amt; totA+=amt; if(recog.slice(0,7)===thisM)totM+=amt;
+    (details[prod]=details[prod]||[]).push({date:recog,facility:fac,amount:amt,qty:x.qty||0});
+    var k=fk(x.product);
+    if(k){ var f=focus[k]=focus[k]||{monthly:[0,0,0,0,0,0,0,0,0,0,0,0],totalAmount:0,totalQty:0,count:0};
+      var mi=parseInt(recog.slice(5,7),10)-1; if(mi>=0&&mi<12)f.monthly[mi]+=amt; f.totalAmount+=amt; f.totalQty+=(x.qty||0); f.count++; }
+  });
+  var pr=Object.keys(pAmt).map(function(k){return {product:k,amount:pAmt[k],qty:pQty[k],count:pCnt[k]};}).sort(function(a,b){return b.amount-a.amount;});
+  var fr=Object.keys(fAmt).map(function(k){return {facility:k,amount:fAmt[k],count:0};}).sort(function(a,b){return b.amount-a.amount;});
+  for(var d in details) details[d].sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  return {totalAnnual:totA,totalThisMonth:totM,topProduct:pr[0]?pr[0].product:'-',topFacility:fr[0]?fr[0].facility:'-',
+    productRank:pr,facilityRank:fr,focusData:focus,productDetails:details};
+}
 function loadConsumableTrend(){
+
+  if(!_consolSales){ loadConsolSales(function(){ loadConsumableTrend(); }); return; }
 
   if(_ctData){renderConsumableTrend(_ctData);return;}
 
@@ -6467,7 +6511,7 @@ function loadConsumableTrend(){
 
     if(!d){document.getElementById('ctLoader').innerHTML='⚠️ '+(lang==='jp'?'読み込み失敗':'로드 실패');return;}
 
-    _ctData=d.consumableTrend||d;
+    _ctData=_buildCtFromSales()||d.consumableTrend||d;
 
     document.getElementById('ctLoader').style.display='none';
 
