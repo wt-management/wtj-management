@@ -612,7 +612,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-item" onclick="showPage('orders-list')"><span class="nav-icon">📋</span><span id="navOrdersList">수주 현황</span></div>
+    
 
 
 
@@ -636,7 +636,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
 
 
-    <div class="nav-item" onclick="showPage('payments-list')"><span class="nav-icon">💰</span><span id="navPayList">입금 현황</span></div>
+    
 
 
 
@@ -2287,129 +2287,10 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 
         <div class="form-title" id="euTitle">📤 엑셀 업로드</div>
 
-        <div class="form-sub" id="euSub">매출현황 엑셀 파일을 업로드하여 수주/입금 데이터를 동기화합니다</div>
+        <div class="form-sub" id="euSub">매출일보(일일현황보고서 ③시트) 엑셀을 올리면 매출·수금·미수가 갱신됩니다.</div>
 
-
-
-        <!-- 파일 선택 -->
-
-        <div style="border:2px dashed #e2e8f0;border-radius:12px;padding:32px;text-align:center;margin:20px 0;cursor:pointer;transition:border-color .2s" id="dropZone" onclick="document.getElementById('excelFile').click()" ondragover="event.preventDefault();this.style.borderColor='#3b82f6'" ondragleave="this.style.borderColor='#e2e8f0'" ondrop="handleDrop(event)">
-
-          <div style="font-size:36px;margin-bottom:8px">📂</div>
-
-          <div style="font-weight:600;color:#1e293b;margin-bottom:4px" id="euDropLabel">파일을 드래그하거나 클릭해서 선택</div>
-
-          <div style="font-size:12px;color:#94a3b8">.xlsx 파일만 지원</div>
-
-          <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="handleFileSelect(this)">
-
-        </div>
-
-
-
-        <!-- 필터 -->
-
-        <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:12px;align-items:center;margin-bottom:16px" id="euFilters" style="display:none">
-
-          <div>
-
-            <label id="euLblYear" style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">연도</label>
-
-            <select id="euYear" class="form-input" style="width:100px" onchange="applyFilter()">
-
-              <option value="">전체</option>
-
-              <option value="2026" selected>2026</option>
-
-              <option value="2025">2025</option>
-
-              <option value="2024">2024</option>
-
-              <option value="2023">2023</option>
-
-            </select>
-
-          </div>
-
-          <div>
-
-            <label id="euLblMonth" style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">월</label>
-
-            <select id="euMonth" class="form-input" style="width:80px" onchange="applyFilter()">
-
-              <option value="">전체</option>
-
-              <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
-
-              <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
-
-              <option value="07">7월</option><option value="08">8월</option><option value="09">9월</option>
-
-              <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-
-            </select>
-
-          </div>
-
-          <div>
-
-            <label id="euLblType" style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px">구분</label>
-
-            <select id="euType" class="form-input" style="width:100px" onchange="applyFilter()">
-
-              <option value="orders">수주</option>
-
-              <option value="payments">입금</option>
-
-            </select>
-
-          </div>
-
-          <div style="text-align:right;align-self:flex-end">
-
-            <span id="euCount" style="font-size:13px;color:#64748b"></span>
-
-          </div>
-
-        </div>
-
-
-
-        <!-- 미리보기 테이블 -->
-
-        <div id="euPreview" style="display:none">
-
-          <div style="overflow-x:auto;max-height:400px;border:1px solid #e2e8f0;border-radius:8px">
-
-            <table class="data-table" style="width:100%;font-size:12px">
-
-              <thead id="euPreviewHead"></thead>
-
-              <tbody id="euPreviewBody"></tbody>
-
-            </table>
-
-          </div>
-
-          <!-- 요약 -->
-
-          <div id="euSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px"></div>
-
-          <!-- 업로드 버튼 -->
-
-          <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end">
-
-            <button class="btn btn-secondary" onclick="resetUpload()">초기화</button>
-
-            <button class="btn btn-primary" id="btnUpload" onclick="submitUpload()">구글 시트에 저장</button>
-
-          </div>
-
-          <div class="alert alert-success" id="euSuccess" style="margin-top:12px"></div>
-
-          <div class="alert alert-error" id="euError" style="margin-top:12px"></div>
-          <div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">
-            <div class="form-title">📒 매출일보 갱신 <span style="font-size:12px;font-weight:500;color:#0d9488">(자금일보 · 연결매출)</span></div>
+        <div style="margin-top:12px">
+            <div class="form-title">📒 매출일보 업로드</div>
             <div class="form-sub">「③매출일보」 시트가 있는 엑셀(일일현황보고서)을 올리면 매출일보 데이터가 갱신됩니다. 기준: 매출인식일(매출기준)·세전 매출액·수수료 제외·미선적 미승인기기 제외.</div>
             <div id="finDrop" onclick="document.getElementById('finFile').click()" ondragover="event.preventDefault();this.style.borderColor='#0d9488'" ondragleave="this.style.borderColor='#5eead4'" ondrop="handleFinDrop(event)" style="border:2px dashed #5eead4;background:#f0fdfa;border-radius:12px;padding:28px;text-align:center;cursor:pointer;margin:16px 0">
               <div style="font-size:32px">📒</div>
