@@ -5292,6 +5292,23 @@ function renderPayments(data){ window._lastPaysView=data;
 // ─── Outstanding (미수금) ────────────────────────────────────
 
 var _osData=null;
+function _buildOsFromSales(){
+  if(!_consolSales) return null;
+  var today=new Date(), rows=[], facMap={};
+  _consolSales.forEach(function(x){
+    if(_isCommRow(x)) return;
+    var out=(x.total||0)-((x.collections||[]).reduce(function(a,c){return a+(c.adv?0:(c.amount||0));},0));
+    if(out<1) return;
+    var od=x.recog||x.date||'';
+    var el=0; try{ el=Math.floor((today-new Date(od))/864e5); }catch(e){}
+    rows.push({orderDate:od, facility:x.client||'-', clinic:'', product:x.product||'', category:x.cat||'', qty:x.qty||1,
+      orderAmount:x.total||0, paidAmount:(x.total||0)-out, outstanding:out, elapsed:el});
+    var f=x.client||'-'; if(!facMap[f])facMap[f]={facility:f,count:0,outstanding:0}; facMap[f].count++; facMap[f].outstanding+=out;
+  });
+  rows.sort(function(a,b){return b.elapsed-a.elapsed;});
+  var fr=Object.keys(facMap).map(function(k){return facMap[k];}).sort(function(a,b){return b.outstanding-a.outstanding;});
+  return {rows:rows,facilityRank:fr,totalOutstanding:rows.reduce(function(s,r){return s+r.outstanding;},0),totalCount:rows.length,facilityCount:fr.length};
+}
 
 function _caKrw(j){ return (_jpyRate>0)?' ('+fmtKRW(j*_jpyRate/100)+')':''; }
 var _caInit=false;
@@ -5352,6 +5369,8 @@ function renderCaDetail(fac){
 
 function loadOutstandingPage(){
 
+  if(!_consolSales){ loadConsolSales(function(){ loadOutstandingPage(); }); return; }
+
   document.getElementById('outstandingPageLoader').style.display='block';
 
   document.getElementById('outstandingPageContent').style.display='none';
@@ -5360,7 +5379,7 @@ function loadOutstandingPage(){
 
     if(!d){document.getElementById('outstandingPageLoader').innerHTML='⚠️ '+(lang==='jp'?'読み込み失敗':'로드 실패');return;}
 
-    _osData=_wtjOutstandingWithManual(d.outstanding||d);
+    _osData=_buildOsFromSales()||_wtjOutstandingWithManual(d.outstanding||d);
 
     document.getElementById('outstandingPageLoader').style.display='none';
 
