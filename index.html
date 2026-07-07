@@ -4392,6 +4392,18 @@ function consolCalc(year){
   });
   return {monthly:m,prevMonthly:pm,total:tot,prevTotal:prev,prevCum:prevCum};
 }
+function consolByCat(year){
+  var mach=[],cons=[]; for(var i=0;i<12;i++){mach.push(0);cons.push(0);}
+  if(!_consolSales) return {mach:mach,cons:cons};
+  _consolSales.forEach(function(x){
+    if(_isCommRow(x)) return;
+    var d=('recog' in x?(x.recog||''):(x.date||'')); if(d.slice(0,4)!==String(year)) return;
+    var mi=parseInt(d.slice(5,7),10)-1; if(mi<0||mi>11) return;
+    var amt=(x.net!=null?x.net:x.total)||0;
+    if(x.cat==='기기') mach[mi]+=amt; else cons[mi]+=amt;
+  });
+  return {mach:mach,cons:cons};
+}
 function consolPayCalc(year){
   var m=[]; for(var i=0;i<12;i++)m.push(0);
   var py=String(Number(year)-1), nowM=(new Date()).getMonth()+1, tot=0, prevCum=0;
@@ -4649,9 +4661,10 @@ function renderDashboard(d){
 
   // 제품/소모품 스택 + 비중% 인라인 표시
 
-  var mVals=mkeys.map(function(k){return Math.round((d.monthlyMachine[k]||0)/1e6*10)/10;});
+  var _cbc=_consolSales?consolByCat(curYear):null;
+  var mVals=mkeys.map(function(k,i){return Math.round(((_cbc?_cbc.mach[i]:(d.monthlyMachine[k]||0)))/1e6*10)/10;});
 
-  var cVals=mkeys.map(function(k){return Math.round((d.monthlyConsumable[k]||0)/1e6*10)/10;});
+  var cVals=mkeys.map(function(k,i){return Math.round(((_cbc?_cbc.cons[i]:(d.monthlyConsumable[k]||0)))/1e6*10)/10;});
 
   var stackedPctPlugin={id:'stackedPct',afterDatasetsDraw:function(chart){
 
