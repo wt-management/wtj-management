@@ -7542,12 +7542,13 @@ function renderDaily(){
   var kind=_day;
   var yr=$('fxDYear').value, cat=$('fxDCat').value, only=$('fxDOnly').checked, q=($('fxDSearch').value||'').toLowerCase();
   var rows=DB[kind].filter(function(x){
-    if(yr&&('recog' in x?(x.recog||''):(x.date||'')).slice(0,4)!==yr)return false;
+    if(yr&&!only&&!_agf&&('recog' in x?(x.recog||''):(x.date||'')).slice(0,4)!==yr)return false;
     if(cat&&x.cat!==cat)return false;
+    if((only||_agf)&&_isCommRow(x))return false;
     if(only&&outst(x)<1)return false;
     if(_agf){
       if(outst(x)<1)return false;
-      var dd=Math.floor((new Date(tdy())-new Date(x.date))/864e5);
+      var dd=Math.floor((new Date(tdy())-new Date(x.recog||x.date))/864e5);
       if(_agf==='12'&&dd<=365)return false;
       if(_agf==='6'&&(dd<=180||dd>365))return false;
       if(_agf==='3'&&(dd<=90||dd>180))return false;
@@ -7579,9 +7580,9 @@ function renderDaily(){
         '<td><span class="fx-badge '+(x.cat==='기기'?'fb-info':x.cat==='소모품'?'fb-ok':'fb-gray')+'">'+esc(x.cat||'-')+'</span></td>'+
         '<td class="num">'+(x.qty||1)+'</td><td class="num">'+fmt(x.total)+'</td><td class="num" style="color:#059669">'+fmt(paid)+'</td>'+
         '<td class="num" style="font-weight:800;color:'+(o>=1?'#dc2626':'#cbd5e1')+'">'+fmt(o)+'</td>'+
-        '<td>'+(o>=1?agingOf(x.date):'<span class="fx-badge fb-ok">완료</span>')+'</td><td>'+(x.hqRemit?'〇':'')+'</td>'+'<td onclick="event.stopPropagation()">'+(o>=1?'<button class="fx-btn sm green" onclick="FIN.quickCollect(\''+x.id+'\')">＋'+(kind==='sales'?'수금':'지불')+'</button>':'')+'</td></tr>';
+        '<td>'+(o>=1?agingOf(x.recog||x.date):'<span class="fx-badge fb-ok">완료</span>')+'</td><td>'+(x.hqRemit?'〇':'')+'</td>'+'<td onclick="event.stopPropagation()">'+(o>=1?'<button class="fx-btn sm green" onclick="FIN.quickCollect(\''+x.id+'\')">＋'+(kind==='sales'?'수금':'지불')+'</button>':'')+'</td></tr>';
     }).join('');
-  $('fxDFoot').textContent='표시 '+Math.min(rows.length,400)+' / '+rows.length+'건'+(rows.length>400?' (상위 400건 — 필터로 좁혀주세요)':'');
+  $('fxDFoot').textContent='표시 '+Math.min(rows.length,400)+' / '+rows.length+'건'+((only||_agf)?jt(' · 미수는 전 기간 조회(연도무시)',' · 未収は全期間'):'')+(rows.length>400?' (상위 400건 — 필터로 좁혀주세요)':'');
 }
 function openDaily(id){
   var kind=_day, isNew=!id;
