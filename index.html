@@ -2285,6 +2285,8 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
       <div id="esDrillTitle" style="font-size:15px;font-weight:800;color:#0f172a"></div>
       <button onclick="closeEsDrill()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button>
     </div>
+    <div id="esDrillSummary" style="padding:16px 22px 4px"></div>
+    <div style="padding:2px 22px 0;font-size:12px;font-weight:800;color:#64748b">📋 상세 내역</div>
     <div style="overflow-x:auto;padding:6px 22px 16px"><table style="width:100%"><thead id="esDrillHead"></thead><tbody id="esDrillBody"></tbody></table></div>
     <div id="esDrillFoot" style="padding:13px 22px;border-top:1px solid #eef2f7;font-size:13px;font-weight:700;color:#0f172a;background:#f8fafc;position:sticky;bottom:0"></div>
   </div>
@@ -4210,6 +4212,18 @@ function openDrill(opts){
     return true;
   }).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));});
   var tot=0; rows.forEach(function(o){tot+=o.amount||0;});
+  var _sQ=0,_sOut=0,_sOutC=0,_bM={},_bF={},_bP={},_agy=0;
+  rows.forEach(function(o){var a=o.amount||0,pd=paid[o.stableId]||0,q=o.qty||0;_sQ+=q;var out=Math.max(0,a-pd);if(out>0){_sOut+=out;_sOutC++;}var m=String(o.date||'').slice(0,7);if(m){_bM[m]=_bM[m]||{a:0,c:0};_bM[m].a+=a;_bM[m].c++;}var f=o.facility||'-';_bF[f]=(_bF[f]||0)+a;var p=o.product||'-';_bP[p]=(_bP[p]||0)+a;var fu=String(f).toUpperCase();if(fu==='JK JAPAN'||fu==='INFIX')_agy+=a;});
+  var _avg=_sQ>0?tot/_sQ:0;
+  function _kc(l,v,s,c){return '<div style="background:#f8fafc;border:1px solid #eef2f7;border-radius:10px;padding:10px 12px"><div style="font-size:10px;color:#94a3b8;margin-bottom:3px">'+l+'</div><div style="font-size:16px;font-weight:800;color:'+(c||'#0f172a')+'">'+v+'</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">'+(s||'&nbsp;')+'</div></div>';}
+  var _kpis=_kc((jp?'件数':'건수'),rows.length+(jp?'件':'건'),'')+_kc((jp?'数量':'수량'),fmt(_sQ),'')+_kc((jp?'総額':'총 금액'),_amt(tot),'')+_kc((jp?'平均単価':'평균 단가'),_amt(Math.round(_avg)),'')+_kc((jp?'未収':'미수'),_amt(_sOut),_sOutC+(jp?'件 未入金':'건 미입금'),_sOut>0?'#dc2626':'#16a34a');
+  var _mk=Object.keys(_bM).sort(),_mmax=1;_mk.forEach(function(k){if(_bM[k].a>_mmax)_mmax=_bM[k].a;});
+  var _mHtml=_mk.map(function(k){var w=Math.round(_bM[k].a/_mmax*100);return '<div style="display:flex;align-items:center;gap:8px;font-size:11px;margin:4px 0"><span style="width:52px;color:#64748b">'+k+'</span><div style="flex:1;background:#f1f5f9;border-radius:3px;height:8px"><div style="width:'+w+'%;height:100%;background:#6366f1;border-radius:3px"></div></div><span style="width:92px;text-align:right;font-weight:600">'+_amt(_bM[k].a)+'</span><span style="width:34px;text-align:right;color:#94a3b8">'+_bM[k].c+(jp?'件':'건')+'</span></div>';}).join('');
+  var _byFac=(opts.product!=null||opts.ym!=null),_grp=_byFac?_bF:_bP,_gttl=_byFac?(jp?'上位 取引先':'상위 거래처'):(jp?'上位 製品':'상위 제품');
+  var _gk=Object.keys(_grp).sort(function(a,b){return _grp[b]-_grp[a];}).slice(0,6),_gmax=_gk.length?_grp[_gk[0]]:1;
+  var _gHtml=_gk.map(function(k){var w=Math.round(_grp[k]/_gmax*100);return '<div style="display:flex;align-items:center;gap:8px;font-size:11px;margin:4px 0"><span style="width:150px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(k)+'</span><div style="flex:1;background:#f1f5f9;border-radius:3px;height:8px"><div style="width:'+w+'%;height:100%;background:#10b981;border-radius:3px"></div></div><span style="width:92px;text-align:right;font-weight:600">'+_amt(_grp[k])+'</span></div>';}).join('');
+  var _agyTxt=(_agy>0&&tot>0)?'<div style="font-size:11px;color:#94a3b8;margin-top:8px">'+(jp?'代理店(JK/INFIX)':'대리점(JK/INFIX)')+' '+Math.round(_agy/tot*100)+'% · '+_amt(_agy)+'</div>':'';
+  var _sumEl=document.getElementById('esDrillSummary'); if(_sumEl)_sumEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">'+_kpis+'</div><div style="display:grid;grid-template-columns:1.1fr 1fr;gap:22px">'+'<div><div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:6px">'+(jp?'月別 分布':'월별 분포')+'</div>'+(_mHtml||'<div style="color:#94a3b8;font-size:11px">-</div>')+'</div>'+'<div><div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:6px">'+_gttl+'</div>'+(_gHtml||'<div style="color:#94a3b8;font-size:11px">-</div>')+_agyTxt+'</div></div>';
   document.getElementById('esDrillTitle').textContent=(opts.title||'')+'  ('+rows.length+(jp?'件':'건')+')';
   var nw='white-space:nowrap';
   document.getElementById('esDrillHead').innerHTML='<tr><th style="text-align:left;'+nw+'">'+(jp?'日付':'날짜')+'</th><th style="text-align:left;'+nw+'">'+(jp?'取引先':'거래처')+'</th><th style="text-align:left;'+nw+'">'+(jp?'クリニック':'클리닉')+'</th><th style="text-align:left;'+nw+'">'+(jp?'商品':'제품')+'</th><th style="text-align:center;'+nw+'">'+(jp?'区分':'구분')+'</th><th style="text-align:right;'+nw+'">'+(jp?'数量':'수량')+'</th><th style="text-align:right;'+nw+'">'+(jp?'金額':'금액')+'</th><th style="text-align:center;'+nw+'">'+(jp?'入金':'입금')+'</th></tr>';
