@@ -617,11 +617,10 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 
 
-    <div class="nav-item active" onclick="showPage('exec-summary')"><span class="nav-icon">📈</span><span id="navExec">임원 요약</span></div>
+    <div class="nav-item active" onclick="showPage('exec-summary')"><span class="nav-icon">📊</span><span id="navExec">대시보드</span></div>
 
 
 
-    <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span><span id="navDash">대시보드</span></div>
 
 
 
@@ -2257,7 +2256,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 <div class="page" id="page-exec-summary">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-    <div style="font-size:18px;font-weight:700;color:#0f172a;white-space:nowrap" id="esPageTitle">📈 임원 요약</div>
+    <div style="font-size:18px;font-weight:700;color:#0f172a;white-space:nowrap" id="esPageTitle">📊 대시보드</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <span style="font-size:12px;color:#64748b;white-space:nowrap">📅 기간</span>
       <select id="esYear" class="filter-input" style="width:90px" onchange="renderExecSummary()"><option value="2026">2026년</option><option value="2025">2025년</option></select>
@@ -2272,6 +2271,9 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   <div class="essec"><div class="esst">📦 품목별 실적 <span style="font-weight:400;color:#94a3b8;font-size:11px">(제품 / 소모품 · 전년 대비 · 클릭 시 내역)</span></div><div id="esProd" class="esdual"></div></div>
   <div class="essec"><div class="esst">🏥 거래처 · 클리닉</div><div id="esConc" style="margin-bottom:12px"></div><div id="esClinic" class="esdual"></div></div>
   <div class="essec"><div class="esst">⚠️ 미수 현황</div><div id="esAge"></div></div>
+  <div class="essec"><div class="esst">📈 월별 매출 실적 vs 목표 · 달성률</div><div style="height:280px"><canvas id="esAchChart"></canvas></div></div>
+  <div class="essec"><div class="esst">🔀 제품 / 소모품 월별 추이 · 비중</div><div style="height:280px"><canvas id="esCatChart"></canvas></div></div>
+  <div class="essec"><div class="esst">📋 월별 목표 · 실적 · 달성률</div><div id="esMonTable" style="overflow-x:auto"></div></div>
 </div>
 
     <div id="esDrill" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1100;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeEsDrill()">
@@ -2581,7 +2583,7 @@ function _applyLoginUI() {
 
 
 var MENU_ROLES = {
-  'dashboard':['sales','finance'], 'exec-summary':['finance'], 'budget-actual':['sales','finance'],
+  'dashboard':['sales','finance'], 'exec-summary':['sales','finance'], 'budget-actual':['sales','finance'],
   'consumable-trend':['sales'], 'orders-list':['sales'], 'order-input':['sales'],
   'customer-analysis':['sales'], 'inventory':['sales'],
   'payments-list':['finance'], 'payment-input':['finance'], 'outstanding':['finance'],
@@ -3489,7 +3491,7 @@ var T = {
 
     navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',
 
-    navDash:'대시보드',navExec:'임원 요약',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
+    navDash:'대시보드',navExec:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
     ordersTableTitle:'수주 현황',paymentsTableTitle:'입금 현황',baTableTitle:'목표 vs 실적 ('+new Date().getFullYear()+'년도)',
 
@@ -3611,7 +3613,7 @@ var T = {
 
     navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',
 
-    navDash:'ダッシュボード',navExec:'役員サマリー',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
+    navDash:'ダッシュボード',navExec:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
     ordersTableTitle:'受注一覧',paymentsTableTitle:'入金一覧',baTableTitle:'予実管理 ('+new Date().getFullYear()+'年度)',
 
@@ -3871,6 +3873,7 @@ var _prevPage = null;
 
 
 function showPage(id, fromHistory){
+  if(id==='dashboard')id='exec-summary';
 
   _closeSidebar();
 
@@ -4052,6 +4055,47 @@ function _pct(v){ return (v===null||v===undefined)?'-':((v>=0?'+':'')+v.toFixed(
 function _amt(j){ return '¥'+fmt(Math.round(j||0)); }
 function _bar(val,maxAbs,col){ var w=maxAbs>0?Math.min(100,Math.abs(val)/maxAbs*100):0; return '<div class="esbar"><div style="height:100%;width:'+w+'%;background:'+col+'"></div></div>'; }
 function loadExecSummary(){ if(_data){renderExecSummary();}else{loadData(renderExecSummary);} }
+function _esTrend(year){
+  if(typeof Chart==='undefined')return;
+  var jp=(lang==='jp');
+  var mkeys=['01','02','03','04','05','06','07','08','09','10','11','12'].map(function(m){return year+'-'+m;});
+  var mlabels=(typeof mLabels==='function')?mLabels():mkeys.map(function(k){return parseInt(k.split('-')[1],10)+(jp?'月':'월');});
+  var dd=(_data&&_data.dashboard)||{};
+  var mon=_consolSales?consolCalc(year).monthly:null;
+  var cbc=_consolSales?consolByCat(year):null;
+  function mt(k){return (dd.monthlyTarget&&dd.monthlyTarget[k])||0;}
+  var payVals=mkeys.map(function(k,i){return Math.round(((mon?mon[i]:0))/1e6*10)/10;});
+  var tgtVals=mkeys.map(function(k){return Math.round(mt(k)/1e6*10)/10;});
+  var rateVals=mkeys.map(function(k,i){var p=mon?mon[i]:0,tt=mt(k);return tt>0?parseFloat((p/tt*100).toFixed(1)):null;});
+  var mVals=mkeys.map(function(k,i){return Math.round(((cbc?cbc.mach[i]:0))/1e6*10)/10;});
+  var cVals=mkeys.map(function(k,i){return Math.round(((cbc?cbc.cons[i]:0))/1e6*10)/10;});
+  var A=document.getElementById('esAchChart');
+  if(A){ if(window._esAchChart)window._esAchChart.destroy();
+    window._esAchChart=new Chart(A,{type:'bar',data:{labels:mlabels,datasets:[
+      {label:jp?'売上実績(百万円)':'매출 실적(백만엔)',data:payVals,backgroundColor:'rgba(99,102,241,0.75)',borderRadius:5,yAxisID:'y'},
+      {label:jp?'目標(百万円)':'목표(백만엔)',data:tgtVals,type:'line',borderColor:'#f59e0b',backgroundColor:'transparent',borderWidth:2,borderDash:[6,3],pointRadius:3,yAxisID:'y'},
+      {label:jp?'達成率(%)':'달성률(%)',data:rateVals,type:'line',borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#8b5cf6',fill:false,yAxisID:'y2'}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+(ctx.parsed.y!==null?ctx.parsed.y+(ctx.datasetIndex===2?'%':'M¥'):'-');}}}},
+      scales:{y:{position:'left',ticks:{callback:function(v){return v+'M¥';}},grid:{color:'#f1f5f9'}},y2:{position:'right',min:0,ticks:{callback:function(v){return v+'%';}},grid:{drawOnChartArea:false}}}
+    }});
+  }
+  var C=document.getElementById('esCatChart');
+  if(C){ if(window._esCatChart)window._esCatChart.destroy();
+    window._esCatChart=new Chart(C,{type:'bar',data:{labels:mlabels,datasets:[
+      {label:jp?'機器(百万円)':'제품(백만엔)',data:mVals,backgroundColor:'rgba(59,130,246,0.85)',borderRadius:4,stack:'s'},
+      {label:jp?'消耗品(百万円)':'소모품(백만엔)',data:cVals,backgroundColor:'rgba(16,185,129,0.85)',borderRadius:4,stack:'s'}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:function(ctx){var tot=(ctx.chart.data.datasets[0].data[ctx.dataIndex]||0)+(ctx.chart.data.datasets[1].data[ctx.dataIndex]||0);var pct=tot>0?Math.round(ctx.parsed.y/tot*100):0;return ctx.dataset.label+': '+ctx.parsed.y+'M¥ ('+pct+'%)';}}}},
+      scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:function(v){return v+'M¥';}},grid:{color:'#f1f5f9'}}}
+    }});
+  }
+  var TB=document.getElementById('esMonTable');
+  if(TB){
+    var body=mkeys.map(function(k,i){var p=mon?mon[i]:0,tt=mt(k),r=tt>0?(p/tt*100):null;var rc=r==null?'#94a3b8':(r>=100?'#16a34a':r>=80?'#f59e0b':'#ef4444');return '<tr><td>'+mlabels[i]+'</td><td class="num" style="color:#94a3b8">'+_amt(tt)+'</td><td class="num" style="font-weight:700">'+_amt(p)+'</td><td class="num" style="color:'+rc+';font-weight:700">'+(r!=null?r.toFixed(0)+'%':'-')+'</td></tr>';}).join('');
+    TB.innerHTML='<table class="estab"><thead><tr><th>'+(jp?'月':'월')+'</th><th class="num">'+(jp?'目標':'목표')+'</th><th class="num">'+(jp?'売上実績':'매출실적')+'</th><th class="num">'+(jp?'達成率':'달성률')+'</th></tr></thead><tbody>'+body+'</tbody></table>';
+  }
+}
 function renderExecSummary(){
   var _essD=document.getElementById('esConsolStrip'); if(_essD){_essD.innerHTML='';_essD.style.display='none';}
   if(!_consolSales){ loadConsolSales(function(){ if(document.getElementById('page-exec-summary').classList.contains('active'))renderExecSummary(); }); }
@@ -4141,6 +4185,7 @@ function renderExecSummary(){
   ag+='<div class="esdl"><div class="t">📋 '+(jp?'長期未収 TOP':'장기 미수 TOP')+' <span style="font-weight:400;color:#94a3b8;font-size:11px">('+(jp?'クリックで明細':'클릭 시 내역')+')</span></div><table class="estab"><thead><tr><th>'+(jp?'取引先':'거래처')+'</th><th>'+(jp?'クリニック':'클리닉')+'</th><th class="num">'+(jp?'未収':'미수')+'</th><th class="num">'+(jp?'経過':'경과')+'</th></tr></thead><tbody>'+
     longO.map(function(x){return '<tr class="clk" onclick="openExecDrill(\'facility\',\''+_dq(x.o.facility||'')+'\')"><td>'+(x.o.facility||'-')+'</td><td>'+(x.o.clinic||'-')+'</td><td class="num">'+_amt(x.out)+'</td><td class="num" style="color:'+(x.el>=180?'#ef4444':x.el>=90?'#f97316':'#64748b')+';font-weight:700">'+x.el+(jp?'日':'일')+'</td></tr>';}).join('')+'</tbody></table></div>';
   document.getElementById('esAge').innerHTML=ag;
+  try{_esTrend(year);}catch(_e){}
 }
 function _dq(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 function openDrill(opts){
