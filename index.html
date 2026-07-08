@@ -2624,6 +2624,8 @@ function applyMenuRoles(){
 }
 
 async function _bootApp() {
+  var _umPg=document.getElementById('page-user-mgmt'), _ctEl=document.querySelector('.main .content');
+  if(_umPg&&_ctEl&&_umPg.parentElement!==_ctEl) _ctEl.appendChild(_umPg);
   var _nav=(performance.getEntriesByType('navigation')[0]||{}).type;   // reload=새로고침 / navigate=신규진입
   var _sv=sessionStorage.getItem('wtj_cur_page');
   var savedPage=(_nav==='reload' && _sv && document.getElementById('page-'+_sv)) ? _sv : 'dashboard';   // 새로고침=머문 페이지, 신규=대시보드
@@ -5395,7 +5397,7 @@ function renderCaDetail(fac){
 
 function loadOutstandingPage(){
 
-  if(!_consolSales){ loadConsolSales(function(){ loadOutstandingPage(); }); return; }
+  if(!_consolSales&&!window._consolTried){ loadConsolSales(function(s){ window._consolTried=!s; loadOutstandingPage(); }); return; }
 
   document.getElementById('outstandingPageLoader').style.display='block';
 
@@ -6601,7 +6603,7 @@ var _ctData=null;
 
 function _buildCtFromSales(){
   if(!_consolSales) return null;
-  var y=String(new Date().getFullYear()), thisM=y+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  var y=(document.getElementById('ct-year-sel')||{}).value||String(new Date().getFullYear()), thisM=y+'-'+String(new Date().getMonth()+1).padStart(2,'0');
   var pAmt={},pQty={},pCnt={},fAmt={},details={},focus={},totA=0,totM=0;
   function fk(p){ var s=(p||'').toLowerCase(); if(/tightan\s*cartridge/.test(s))return 'Tightan Cartridge'; if(/oligiokiss\s*tip/.test(s))return 'OligioKiss Tip'; return null; }
   _consolSales.forEach(function(x){
@@ -6623,9 +6625,10 @@ function _buildCtFromSales(){
 }
 function loadConsumableTrend(){
 
-  if(!_consolSales){ loadConsolSales(function(){ loadConsumableTrend(); }); return; }
+  if(!_consolSales&&!window._consolTried){ loadConsolSales(function(s){ window._consolTried=!s; loadConsumableTrend(); }); return; }
 
-  if(_ctData){renderConsumableTrend(_ctData);return;}
+  var _ctYr=(document.getElementById('ct-year-sel')||{}).value||'';
+  if(_ctData&&_ctData._yr===_ctYr){renderConsumableTrend(_ctData);return;}
 
   document.getElementById('ctLoader').style.display='block';
 
@@ -6635,7 +6638,7 @@ function loadConsumableTrend(){
 
     if(!d){document.getElementById('ctLoader').innerHTML='⚠️ '+(lang==='jp'?'読み込み失敗':'로드 실패');return;}
 
-    _ctData=_buildCtFromSales()||d.consumableTrend||d;
+    _ctData=_buildCtFromSales()||d.consumableTrend||d; _ctData._yr=_ctYr;
 
     document.getElementById('ctLoader').style.display='none';
 
