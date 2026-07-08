@@ -418,6 +418,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 .esc .l{font-size:11px;color:#64748b;margin-bottom:7px;font-weight:500}.esc .v{font-size:19px;font-weight:700;color:#0f172a;letter-spacing:-.3px}.esc .d{font-size:11px;font-weight:600;margin-top:6px}
 .essec{margin-bottom:22px}.esst{font-size:13px;font-weight:700;color:#334155;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .esdual{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.esdual2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start}
 .esdl{background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:18px}
 .esdl .t{font-size:13px;font-weight:700;margin-bottom:12px}
 .esrow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}
@@ -428,7 +429,7 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 .esrow.clk:hover{background:#f3f6fa}
 .esrow .chev{color:#cbd5e1;font-size:13px;margin-left:2px}
 .estab{width:100%;border-collapse:collapse;font-size:13px}.estab th{text-align:left;color:#94a3b8;font-weight:600;font-size:11px;padding:7px 10px;border-bottom:1px solid #eef2f7}.estab td{padding:9px 10px;border-bottom:1px solid #f4f7fa;color:#1e293b}.estab tr:last-child td{border-bottom:none}.estab tr.clk{cursor:pointer}.estab tr.clk:hover td{background:#f7fafc}.estab .num{text-align:right;white-space:nowrap}.escard{background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:8px 4px}
-@media(max-width:900px){.esk{grid-template-columns:repeat(2,1fr)}.esdual{grid-template-columns:1fr}}
+@media(max-width:900px){.esk{grid-template-columns:repeat(2,1fr)}.esdual{grid-template-columns:1fr}.esdual2{grid-template-columns:1fr}}
 
 /* ═══ 자금일보 (FIN) — .finpage 스코프 ═══ */
 .finpage .fx-kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
@@ -2268,12 +2269,14 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   <div id="esHero"></div>
   <div id="esConsolStrip" class="finpage" style="margin-bottom:14px"></div>
   <div id="esKpi" class="esk"></div>
+  <div class="essec"><div class="esdual2">
+    <div><div class="esst">📈 월별 매출 실적 vs 목표 · 달성률</div><div style="height:240px"><canvas id="esAchChart"></canvas></div></div>
+    <div><div class="esst">🔀 제품/소모품 월별 · 비중</div><div style="height:240px"><canvas id="esCatChart"></canvas></div></div>
+  </div></div>
+  <div class="essec"><div class="esst">📋 월별 · 분기 목표 · 실적 · 달성률</div><div id="esMonTable" style="overflow-x:auto"></div></div>
   <div class="essec"><div class="esst">📦 품목별 실적 <span style="font-weight:400;color:#94a3b8;font-size:11px">(제품 / 소모품 · 전년 대비 · 클릭 시 내역)</span></div><div id="esProd" class="esdual"></div></div>
   <div class="essec"><div class="esst">🏥 거래처 · 클리닉</div><div id="esConc" style="margin-bottom:12px"></div><div id="esClinic" class="esdual"></div></div>
   <div class="essec"><div class="esst">⚠️ 미수 현황</div><div id="esAge"></div></div>
-  <div class="essec"><div class="esst">📈 월별 매출 실적 vs 목표 · 달성률</div><div style="height:280px"><canvas id="esAchChart"></canvas></div></div>
-  <div class="essec"><div class="esst">🔀 제품 / 소모품 월별 추이 · 비중</div><div style="height:280px"><canvas id="esCatChart"></canvas></div></div>
-  <div class="essec"><div class="esst">📋 월별 목표 · 실적 · 달성률</div><div id="esMonTable" style="overflow-x:auto"></div></div>
 </div>
 
     <div id="esDrill" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1100;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeEsDrill()">
@@ -4055,6 +4058,7 @@ function _pct(v){ return (v===null||v===undefined)?'-':((v>=0?'+':'')+v.toFixed(
 function _amt(j){ return '¥'+fmt(Math.round(j||0)); }
 function _bar(val,maxAbs,col){ var w=maxAbs>0?Math.min(100,Math.abs(val)/maxAbs*100):0; return '<div class="esbar"><div style="height:100%;width:'+w+'%;background:'+col+'"></div></div>'; }
 function loadExecSummary(){ if(_data){renderExecSummary();}else{loadData(renderExecSummary);} }
+function _esQToggle(q){var rows=document.querySelectorAll('.esq-'+q);if(!rows.length)return;var hide=rows[0].style.display!=='none';for(var i=0;i<rows.length;i++)rows[i].style.display=hide?'none':'';var c=document.getElementById('esqc-'+q);if(c)c.textContent=hide?'▸':'▾';}
 function _esTrend(year){
   if(typeof Chart==='undefined')return;
   var jp=(lang==='jp');
@@ -4092,8 +4096,13 @@ function _esTrend(year){
   }
   var TB=document.getElementById('esMonTable');
   if(TB){
-    var body=mkeys.map(function(k,i){var p=mon?mon[i]:0,tt=mt(k),r=tt>0?(p/tt*100):null;var rc=r==null?'#94a3b8':(r>=100?'#16a34a':r>=80?'#f59e0b':'#ef4444');return '<tr><td>'+mlabels[i]+'</td><td class="num" style="color:#94a3b8">'+_amt(tt)+'</td><td class="num" style="font-weight:700">'+_amt(p)+'</td><td class="num" style="color:'+rc+';font-weight:700">'+(r!=null?r.toFixed(0)+'%':'-')+'</td></tr>';}).join('');
-    TB.innerHTML='<table class="estab"><thead><tr><th>'+(jp?'月':'월')+'</th><th class="num">'+(jp?'目標':'목표')+'</th><th class="num">'+(jp?'売上実績':'매출실적')+'</th><th class="num">'+(jp?'達成率':'달성률')+'</th></tr></thead><tbody>'+body+'</tbody></table>';
+    var curM=(new Date()).getMonth()+1; function _rcQ(r){return r==null?'#94a3b8':(r>=100?'#16a34a':r>=80?'#f59e0b':'#ef4444');} var body='';
+    for(var _q=1;_q<=4;_q++){ var _qms=[_q*3-2,_q*3-1,_q*3],_qt=0,_qp=0,_z; for(_z=0;_z<3;_z++){var _mo=_qms[_z],_kk=year+'-'+('0'+_mo).slice(-2);_qt+=mt(_kk);_qp+=(mon?mon[_mo-1]:0);} var _qr=_qt>0?(_qp/_qt*100):null,_past=(_q*3)<curM,_disp=_past?'none':'',_car=_past?'▸':'▾';
+      body+='<tr class="esqh" onclick="_esQToggle('+_q+')" style="cursor:pointer;background:#eef2f7"><td style="font-weight:800"><span id="esqc-'+_q+'" style="display:inline-block;width:15px;color:#64748b">'+_car+'</span>Q'+_q+' ('+(_q*3-2)+'~'+(_q*3)+(jp?'月':'월')+')</td><td class="num" style="font-weight:800;color:#475569">'+_amt(_qt)+'</td><td class="num" style="font-weight:800">'+_amt(_qp)+'</td><td class="num" style="font-weight:800;color:'+_rcQ(_qr)+'">'+(_qr!=null?_qr.toFixed(0)+'%':'-')+'</td></tr>';
+      for(_z=0;_z<3;_z++){var _mo2=_qms[_z],_k2=year+'-'+('0'+_mo2).slice(-2),_p2=mon?mon[_mo2-1]:0,_t2=mt(_k2),_r2=_t2>0?(_p2/_t2*100):null;
+        body+='<tr class="esq-'+_q+'" style="display:'+_disp+'"><td style="padding-left:24px;color:#64748b">'+mlabels[_mo2-1]+'</td><td class="num" style="color:#94a3b8">'+_amt(_t2)+'</td><td class="num" style="font-weight:700">'+_amt(_p2)+'</td><td class="num" style="color:'+_rcQ(_r2)+';font-weight:700">'+(_r2!=null?_r2.toFixed(0)+'%':'-')+'</td></tr>';}
+    }
+    TB.innerHTML='<table class="estab"><thead><tr><th>'+(jp?'月/四半期':'월/분기')+'</th><th class="num">'+(jp?'目標':'목표')+'</th><th class="num">'+(jp?'売上実績':'매출실적')+'</th><th class="num">'+(jp?'達成率':'달성률')+'</th></tr></thead><tbody>'+body+'</tbody></table>';
   }
 }
 function renderExecSummary(){
