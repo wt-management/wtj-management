@@ -3024,10 +3024,19 @@ function getProductOrdersLocal(product, year, maxMonth) {
 
   var MAIN_CONSUMABLES = ['Tightan Cartridge','OligioKiss Tip','OligioX Tip','OligioKiss Cartridge','Cooling Spray','Oligio Tip'];
 
-  var orders = (_data && _data.orders) || [];
-
   var mm = maxMonth ? String(maxMonth).padStart(2,'0') : '12';
 
+  if (_consolSales) {
+    return _consolSales.filter(function(x){
+      if(_isCommRow(x)) return false;
+      var d=x.date||''; if(!d.startsWith(String(year))) return false;
+      if(d.substring(5,7)>mm) return false;
+      return (x.prod2||x.product||'-')===product;
+    }).map(function(x){
+      return {date:x.date, facility:x.client, product:x.product||x.prod2, qty:x.qty||0, amount:(x.net!=null?x.net:x.total)||0};
+    }).sort(function(a,b){ return (a.date||'')<(b.date||'')?-1:1; });
+  }
+  var orders = (_data && _data.orders) || [];
   return orders.filter(function(o){
 
     if (!o.date || !o.date.startsWith(year)) return false;
@@ -3191,13 +3200,28 @@ function switchRankTab(tab){
 
 
 
+function _buildRankFromSales(year,fromM,toM){
+  var mach={},cons={};
+  function add(o,name,amt,qty){ if(!o[name])o[name]={amount:0,qty:0,count:0}; o[name].amount+=amt; o[name].qty+=qty; o[name].count++; }
+  (_consolSales||[]).forEach(function(x){
+    if(_isCommRow(x)) return;
+    var d=x.date||''; if(d.slice(0,4)!==String(year)) return;   // 제품 수주 상세 = 수주일(발주일) 기준
+    var m=d.slice(5,7); if(m<fromM||m>toM) return;
+    var amt=(x.net!=null?x.net:x.total)||0, name=x.prod2||x.product||'-';
+    if(x.cat==='기기') add(mach,name,amt,x.qty||0); else add(cons,name,amt,x.qty||0);
+  });
+  function rk(o){ return Object.keys(o).map(function(k){return {product:k,amount:o[k].amount,qty:o[k].qty,count:o[k].count};}).sort(function(a,b){return b.amount-a.amount;}); }
+  return {machineRank:rk(mach),consumableRank:rk(cons)};
+}
 function renderRanking(d, tab){
 
   var isMon = tab==='month';
 
-  var mr  = ((isMon ? d.machineRankMonth    : d.machineRank)||[]).filter(function(r){return r.amount>0;});
+  var _rfrom=isMon?_dmToM():_dmFromM(), _rto=_dmToM(), _ry=d.curYear||String(new Date().getFullYear());
+  var _rk=_consolSales?_buildRankFromSales(_ry,_rfrom,_rto):null;
+  var mr  = (_rk?_rk.machineRank:((isMon ? d.machineRankMonth : d.machineRank)||[])).filter(function(r){return r.amount>0;});
 
-  var cr  = ((isMon ? d.consumableRankMonth : d.consumableRank)||[]).filter(function(r){return r.amount>0;});
+  var cr  = (_rk?_rk.consumableRank:((isMon ? d.consumableRankMonth : d.consumableRank)||[])).filter(function(r){return r.amount>0;});
 
 
 
@@ -4170,13 +4194,20 @@ function showDetailModal(type, year, fromM, toM, label) {
 
   var isP = type === 'payments';
 
-  var data = (isP ? allPayments : allOrders).filter(function(r) {
-
-    var d = r.date || '';
-
-    return d.slice(0,4) === String(year) && d.slice(5,7) >= fromM && d.slice(5,7) <= toM;
-
-  }).sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1 : 1; });
+  var data;
+  if (!isP && _consolSales) {
+    data = _consolSales.filter(function(x){
+      if(_isCommRow(x)) return false;
+      var d=x.date||'';
+      return d.slice(0,4)===String(year) && d.slice(5,7)>=fromM && d.slice(5,7)<=toM;
+    }).map(function(x){ return {date:x.date, description:x.client, orderRef:x.sn, amount:(x.net!=null?x.net:x.total)||0}; })
+     .sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1 : 1; });
+  } else {
+    data = (isP ? allPayments : allOrders).filter(function(r) {
+      var d = r.date || '';
+      return d.slice(0,4) === String(year) && d.slice(5,7) >= fromM && d.slice(5,7) <= toM;
+    }).sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1 : 1; });
+  }
 
 
 
