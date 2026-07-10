@@ -699,13 +699,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 
 
-    <!-- 관리자 전용 -->
-    <div id="nav-admin-group" style="display:none">
-      <div class="nav-label" style="margin-top:8px">관리자</div>
-      <div class="nav-item" onclick="showPage('user-mgmt')">
-        <span class="nav-icon"><i class="bi bi-people"></i></span><span>사용자 관리</span>
-      </div>
-    </div>
+    <!-- 사용자 관리 메뉴 제거됨 -->
 
 
 
@@ -2571,8 +2565,7 @@ function _applyLoginUI() {
   var _isAdmin2   = _role === 'admin';
   var ag2 = document.getElementById('nav-admin-group');
   if(ag2 && (_isMaster || _isAdmin2)) ag2.style.display = 'block';
-  var navUp = document.getElementById('nav-excel-upload');
-  if(navUp && (_isMaster || _isUploader)) navUp.style.display = 'flex';
+  // 엑셀 업로드 메뉴 숨김(사용 안 함)
   // 마스터만 uploader/master 역할 선택 옵션 표시
   var roU = document.getElementById('role-opt-uploader');
   var roM = document.getElementById('role-opt-master');
