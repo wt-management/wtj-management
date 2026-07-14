@@ -492,6 +492,10 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 .finpage input,.finpage select{width:auto}
 .finpage .fx-filters label,.finpage .fx-tab{white-space:nowrap}
 #fxmodal .frow input,#fxmodal .frow select{width:100%}
+/* WT_SWITCHER — 권한 기반 사이트 이동 항목 */
+.sw-item{border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s;margin-top:2px}
+.sw-item:hover{background:rgba(255,255,255,.08)}
+.sw-item .sw-badge{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0}
 </style>
 
 <script>/* WT_ERRLOG_V1 — 공통 오류수집+요청함 (자동주입 스니펫, 개별 수정 금지) */
@@ -719,18 +723,8 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
     <div id="site-dropdown" style="display:none;position:absolute;bottom:110%;left:0;right:0;background:#1e293b;border:1px solid #334155;border-radius:10px;overflow:hidden;box-shadow:0 -8px 24px rgba(0,0,0,.5);z-index:200">
 
-            <div style="padding:6px">
-        <div onclick="location.href=&#39;https://wt-management.github.io/wontech/total.html&#39;" style="border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&#39;rgba(255,255,255,.08)&#39;" onmouseout="this.style.background=&#39;&#39;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#4f46e5;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">종합</span><span style="flex:1">전사 종합 경영현황</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="(async function(){var s=(await _sb.auth.getSession()).data.session;var u=&#39;https://wt-management.github.io/wontech/&#39;;if(s)u+=&#39;#at=&#39;+encodeURIComponent(s.access_token)+&#39;&amp;rt=&#39;+encodeURIComponent(s.refresh_token)+&#39;&amp;app=korea&#39;;location.href=u;})()" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&#39;rgba(255,255,255,.08)&#39;" onmouseout="this.style.background=&#39;&#39;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#0891b2;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">KR</span><span style="flex:1">한국 영업</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="(async function(){var s=(await _sb.auth.getSession()).data.session;var u=&#39;https://wt-management.github.io/wontech-intl/&#39;;if(s)u+=&#39;#at=&#39;+encodeURIComponent(s.access_token)+&#39;&amp;rt=&#39;+encodeURIComponent(s.refresh_token);location.href=u;})()" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&#39;rgba(255,255,255,.08)&#39;" onmouseout="this.style.background=&#39;&#39;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#0d9488;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">INT</span><span style="flex:1">해외 영업</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#f59e0b;font-size:12px;font-weight:700;background:rgba(245,158,11,.12)"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#f59e0b;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">JP</span><span style="flex:1">일본법인 관리</span><i class="bi bi-check2" style="font-size:12px"></i></div>
-        <div onclick="location.href='https://wt-management.github.io/wt-corps/us.html'" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#1e3a8a;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">US</span><span style="flex:1">미국법인 관리</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="location.href='https://wt-management.github.io/wt-corps/th.html'" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#b45309;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">TH</span><span style="flex:1">태국법인 관리</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="location.href=&#39;https://wt-management.github.io/wt-consumables/ilbo.html&#39;" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&#39;rgba(255,255,255,.08)&#39;" onmouseout="this.style.background=&#39;&#39;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#16a34a;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">일보</span><span style="flex:1">일일매출보고</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="location.href='https://wt-management.github.io/pm-planner/'" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#8b5cf6;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">기획</span><span style="flex:1">상품기획 PM</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="location.href='https://wt-management.github.io/sales-portfolio/'" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#3f5e7a;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">PF</span><span style="flex:1">Sales Portfolio</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="location.href='https://wt-management.github.io/demo-schedule/'" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background=''"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#2563eb;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">데모</span><span style="flex:1">데모 일정</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
-        <div onclick="(async function(){var s=(await _sb.auth.getSession()).data.session;var u=&#39;https://wt-management.github.io/wontech/&#39;;if(s)u+=&#39;#at=&#39;+encodeURIComponent(s.access_token)+&#39;&amp;rt=&#39;+encodeURIComponent(s.refresh_token)+&#39;&amp;app=admin&#39;;location.href=u;})()" style="margin-top:2px;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&#39;rgba(255,255,255,.08)&#39;" onmouseout="this.style.background=&#39;&#39;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;background:#6b7280;color:#fff;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:0 5px;flex-shrink:0">ADM</span><span style="flex:1">관리자 페이지</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>
+            <div style="padding:6px" id="site-dropdown-list">
+        <!-- WT_SWITCHER: 권한 기반 사이트 목록이 _wtRenderSwitcher()에 의해 동적 렌더링됨 -->
       </div>
 
     </div>
@@ -2364,6 +2358,52 @@ var _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
 
+/* ===== 권한 기반 사이트 이동 (site_registry 공통) — WT_SWITCHER ===== */
+var _WT_MASTER='pmw0406@gmail.com';
+var _WT_OWN=["japan"];                 /* 이 사이트 자신의 registry key(들) */
+var _WT_WONTECH='https://wt-management.github.io/wontech/';
+var _wtReg=null, _wtItems=[];
+async function _wtLoadReg(){ if(_wtReg) return _wtReg; try{ var r=await _sb.from('site_registry').select('*').order('sort_order'); _wtReg=r.data||[]; }catch(e){ _wtReg=[]; } return _wtReg; }
+function _wtVis(s,ac,ad){ if(ac.indexOf(s.key)>=0) return true; if(s.admin_bypass&&ad) return true; if(s.extra_visible_rule){ try{ return !!(new Function('access','isAdmin','return ('+s.extra_visible_rule+')'))(ac,ad); }catch(e){ return false; } } return false; }
+async function _wtGo(i){
+  var s=_wtItems[i]; if(!s) return;
+  var u=(s.key==='korea'||s.url==='LOCAL')?_WT_WONTECH:s.url;
+  var extra=s.key==='korea'?'&app=korea':(s.key==='admin'?'&app=admin':'');
+  var sess=null; try{ sess=(await _sb.auth.getSession()).data.session; }catch(e){}
+  if(sess && u.indexOf('#')<0) u+='#at='+encodeURIComponent(sess.access_token)+'&rt='+encodeURIComponent(sess.refresh_token);
+  u+=extra; location.href=u;
+}
+async function _wtRenderSwitcher(){
+  await _wtLoadReg();
+  var ac=[], ad=false;
+  try{ var ses=(await _sb.auth.getSession()).data.session;
+    if(ses&&ses.user){ if(ses.user.email===_WT_MASTER) ad=true;
+      var p=await _sb.from('crm_profiles').select('access,role').eq('id',ses.user.id).maybeSingle();
+      if(p&&p.data){ ac=(p.data.access||'').split(',').map(function(x){return x.trim();}).filter(Boolean); if(p.data.role==='admin') ad=true; }
+    }
+  }catch(e){}
+  var seen={};
+  _wtItems=_wtReg.filter(function(s){
+    if(_WT_OWN.indexOf(s.key)>=0) return false;
+    if(!_wtVis(s,ac,ad)) return false;
+    var dest=(s.key==='korea'||s.url==='LOCAL')?'wontech':s.url; if(seen[dest]) return false; seen[dest]=1;
+    return true;
+  }).sort(function(a,b){ return a.key==='total'?-1:(b.key==='total'?1:(a.sort_order-b.sort_order)); });
+  if(ad){ _wtItems.push({key:'admin',badge:'ADM',grad_from:'#6b7280',title:'관리자 페이지',url:_WT_WONTECH}); }
+  var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  var box=document.querySelector("#site-dropdown-list"); if(!box) return;
+  if("div"==='select'){
+    box.innerHTML='<option value="">사이트 이동…</option>'+_wtItems.map(function(s,i){ return '<option value="'+i+'">'+esc(s.badge)+' · '+esc(s.title)+'</option>'; }).join('');
+    box.onchange=function(){ var v=box.value; if(v!=='') _wtGo(+v); };
+  } else {
+    box.innerHTML=_wtItems.map(function(s,i){
+      return '<div class="sw-item" onclick="_wtGo('+i+')"><span class="sw-badge" style="background:'+(s.grad_from||'#64748b')+'">'+esc(s.badge)+'</span><span style="flex:1">'+esc(s.title)+'</span><i class="bi bi-arrow-right" style="font-size:11px;opacity:.5"></i></div>';
+    }).join('');
+  }
+}
+
+
+
 var _currentUser = null; // {email, name, role, id}
 
 
@@ -2641,6 +2681,7 @@ async function _bootApp() {
   var veil = document.getElementById('__page_veil');
   if(veil) veil.style.display = 'none';
   showDataTimestamp();
+  try{ _wtRenderSwitcher(); }catch(e){}
 }
 
 
