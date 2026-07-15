@@ -2558,11 +2558,13 @@ async function doLogout() {
 
   _currentUser = null;
 
+  try{ sessionStorage.removeItem('wtj_cur_page'); }catch(e){}   // 다음 계정에 이전 페이지 복원 방지
+
   document.getElementById('sidebar-user').style.display = 'none';
 
   var ag=document.getElementById('nav-admin-group'); if(ag) ag.style.display = 'none';
 
-  location.href = 'https://wt-management.github.io/wontech/';
+  location.replace('https://wt-management.github.io/wontech/');
 
 }
 
@@ -2658,10 +2660,26 @@ function applyMenuRoles(){
   _hideEmptyNavLabels();
 }
 
+// 페이지 접근 가능 여부: 요소 존재 + 역할 게이트(MENU_ROLES/관리자그룹)
+function _pageAllowed(id){
+  if(id==='dashboard') id='exec-summary';
+  if(!document.getElementById('page-'+id)) return false;
+  var role=_currentUser?_currentUser.role:'';
+  if(id==='user-mgmt') return role==='master'||role==='admin';
+  if(role==='sales'||role==='finance'){
+    var allowed=MENU_ROLES[id];
+    if(allowed && allowed.indexOf(role)<0) return false;
+  }
+  return true;
+}
+
 async function _bootApp() {
-  var _nav=(performance.getEntriesByType('navigation')[0]||{}).type;   // reload=새로고침 / navigate=신규진입
+  var _nav=(performance.getEntriesByType('navigation')[0]||{}).type;   // reload/back_forward=머문 페이지 복원 / navigate=신규진입
   var _sv=sessionStorage.getItem('wtj_cur_page');
-  var savedPage=(_nav==='reload' && _sv && document.getElementById('page-'+_sv)) ? _sv : 'dashboard';   // 새로고침=머문 페이지, 신규=대시보드
+  var _hm=(location.hash||'').match(/^#p=([A-Za-z0-9_-]+)$/);          // 딥링크 #p=키
+  var savedPage='dashboard';
+  if(_hm && _pageAllowed(_hm[1])) savedPage=_hm[1];                    // ① 유효한 딥링크
+  else if((_nav==='reload'||_nav==='back_forward') && _sv && _pageAllowed(_sv)) savedPage=_sv;   // ② 새로고침·복귀=머문 페이지
   var _nowM = String(new Date().getMonth()+1).padStart(2,'0');
   var _toEl = document.getElementById('dash-to-sel');
   if (_toEl) _toEl.value = _nowM;
@@ -2677,7 +2695,8 @@ async function _bootApp() {
   }
   var dl = document.getElementById('facilityList');
   if (dl) dl.innerHTML = getFacilitiesLocal().map(function(f){ return '<option value="'+f.replace(/"/g,'&quot;')+'">'; }).join('');
-  showPage(savedPage);
+  showPage(savedPage, true);                                           // 첫 렌더는 pushState 없이
+  history.replaceState({p:_curPage},'','#p='+_curPage);                // 현재 엔트리에 state seed(여분 엔트리 금지)
   var veil = document.getElementById('__page_veil');
   if(veil) veil.style.display = 'none';
   showDataTimestamp();
@@ -3980,7 +3999,7 @@ function showPage(id, fromHistory){
 
     if(_curPage !== id) _prevPage = _curPage;
 
-    history.pushState({p:id},'','#p='+id);
+    if(!(history.state && history.state.p===id)) history.pushState({p:id},'','#p='+id);   // 같은 키 중복 push 금지
 
   }
 
@@ -4032,14 +4051,42 @@ function goBack(){
 
 
 
+// 열려있는 오버레이(모달/드로어) 하나 닫기 — 성공 시 true
+function _closeTopOverlay(){
+  var sb=document.querySelector('.sidebar');
+  if(sb && sb.classList.contains('open')){ _closeSidebar(); return true; }
+  var fx=document.getElementById('fxmodal');
+  if(fx && fx.classList.contains('on')){
+    try{ if(window.FIN&&FIN.closeModal) FIN.closeModal(); else fx.classList.remove('on'); }catch(err){ fx.classList.remove('on'); }
+    return true;
+  }
+  var ids=['wtinv-mbg','esDrill','detailModal','productDetailModal','ctDetailModal','modalEditOrder','modalInvoice','modalEditPayment'];
+  for(var i=0;i<ids.length;i++){
+    var el=document.getElementById(ids[i]);
+    if(el && el.style.display==='flex'){ el.style.display='none'; return true; }
+  }
+  return false;
+}
+
 window.addEventListener('popstate', function(e){
 
-  var page = (e.state&&e.state.p) || 'dashboard';
+  // 모바일 '뒤로가기=모달 닫기': 오버레이만 닫고 소모된 히스토리 엔트리 복구
+  if(_closeTopOverlay()){ history.pushState({p:_curPage},'','#p='+_curPage); return; }
 
-  _prevPage = null;
+  if(e.state && e.state.p){
+    var page = _pageAllowed(e.state.p) ? e.state.p : 'dashboard';   // 권한 게이트 체크
+    if(_curPage !== page) _prevPage = _curPage;                     // 상단 back 버튼 유지
+    showPage(page, true);
+  }
+  // state 없으면 아무것도 하지 않음(부팅 replaceState seed로 커버) — pushState로 되밀지 않는다
 
-  showPage(page, true);
+});
 
+// bfcache 복원 시 세션 만료 화면 노출 차단
+window.addEventListener('pageshow', function(e){
+  if(e.persisted){
+    _sb.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) location.reload(); });
+  }
 });
 
 
@@ -7269,7 +7316,7 @@ window.onload = async function() {
 
   } else {
 
-    location.href = 'https://wt-management.github.io/wontech/';
+    location.replace('https://wt-management.github.io/wontech/');   // 게이트 실패 — 히스토리 오염 방지
 
   }
 
