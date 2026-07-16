@@ -2408,6 +2408,26 @@ var _currentUser = null; // {email, name, role, id}
 
 
 
+// ── 중앙 로그인(WT_SSO) ──────────────────────────────────
+
+// 자체 로그인 화면은 더 이상 노출하지 않는다. 세션 없음 → 중앙(wontech)으로 ret 붙여 보냄(로그인 후 복귀).
+
+// 권한 없음은 ret 없이 보낸다(붙이면 중앙→여기→중앙 무한루프).
+
+var _WT_CENTRAL = 'https://wt-management.github.io/wontech/';
+
+function _wtToCentral(withRet) {
+
+  var u = _WT_CENTRAL;
+
+  if (withRet) u += '#ret=' + encodeURIComponent(location.origin + location.pathname + location.search);   // 해시 제외(토큰 유출·오염 방지)
+
+  location.replace(u);
+
+}
+
+
+
 async function doLogin() {
 
   var email = (document.getElementById('login-email').value || '').trim().toLowerCase();
@@ -2486,7 +2506,9 @@ async function _getWtjMember(email, userId) {
 
     var r2 = await _sb.from('crm_profiles').select('*').eq('id', userId).maybeSingle();
 
-    if (r2.data && (r2.data.role === 'admin' || (r2.data.access && r2.data.access.includes('jp')))) {
+    // access는 콤마문자열 → 토큰 단위 비교. 'japan'.includes('jp')는 false라 과거 japan 권한자가 이 경로로 못 들어왔음.
+    var _acc = String((r2.data && r2.data.access) || '').split(',').map(function(s){ return s.trim(); });
+    if (r2.data && (r2.data.role === 'admin' || _acc.indexOf('japan') >= 0 || _acc.indexOf('jp') >= 0)) {
 
       return {
 
@@ -7298,11 +7320,23 @@ window.onload = async function() {
 
   if (res.data && res.data.session) {
 
-    // 세션이 있으면 무조건 입장 (wtj_members 없어도 OK)
-
     var sUser = res.data.session.user;
 
     var wtjM = await _getWtjMember(sUser.email, sUser.id);
+
+    // ★접근 게이트: 원래 doLogin 안에만 있던 검사를 부팅 경로로 이관(자체 로그인 폐지로 doLogin이 사문화됨).
+    //   전 사이트가 동일 오리진·세션 공유라, 게이트가 없으면 아무 계정이나 URL만 알면 진입 가능했음.
+    //   통과 = wtj_members 활성 OR crm_profiles(admin | access에 japan/jp) OR 마스터.
+
+    if (sUser.email !== 'pmw0406@gmail.com' && (!wtjM || !wtjM.is_active)) {
+
+      alert(wtjM ? '❌ 계정이 비활성화 상태입니다' : '❌ 일본법인 관리 시스템 접근 권한이 없습니다');
+
+      _wtToCentral(false);   // 권한 없음 → ret 없이(무한루프 방지). 세션은 유지(다른 사이트는 계속 사용)
+
+      return;
+
+    }
 
     var displayName = (wtjM && wtjM.display_name) || sUser.email.split('@')[0];
 
@@ -7316,7 +7350,7 @@ window.onload = async function() {
 
   } else {
 
-    location.replace('https://wt-management.github.io/wontech/');   // 게이트 실패 — 히스토리 오염 방지
+    _wtToCentral(true);   // 세션 없음 → 중앙 로그인(로그인 후 여기로 복귀). replace로 히스토리 오염 방지
 
   }
 
