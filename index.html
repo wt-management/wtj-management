@@ -703,6 +703,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
     <div class="nav-item" onclick="showPage('crm-clients')"><span class="nav-icon">👥</span><span id="navCRMClients">고객사</span></div>
     <div class="nav-item" onclick="showPage('crm-activities')"><span class="nav-icon">📇</span><span id="navCRMActs">활동 기록</span></div>
     <div class="nav-item" onclick="showPage('crm-perf')"><span class="nav-icon">🏆</span><span id="navCRMPerf">영업 성과</span></div>
+    <div class="nav-item" onclick="showPage('crm-sched')"><span class="nav-icon">🗓</span><span id="navCRMSched">일정 · 할일</span></div>
     <div class="nav-item" onclick="showPage('crm-forecast')"><span class="nav-icon">🔮</span><span id="navCRMForecast">매출 예측</span></div>
 
 
@@ -2267,6 +2268,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 <div class="page" id="page-crm-clients"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">👥 <span id="crmClPageT">고객사</span></div></div><div id="crmClBody"></div></div>
 <div class="page" id="page-crm-activities"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">📇 <span id="crmAcPageT">활동 기록</span></div></div><div id="crmAcBody"></div></div>
+<div class="page" id="page-crm-sched"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">🗓 <span id="crmScPageT">일정 · 할일</span></div></div><div id="crmScBody"></div></div>
 <div class="page" id="page-crm-perf"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">🏆 <span id="crmPfPageT">영업 성과</span></div></div><div id="crmPfBody"></div></div>
 <div id="crmDw" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1150;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)CRM._closeDw()"><div style="background:#fff;border-radius:14px;max-width:640px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmDwTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="CRM._closeDw()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmDwBody" style="padding:18px 20px"></div></div></div>
 <div id="crmClModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)document.getElementById('crmClModal').style.display='none'"><div style="background:#fff;border-radius:14px;max-width:560px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmClTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="document.getElementById('crmClModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmClForm" style="padding:18px 20px"></div><div style="display:flex;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid #eef2f7;position:sticky;bottom:0;background:#fff"><button id="crmClDel" onclick="CRM._delCl()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">삭제</button><button onclick="CRM._saveCl()" class="crm-btn" style="padding:8px 22px">저장</button></div></div></div>
@@ -2281,7 +2283,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div style="font-size:18px;font-weight:700;color:#0f172a">🔮 <span id="crmFcTitle">매출 예측</span></div>
   </div>
-  <div id="crmFcBody"></div>
+  <div id="crmFcBody"></div><div id="crmSnapBody" style="margin-top:20px"></div>
 </div>
 <div id="crmDlModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)CRM._closeDl()">
   <div style="background:#fff;border-radius:14px;max-width:560px;width:96vw;max-height:90vh;overflow:auto">
@@ -2310,6 +2312,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   <div id="esHero"></div>
   <div id="esConsolStrip" class="finpage" style="margin-bottom:14px"></div>
   <div id="esKpi" class="esk"></div>
+  <div id="esCrmAlerts"></div>
   <div class="essec"><div class="esdual2">
     <div><div class="esst">📈 월별 매출 실적 vs 목표 · 달성률</div><div style="height:240px"><canvas id="esAchChart"></canvas></div></div>
     <div><div class="esst">🔀 제품/소모품 월별 · 비중</div><div style="height:240px"><canvas id="esCatChart"></canvas></div></div>
@@ -2633,7 +2636,7 @@ var MENU_ROLES = {
   'customer-analysis':['sales'], 'inventory':['sales'],
   'payments-list':['finance'], 'payment-input':['finance'], 'outstanding':['finance'],
   'fin-report':['finance'], 'fin-ledger':['finance'], 'fin-daily':['finance'], 'fin-assets':['finance'],
-  'excel-upload':['finance'],'crm-pipeline':['sales','finance'],'crm-forecast':['sales','finance'],'crm-clients':['sales','finance'],'crm-activities':['sales','finance'],'crm-perf':['sales','finance']
+  'excel-upload':['finance'],'crm-pipeline':['sales','finance'],'crm-forecast':['sales','finance'],'crm-clients':['sales','finance'],'crm-activities':['sales','finance'],'crm-perf':['sales','finance'],'crm-sched':['sales','finance']
 };
 function _navKey(item){
   var oc=item.getAttribute('onclick')||'';
@@ -3534,7 +3537,7 @@ var T = {
 
     sideTitle:'일본법인<br>경영관리',sideSubtitle:'',
 
-    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'딜 파이프라인',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',
+    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'딜 파이프라인',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',navCRMSched:'일정 · 할일',
 
     navDash:'대시보드',navExec:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
@@ -3656,7 +3659,7 @@ var T = {
 
     sideTitle:'日本法人<br>経営管理',sideSubtitle:'',
 
-    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'ディール パイプライン',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',
+    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'ディール パイプライン',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',navCRMSched:'予定 · タスク',
 
     navDash:'ダッシュボード',navExec:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
@@ -4159,6 +4162,7 @@ function _esTrend(year){
   var _mach=(window.CRM&&CRM.forecastMachArr)?CRM.forecastMachArr(year):null;
   var _cons=(window.CRM&&CRM.consRunArr)?CRM.consRunArr(year):null;
   var fcVals=mkeys.map(function(k,i){var m=i+1;if(m<_curM)return null;var f=((_mach?_mach[i]:0)+(_cons?_cons[i]:0));if(f<=0)return null;return Math.round(((mon?mon[i]:0)+f)/1e6*10)/10;});
+  if(window.CRM&&CRM.renderAlerts)CRM.renderAlerts();
   var A=document.getElementById('esAchChart');
   if(A){ if(window._esAchChart)window._esAchChart.destroy();
     window._esAchChart=new Chart(A,{type:'bar',data:{labels:mlabels,datasets:[
@@ -8304,7 +8308,7 @@ window.CRM=(function(){
     if(_loaded){if(cb)cb();return;}
     try{_sb.from('wtj_data').select('data').eq('key','crm').maybeSingle().then(function(r){
       var d=(r&&r.data&&r.data.data)||{};
-      _d={deals:d.deals||[],clients:d.clients||[],acts:d.acts||[]};
+      _d={deals:d.deals||[],clients:d.clients||[],acts:d.acts||[],snapshots:d.snapshots||[]};
       _loaded=true; if(cb)cb();
     }).catch(function(){_loaded=true;if(cb)cb();});}catch(e){_loaded=true;if(cb)cb();}
   }
@@ -8541,7 +8545,7 @@ window.CRM=(function(){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         fld(jp?'次アクション':'다음 액션','<input id="dlNext" class="filter-input" style="width:100%" value="'+_esc(d.next||'')+'">')+
         fld(jp?'期限':'기한','<input id="dlNextDate" type="date" class="filter-input" style="width:100%" value="'+(d.nextDate||'')+'">')+'</div>'+
-      fld(jp?'メモ':'비고','<textarea id="dlMemo" class="filter-input" style="width:100%;height:52px">'+_esc(d.memo||'')+'</textarea>');
+      fld(jp?'メモ':'비고','<textarea id="dlMemo" class="filter-input" style="width:100%;height:52px">'+_esc(d.memo||'')+'</textarea>')+'<label style="display:block;font-size:12.5px;color:#334155;margin-top:2px"><input type="checkbox" id="dlSaleMatched"'+(d.saleMatched?' checked':'')+'> '+(jp?'この成約は売上日報に反映済み':'이 계약완료는 매출일보에 반영됨')+'</label>';
     document.getElementById('crmDlDel').style.display=isNew?'none':'inline-block';
     var mo=document.getElementById('crmDlModal'); mo.setAttribute('data-id',d.id); mo.setAttribute('data-new',isNew?'1':'0'); mo.style.display='flex';
   }
@@ -8550,7 +8554,7 @@ window.CRM=(function(){
     var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
     var client=g('dlClient'); if(!client){alert(L('거래처를 입력하세요','取引先を入力してください'));return;}
     var mo=document.getElementById('crmDlModal'),mid=mo.getAttribute('data-id'),isNew=mo.getAttribute('data-new')==='1',probRaw=g('dlProb');
-    var obj={id:mid,client:client,product:g('dlProduct'),cat:g('dlCat'),amount:parseFloat(g('dlAmount'))||0,expMonth:g('dlExpMonth'),stage:g('dlStage'),prob:probRaw!==''?parseFloat(probRaw):null,owner:g('dlOwner'),next:g('dlNext'),nextDate:g('dlNextDate'),memo:g('dlMemo'),updatedAt:_today()};
+    var obj={id:mid,client:client,product:g('dlProduct'),cat:g('dlCat'),amount:parseFloat(g('dlAmount'))||0,expMonth:g('dlExpMonth'),stage:g('dlStage'),prob:probRaw!==''?parseFloat(probRaw):null,owner:g('dlOwner'),next:g('dlNext'),nextDate:g('dlNextDate'),memo:g('dlMemo'),saleMatched:(document.getElementById('dlSaleMatched')?document.getElementById('dlSaleMatched').checked:false),updatedAt:_today()};
     if(isNew){obj.createdAt=_today();_d.deals.push(obj);}
     else{for(var i=0;i<_d.deals.length;i++)if(_d.deals[i].id===mid){obj.createdAt=_d.deals[i].createdAt||_today();_d.deals[i]=obj;break;}}
     save(); _closeDl(); render();
@@ -8651,19 +8655,56 @@ window.CRM=(function(){
     }).join('')+'</div>';
   }
 
+  /* ═══ 일정/할일 ═══ */
+  function _schItems(){var items=[];_d.deals.forEach(function(d){if(d.stage==='won'||d.stage==='lost')return;if(d.next&&d.nextDate)items.push({date:d.nextDate,kind:'deal',id:d.id,client:d.client,text:d.next,owner:d.owner});});_d.acts.forEach(function(a){if(a.next&&a.nextDate&&!a.done)items.push({date:a.nextDate,kind:'act',id:a.id,client:a.client,text:a.next,owner:a.owner});});items.sort(function(a,b){return a.date<b.date?-1:1;});return items;}
+  function renderSched(){
+    var host=document.getElementById('crmScBody'); if(!host)return; var jp=(lang==='jp'),today=_today();
+    var items=_schItems(),over=[],td=[],wk=[],later=[];
+    items.forEach(function(it){var dd=(new Date(it.date)-new Date(today))/864e5;if(it.date<today)over.push(it);else if(it.date===today)td.push(it);else if(dd<=7)wk.push(it);else later.push(it);});
+    function sec(title,arr,col){if(!arr.length)return '';return '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:800;color:'+col+';margin-bottom:6px">'+title+' ('+arr.length+')</div>'+arr.map(function(it){var kk=it.kind==='deal'?'🧩':'📇',fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";return '<div onclick="'+fn+'" style="cursor:pointer;display:flex;gap:10px;padding:8px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:5px"><span style="color:#94a3b8;width:76px;flex-shrink:0;font-size:12px">'+it.date+'</span><span>'+kk+'</span><span style="flex:1;font-size:13px">'+_tr(it.text)+' <span style="color:#94a3b8">· '+_tr(it.client||'')+(it.owner?' · '+_esc(it.owner):'')+'</span></span></div>';}).join('')+'</div>';}
+    var kpi='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'+_kc(jp?'遅延':'지남',over.length+(jp?'件':'건'),'',over.length?'#dc2626':'#94a3b8')+_kc(jp?'今日':'오늘',td.length+(jp?'件':'건'),'','#0f766e')+_kc(jp?'今週':'이번주',wk.length+(jp?'件':'건'),'','#3b82f6')+'</div>';
+    host.innerHTML=kpi+(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#0f766e')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
+  }
+  /* ═══ 대시보드 알림 ═══ */
+  function renderAlerts(){
+    var host=document.getElementById('esCrmAlerts'); if(!host)return; var jp=(lang==='jp'),today=_today();
+    var lateAct=_d.acts.filter(function(a){return a.next&&a.nextDate&&a.nextDate<today&&!a.done;});
+    var stale=_d.deals.filter(function(d){if(d.stage==='won'||d.stage==='lost')return false;var days=0;try{days=Math.floor((new Date(today)-new Date(d.updatedAt||d.createdAt||today))/864e5);}catch(e){}return days>=14;});
+    var soon=_d.deals.filter(function(d){if(d.stage==='won'||d.stage==='lost')return false;if(!d.nextDate)return false;var dd=(new Date(d.nextDate)-new Date(today))/864e5;return dd>=0&&dd<=7;});
+    if(!(lateAct.length+stale.length+soon.length)){host.innerHTML='';return;}
+    host.innerHTML='<div class="essec"><div class="esst">🔔 '+(jp?'アラート (CRM)':'알림 (CRM)')+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
+      _kc(jp?'フォロー遅延':'후속 지연',lateAct.length+(jp?'件':'건'),jp?'活動の次アクション':'활동 후속조치',lateAct.length?'#dc2626':'#94a3b8')+
+      _kc(jp?'停滞ディール':'정체 딜',stale.length+(jp?'件':'건'),'14'+(jp?'日以上':'일 이상'),stale.length?'#f59e0b':'#94a3b8')+
+      _kc(jp?'期限間近':'기한 임박',soon.length+(jp?'件':'건'),jp?'7日以内':'7일 이내',soon.length?'#3b82f6':'#94a3b8')+'</div></div>';
+  }
+  /* ═══ 예측 스냅샷 ═══ */
+  function _snap(){
+    var year=String((new Date()).getFullYear()),mach=forecastMach(year),cons=consRun(year),act=[];
+    try{if(typeof _consolSales!=='undefined'&&_consolSales)act=consolCalc(year).monthly.slice();}catch(e){}
+    var curM=(new Date()).getMonth()+1,base=0;
+    for(var m=1;m<=12;m++){var a=act[m-1]||0,mw=mach[m-1]||0,cr=cons[m-1]||0;base+=(m<curM)?a:(m===curM?a+mw+cr:mw+cr);}
+    _d.snapshots=_d.snapshots||[]; _d.snapshots.push({date:_today(),year:year,base:Math.round(base)}); save(); renderSnap();
+  }
+  function renderSnap(){
+    var host=document.getElementById('crmSnapBody'); if(!host)return; var jp=(lang==='jp'),year=String((new Date()).getFullYear());
+    var snaps=(_d.snapshots||[]).filter(function(s){return s.year===year;}).sort(function(a,b){return a.date<b.date?-1:1;});
+    var rows=snaps.map(function(s,i){var prev=i>0?snaps[i-1].base:null,delta=prev!=null?s.base-prev:null;return '<tr><td style="padding:6px 10px">'+s.date+'</td><td class="num" style="padding:6px 10px;font-weight:700">'+_yen(s.base)+'</td><td class="num" style="padding:6px 10px;color:'+(delta>0?'#16a34a':delta<0?'#dc2626':'#94a3b8')+'">'+(delta!=null?(delta>=0?'+':'')+_yen(delta).replace('¥',''):'-')+'</td></tr>';}).join('');
+    host.innerHTML='<div class="essec"><div class="esst" style="display:flex;justify-content:space-between;align-items:center"><span>📸 '+(jp?'予測スナップショット':'예측 스냅샷')+' <span style="font-weight:400;color:#94a3b8;font-size:11px">('+(jp?'着地予測の推移':'착지전망 추이')+')</span></span><button class="crm-btn" style="font-size:12px;padding:5px 12px" onclick="CRM._snap()">'+(jp?'今の予測を保存':'지금 예측 저장')+'</button></div>'+(rows?'<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr><th style="text-align:left;padding:6px 10px">'+(jp?'日付':'날짜')+'</th><th class="num" style="padding:6px 10px">'+(jp?'着地予測(基本)':'착지전망(기본)')+'</th><th class="num" style="padding:6px 10px">'+(jp?'前回比':'직전대비')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div style="color:#94a3b8;font-size:12px;padding:10px 0">'+(jp?'保存された予測なし。ボタンで記録すると推移が蓄積されます。':'저장된 예측 없음. 버튼으로 기록하면 추이가 쌓입니다.')+'</div>')+'</div>';
+  }
   function onPage(id){ load(function(){
     if(id==='crm-pipeline')render();
-    else if(id==='crm-forecast')renderForecast();
+    else if(id==='crm-forecast'){renderForecast();renderSnap();}
     else if(id==='crm-clients')renderClients();
     else if(id==='crm-activities')renderActs();
     else if(id==='crm-perf')renderPerf();
+    else if(id==='crm-sched')renderSched();
   }); }
   function relang(){ var ap=document.querySelector('.page.active'); if(!ap)return; var id=ap.id.replace('page-','');
-    if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); else if(id==='crm-clients')renderClients(); else if(id==='crm-activities')renderActs(); else if(id==='crm-perf')renderPerf(); }
+    if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); else if(id==='crm-clients')renderClients(); else if(id==='crm-activities')renderActs(); else if(id==='crm-perf')renderPerf(); else if(id==='crm-sched')renderSched(); }
   return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;}, forecastMachArr:forecastMach, consRunArr:consRun,
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
     _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt,
-    _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt};
+    _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
 })();
 </script>
 
