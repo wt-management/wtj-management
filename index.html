@@ -624,7 +624,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
   <div class="nav-section">
 
-    <div class="nav-label" id="navGroupKr1">경영 요약</div>
+    
 
 
 
@@ -635,7 +635,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 
 
-    <div class="nav-item" onclick="showPage('consumable-trend')"><span class="nav-icon">📦</span><span id="navConsTrend">소모품 트렌드</span></div>
+    
     
 
 
@@ -650,6 +650,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
     
     
     <div class="nav-item" onclick="showPage('budget-actual')"><span class="nav-icon">🎯</span><span id="navBA">목표·실적·예측</span></div>
+    <div class="nav-item" onclick="showPage('consumable-trend')"><span class="nav-icon">📈</span><span id="navConsTrend">소모품 트렌드</span></div>
     
 
 
@@ -675,7 +676,11 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 
 
-    <div class="nav-label" style="margin-top:8px" id="navGroupPay">수금 · 채권</div>
+    
+
+
+
+    
 
 
 
@@ -687,23 +692,19 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 
 
-    <div class="nav-item" onclick="showPage('outstanding')"><span class="nav-icon">⚠️</span><span id="navOutstanding">미수금 현황</span></div>
+    <div class="nav-label" style="margin-top:8px" id="navGroupFin"><span id="navGroupFinTxt">재무</span></div>
 
 
 
-    <div class="nav-label" style="margin-top:8px" id="navGroupFin"><span id="navGroupFinTxt">자금일보</span></div>
+    <div class="nav-item" onclick="showPage('fin-report')"><span class="nav-icon">📒</span><span id="navFinReport">자금 현황</span></div>
 
 
 
-    <div class="nav-item" onclick="showPage('fin-report')"><span class="nav-icon">📒</span><span id="navFinReport">자금현황 보고서</span></div>
+    
 
 
 
-    <div class="nav-item" onclick="showPage('fin-ledger')"><span class="nav-icon">🏦</span><span id="navFinLedger">입금·지출 원장</span></div>
-
-
-
-    <div class="nav-item" onclick="showPage('fin-daily')"><span class="nav-icon">🧾</span><span id="navFinDaily">매출·매입 일보</span></div>
+    
     <div class="nav-item" onclick="showPage('fin-assets')"><span class="nav-icon">🏥</span><span id="navFinAssets">자산·기준정보</span></div>
 
 
@@ -823,7 +824,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   <div class="content">
 
     <!-- ═══ 자금일보 pages ═══ -->
-    <div class="page finpage" id="page-fin-report">
+    <div class="page finpage" id="page-fin-report"><div class="finTabHost" style="margin-bottom:12px"></div>
       <div class="fx-filters" style="justify-content:flex-end"><label class="fx-mini">기준일</label><button class="fx-btn gray sm" onclick="FIN.rptShift(-1)">◀</button><input type="date" id="fxRptDate" onchange="FIN.renderReport()"><button class="fx-btn gray sm" onclick="FIN.rptShift(1)">▶</button><button class="fx-btn sm" onclick="FIN.rptToday()">오늘</button></div>
       <div class="fx-kgrid" id="fxRptKpi"></div>
       <div class="fx-sec"><div class="fx-st">🏦 계좌별 자금 현황 <span class="fx-mini">전일잔액 + 오늘입금 − 오늘지출 = 현재잔액</span></div>
@@ -840,7 +841,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
       </div>
     </div>
 
-    <div class="page finpage" id="page-fin-ledger">
+    <div class="page finpage" id="page-fin-ledger"><div class="finTabHost" style="margin-bottom:12px"></div>
       <div class="fx-tabs">
         <div class="fx-tab active" id="fxLTabR" onclick="FIN.setLed('receipts')">💰 수금(입금)</div>
         <div class="fx-tab" id="fxLTabE" onclick="FIN.setLed('expenses')">💸 지출</div>
@@ -869,7 +870,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
       <div id="fxLFoot" class="fx-mini" style="padding:10px 4px"></div>
     </div>
 
-    <div class="page finpage" id="page-fin-daily">
+    <div class="page finpage" id="page-fin-daily"><div class="finTabHost" style="margin-bottom:12px"></div>
       <div class="fx-tabs">
         <div class="fx-tab active" id="fxDTabS" onclick="FIN.setDay('sales')">🧾 매출일보 · 미수채권</div>
         <div class="fx-tab" id="fxDTabP" onclick="FIN.setDay('purchases')">📥 매입일보 · 미지급금</div>
@@ -2127,7 +2128,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
     <!-- ═══ 미수금 현황 ═══ -->
 
-    <div class="page" id="page-outstanding">
+    <div class="page" id="page-outstanding"><div class="finTabHost" style="margin-bottom:12px"></div>
 
       <div class="loader" id="outstandingPageLoader"><div class="spinner"></div><br><br>데이터 불러오는 중...</div>
 
@@ -3548,7 +3549,7 @@ var T = {
 
     sideTitle:'일본법인<br>경영관리',sideSubtitle:'',
 
-    navGroupKr1:'경영 요약',navGroupSales:'영업',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navAsset:'장비·AS 관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'영업 활동',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',navCRMSched:'일정 · 할일',
+    navGroupKr1:'경영 요약',navGroupSales:'영업',navGroupPay:'수금 · 채권',navGroupFinTxt:'재무',navFinReport:'자금 현황',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navAsset:'장비·AS 관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'영업 활동',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',navCRMSched:'일정 · 할일',
 
     navDash:'대시보드',navExec:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표·실적·예측',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',planBA1:'실적·달성',planFC1:'예측·착지',planBA2:'실적·달성',planFC2:'예측·착지',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
@@ -3670,7 +3671,7 @@ var T = {
 
     sideTitle:'日本法人<br>経営管理',sideSubtitle:'',
 
-    navGroupKr1:'経営サマリー',navGroupSales:'営業',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navAsset:'機器·AS管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'営業活動',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',navCRMSched:'予定 · タスク',
+    navGroupKr1:'経営サマリー',navGroupSales:'営業',navGroupPay:'集金 · 債権',navGroupFinTxt:'財務',navFinReport:'資金現況',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navAsset:'機器·AS管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'営業活動',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',navCRMSched:'予定 · タスク',
 
     navDash:'ダッシュボード',navExec:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標·実績·予測',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',planBA1:'実績·達成',planFC1:'予測·着地',planBA2:'実績·達成',planFC2:'予測·着地',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
@@ -3833,7 +3834,7 @@ async function applyUserTr(){
 }
 (function(){var _tt=null;function hook(){if(!document.body){setTimeout(hook,200);return;}try{document.head.insertAdjacentHTML('beforeend','<style>.utr{opacity:.55}</style>');}catch(e){}new MutationObserver(function(){clearTimeout(_tt);_tt=setTimeout(applyUserTr,150);}).observe(document.body,{childList:true,subtree:true});}hook();})();
 function setLang(l){
-  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); if(window.CRM&&CRM.relang)CRM.relang(); if(window.WTAS&&WTAS.relang)WTAS.relang(); try{var _sp=document.querySelector('.page.active');if(_sp&&/^page-crm-(pipeline|activities|sched|perf)$/.test(_sp.id)){var _sh=_sp.querySelector('.salesTabHost');if(_sh&&window._salesTabBar)_sh.innerHTML=_salesTabBar(_sp.id.replace('page-',''));}}catch(e){} try{ var _ap=document.querySelector('.page.active'); if(_ap&&_ap.id==='page-dashboard'&&window._data)renderDashboard(_data.dashboard); if(_ap&&_ap.id==='page-budget-actual'&&window._data)renderBudgetActual(_data.budgetActual); }catch(e){} },0);
+  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); if(window.CRM&&CRM.relang)CRM.relang(); if(window.WTAS&&WTAS.relang)WTAS.relang(); try{var _sp=document.querySelector('.page.active');if(_sp&&/^page-crm-(pipeline|activities|sched|perf)$/.test(_sp.id)){var _sh=_sp.querySelector('.salesTabHost');if(_sh&&window._salesTabBar)_sh.innerHTML=_salesTabBar(_sp.id.replace('page-',''));} if(_sp&&/^page-(fin-report|fin-ledger|fin-daily|outstanding)$/.test(_sp.id)){var _fh=_sp.querySelector('.finTabHost');if(_fh&&window._finTabBar)_fh.innerHTML=_finTabBar(_sp.id.replace('page-',''));}}catch(e){} try{ var _ap=document.querySelector('.page.active'); if(_ap&&_ap.id==='page-dashboard'&&window._data)renderDashboard(_data.dashboard); if(_ap&&_ap.id==='page-budget-actual'&&window._data)renderBudgetActual(_data.budgetActual); }catch(e){} },0);
 
   lang=l;
 
@@ -3957,9 +3958,9 @@ function setLang(l){
 
 // ─── Navigation ─────────────────────────────────────────────
 
-var pageTitles={'dashboard':{kr:'대시보드',jp:'ダッシュボード'},'inventory':{kr:'재고관리',jp:'在庫管理'},'consumable-trend':{kr:'소모품 트렌드',jp:'消耗品トレンド'},'orders-list':{kr:'수주 현황',jp:'受注一覧'},'payments-list':{kr:'입금 현황',jp:'入金一覧'},'budget-actual':{kr:'목표·실적·예측',jp:'目標·実績·予測'},'crm-forecast':{kr:'목표·실적·예측',jp:'目標·実績·予測'},'crm-pipeline':{kr:'영업 활동',jp:'営業活動'},'crm-activities':{kr:'영업 활동',jp:'営業活動'},'crm-sched':{kr:'영업 활동',jp:'営業活動'},'crm-perf':{kr:'영업 활동',jp:'営業活動'},'outstanding':{kr:'미수금 현황',jp:'未収金一覧'},'excel-upload':{kr:'엑셀 업로드',jp:'Excelアップロード'},'order-input':{kr:'수주 입력',jp:'受注入力'},'payment-input':{kr:'입금 입력',jp:'入金入力'}};
+var pageTitles={'dashboard':{kr:'대시보드',jp:'ダッシュボード'},'inventory':{kr:'재고관리',jp:'在庫管理'},'consumable-trend':{kr:'소모품 트렌드',jp:'消耗品トレンド'},'orders-list':{kr:'수주 현황',jp:'受注一覧'},'payments-list':{kr:'입금 현황',jp:'入金一覧'},'budget-actual':{kr:'목표·실적·예측',jp:'目標·実績·予測'},'crm-forecast':{kr:'목표·실적·예측',jp:'目標·実績·予測'},'crm-pipeline':{kr:'영업 활동',jp:'営業活動'},'crm-activities':{kr:'영업 활동',jp:'営業活動'},'crm-sched':{kr:'영업 활동',jp:'営業活動'},'crm-perf':{kr:'영업 활동',jp:'営業活動'},'outstanding':{kr:'자금 현황',jp:'資金現況'},'fin-report':{kr:'자금 현황',jp:'資金現況'},'fin-ledger':{kr:'자금 현황',jp:'資金現況'},'fin-daily':{kr:'자금 현황',jp:'資金現況'},'excel-upload':{kr:'엑셀 업로드',jp:'Excelアップロード'},'order-input':{kr:'수주 입력',jp:'受注入力'},'payment-input':{kr:'입금 입력',jp:'入金入力'}};
 
-var pageSubtitles={'dashboard':{kr:'2026년도 매출 현황 (입금기준)',jp:'2026年度 売上サマリー（入金基準）'},'consumable-trend':{kr:'소모품 매출 트렌드 분석 (입금기준)',jp:'消耗品 売上トレンド分析（入金基準）'},'orders-list':{kr:'수주 기준 전체 내역',jp:'受注ベース全件一覧'},'payments-list':{kr:'입금 전체 내역',jp:'入金全件一覧'},'budget-actual':{kr:'실적·달성 및 파이프라인 예측',jp:'実績·達成及びパイプライン予測'},'crm-forecast':{kr:'실적·달성 및 파이프라인 예측',jp:'実績·達成及びパイプライン予測'},'crm-pipeline':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'crm-activities':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'crm-sched':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'crm-perf':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'outstanding':{kr:'2025년 이후 미입금 수주 내역',jp:'2025年以降 未収金受注一覧'},'excel-upload':{kr:'매출일보 엑셀 업로드',jp:'売上日報Excelアップロード',_old:'売上ExcelデータをGoogleシートに同期'},'order-input':{kr:'새 수주 건 등록',jp:'新規受注登録'},'payment-input':{kr:'새 입금 건 등록',jp:'新規入金登録'}};
+var pageSubtitles={'dashboard':{kr:'2026년도 매출 현황 (입금기준)',jp:'2026年度 売上サマリー（入金基準）'},'consumable-trend':{kr:'소모품 매출 트렌드 분석 (입금기준)',jp:'消耗品 売上トレンド分析（入金基準）'},'orders-list':{kr:'수주 기준 전체 내역',jp:'受注ベース全件一覧'},'payments-list':{kr:'입금 전체 내역',jp:'入金全件一覧'},'budget-actual':{kr:'실적·달성 및 파이프라인 예측',jp:'実績·達成及びパイプライン予測'},'crm-forecast':{kr:'실적·달성 및 파이프라인 예측',jp:'実績·達成及びパイプライン予測'},'crm-pipeline':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'crm-activities':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'crm-sched':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'crm-perf':{kr:'파이프라인·활동·일정·성과',jp:'パイプライン·活動·日程·成果'},'outstanding':{kr:'보고서·원장·매출매입·미수채권 통합',jp:'報告書·元帳·売上仕入·未収債権 統合'},'fin-report':{kr:'보고서·원장·매출매입·미수채권 통합',jp:'報告書·元帳·売上仕入·未収債権 統合'},'fin-ledger':{kr:'보고서·원장·매출매입·미수채권 통합',jp:'報告書·元帳·売上仕入·未収債権 統合'},'fin-daily':{kr:'보고서·원장·매출매입·미수채권 통합',jp:'報告書·元帳·売上仕入·未収債権 統合'},'excel-upload':{kr:'매출일보 엑셀 업로드',jp:'売上日報Excelアップロード',_old:'売上ExcelデータをGoogleシートに同期'},'order-input':{kr:'새 수주 건 등록',jp:'新規受注登録'},'payment-input':{kr:'새 입금 건 등록',jp:'新規入金登録'}};
 
 
 
@@ -3969,6 +3970,11 @@ var _prevPage = null;
 
 
 
+function _finTabBar(active){
+  var jp=(lang==='jp');
+  var tabs=[['fin-report','📒',jp?'報告書':'보고서'],['fin-ledger','🏦',jp?'元帳':'원장'],['fin-daily','🧾',jp?'売上·仕入':'매출·매입'],['outstanding','⚠️',jp?'未収·債権':'미수·채권']];
+  return '<div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;flex-wrap:wrap;margin-bottom:2px">'+tabs.map(function(x){var on=(x[0]===active);return '<button onclick="showPage(\''+x[0]+'\')" style="font-family:inherit;border:none;background:'+(on?'#0f766e':'#fff')+';color:'+(on?'#fff':'#64748b')+';padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer">'+x[1]+' '+x[2]+'</button>';}).join('')+'</div>';
+}
 function _salesTabBar(active){
   var jp=(lang==='jp');
   var tabs=[['crm-pipeline','🧩',jp?'パイプライン':'파이프라인'],['crm-activities','📇',jp?'活動':'활동'],['crm-sched','🗓',jp?'日程':'일정'],['crm-perf','🏆',jp?'成果':'성과']];
@@ -3992,6 +3998,7 @@ function showPage(id, fromHistory){
   document.querySelectorAll('.nav-item').forEach(function(item){if(item.getAttribute('onclick')&&item.getAttribute('onclick').indexOf("'"+id+"'")!==-1) item.classList.add('active');});
   if(id==='crm-forecast'){document.querySelectorAll('.nav-item').forEach(function(item){var oc=item.getAttribute('onclick');if(oc&&oc.indexOf("'budget-actual'")!==-1)item.classList.add('active');});}
   if(id==='crm-pipeline'||id==='crm-activities'||id==='crm-sched'||id==='crm-perf'){ var _sh=document.querySelector('#page-'+id+' .salesTabHost'); if(_sh&&window._salesTabBar)_sh.innerHTML=_salesTabBar(id); document.querySelectorAll('.nav-item').forEach(function(item){var oc=item.getAttribute('onclick');if(oc&&oc.indexOf("'crm-pipeline'")!==-1)item.classList.add('active');}); }
+  if(id==='fin-report'||id==='fin-ledger'||id==='fin-daily'||id==='outstanding'){ var _fh=document.querySelector('#page-'+id+' .finTabHost'); if(_fh&&window._finTabBar)_fh.innerHTML=_finTabBar(id); document.querySelectorAll('.nav-item').forEach(function(item){var oc=item.getAttribute('onclick');if(oc&&oc.indexOf("'fin-report'")!==-1)item.classList.add('active');}); }
 
   document.getElementById('pageTitle').textContent=pageTitles[id]?pageTitles[id][lang]:'';
 
