@@ -425,6 +425,9 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 .crm-colh{padding:8px 6px;display:flex;flex-direction:column;position:relative}.crm-colh .crm-colc{position:absolute;right:6px;top:8px;background:#e2e8f0;color:#475569;border-radius:999px;font-size:11px;padding:1px 8px}
 .crm-collist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .crm-card{background:#fff;border:1px solid #e8edf3;border-radius:10px;padding:10px 11px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}.crm-card:hover{border-color:#0f766e;box-shadow:0 3px 8px rgba(15,118,110,.12)}
+.crm-cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.crm-ccard{background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:13px 14px;cursor:pointer}.crm-ccard:hover{border-color:#0f766e;box-shadow:0 3px 8px rgba(15,118,110,.12)}
+.crm-tl{padding:4px 0}.crm-tlrow{display:flex;gap:12px}.crm-tlrail{position:relative;width:30px;display:flex;flex-direction:column;align-items:center}.crm-tlline{position:absolute;top:30px;bottom:-4px;width:2px;background:#e8edf3}.crm-tlcontent{flex:1;min-width:0;padding-bottom:16px}
 .esdl{background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:18px}
 .esdl .t{font-size:13px;font-weight:700;margin-bottom:12px}
 .esrow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}
@@ -697,6 +700,9 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
     <div class="nav-label" style="margin-top:8px" id="navCRMGroup">CRM 영업</div>
     <div class="nav-item" onclick="showPage('crm-pipeline')"><span class="nav-icon">🧩</span><span id="navCRMPipe">딜 파이프라인</span></div>
+    <div class="nav-item" onclick="showPage('crm-clients')"><span class="nav-icon">👥</span><span id="navCRMClients">고객사</span></div>
+    <div class="nav-item" onclick="showPage('crm-activities')"><span class="nav-icon">📇</span><span id="navCRMActs">활동 기록</span></div>
+    <div class="nav-item" onclick="showPage('crm-perf')"><span class="nav-icon">🏆</span><span id="navCRMPerf">영업 성과</span></div>
     <div class="nav-item" onclick="showPage('crm-forecast')"><span class="nav-icon">🔮</span><span id="navCRMForecast">매출 예측</span></div>
 
 
@@ -2259,6 +2265,12 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
     <!-- ═══ 엑셀 업로드 ═══ -->
 
+<div class="page" id="page-crm-clients"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">👥 <span id="crmClPageT">고객사</span></div></div><div id="crmClBody"></div></div>
+<div class="page" id="page-crm-activities"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">📇 <span id="crmAcPageT">활동 기록</span></div></div><div id="crmAcBody"></div></div>
+<div class="page" id="page-crm-perf"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">🏆 <span id="crmPfPageT">영업 성과</span></div></div><div id="crmPfBody"></div></div>
+<div id="crmDw" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1150;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)CRM._closeDw()"><div style="background:#fff;border-radius:14px;max-width:640px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmDwTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="CRM._closeDw()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmDwBody" style="padding:18px 20px"></div></div></div>
+<div id="crmClModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)document.getElementById('crmClModal').style.display='none'"><div style="background:#fff;border-radius:14px;max-width:560px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmClTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="document.getElementById('crmClModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmClForm" style="padding:18px 20px"></div><div style="display:flex;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid #eef2f7;position:sticky;bottom:0;background:#fff"><button id="crmClDel" onclick="CRM._delCl()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">삭제</button><button onclick="CRM._saveCl()" class="crm-btn" style="padding:8px 22px">저장</button></div></div></div>
+<div id="crmAcModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)document.getElementById('crmAcModal').style.display='none'"><div style="background:#fff;border-radius:14px;max-width:560px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmAcTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="document.getElementById('crmAcModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmAcForm" style="padding:18px 20px"></div><div style="display:flex;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid #eef2f7;position:sticky;bottom:0;background:#fff"><button id="crmAcDel" onclick="CRM._delAc()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">삭제</button><button onclick="CRM._saveAc()" class="crm-btn" style="padding:8px 22px">저장</button></div></div></div>
 <div class="page" id="page-crm-pipeline">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div style="font-size:18px;font-weight:700;color:#0f172a">🧩 <span id="crmPipeTitle">딜 파이프라인</span></div>
@@ -2621,7 +2633,7 @@ var MENU_ROLES = {
   'customer-analysis':['sales'], 'inventory':['sales'],
   'payments-list':['finance'], 'payment-input':['finance'], 'outstanding':['finance'],
   'fin-report':['finance'], 'fin-ledger':['finance'], 'fin-daily':['finance'], 'fin-assets':['finance'],
-  'excel-upload':['finance'],'crm-pipeline':['sales','finance'],'crm-forecast':['sales','finance']
+  'excel-upload':['finance'],'crm-pipeline':['sales','finance'],'crm-forecast':['sales','finance'],'crm-clients':['sales','finance'],'crm-activities':['sales','finance'],'crm-perf':['sales','finance']
 };
 function _navKey(item){
   var oc=item.getAttribute('onclick')||'';
@@ -3522,7 +3534,7 @@ var T = {
 
     sideTitle:'일본법인<br>경영관리',sideSubtitle:'',
 
-    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'딜 파이프라인',navCRMForecast:'매출 예측',
+    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'딜 파이프라인',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',
 
     navDash:'대시보드',navExec:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
@@ -3644,7 +3656,7 @@ var T = {
 
     sideTitle:'日本法人<br>経営管理',sideSubtitle:'',
 
-    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'ディール パイプライン',navCRMForecast:'売上予測',
+    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'ディール パイプライン',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',
 
     navDash:'ダッシュボード',navExec:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
@@ -4142,12 +4154,17 @@ function _esTrend(year){
   var rateVals=mkeys.map(function(k,i){var p=mon?mon[i]:0,tt=mt(k);return tt>0?parseFloat((p/tt*100).toFixed(1)):null;});
   var mVals=mkeys.map(function(k,i){return Math.round(((cbc?cbc.mach[i]:0))/1e6*10)/10;});
   var cVals=mkeys.map(function(k,i){return Math.round(((cbc?cbc.cons[i]:0))/1e6*10)/10;});
+  var _curM=(new Date()).getMonth()+1;
+  if(window.CRM&&CRM.isLoaded&&!CRM.isLoaded()&&!window._esFcWait){window._esFcWait=1;CRM.ensure(function(){window._esFcWait=0;var ap=document.querySelector('.page.active');if(ap&&ap.id==='page-exec-summary')_esTrend(year);});}
+  var _fc=(window.CRM&&CRM.forecastArr)?CRM.forecastArr(year):null;
+  var fcVals=mkeys.map(function(k,i){var m=i+1;if(!_fc||m<_curM)return null;var f=_fc[i]||0;if(f<=0)return null;return Math.round(((mon?mon[i]:0)+f)/1e6*10)/10;});
   var A=document.getElementById('esAchChart');
   if(A){ if(window._esAchChart)window._esAchChart.destroy();
     window._esAchChart=new Chart(A,{type:'bar',data:{labels:mlabels,datasets:[
       {label:jp?'売上実績(百万円)':'매출 실적(백만엔)',data:payVals,backgroundColor:'rgba(99,102,241,0.75)',borderRadius:5,yAxisID:'y'},
       {label:jp?'目標(百万円)':'목표(백만엔)',data:tgtVals,type:'line',borderColor:'#f59e0b',backgroundColor:'transparent',borderWidth:2,borderDash:[6,3],pointRadius:3,yAxisID:'y'},
-      {label:jp?'達成率(%)':'달성률(%)',data:rateVals,type:'line',borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#8b5cf6',fill:false,yAxisID:'y2'}
+      {label:jp?'達成率(%)':'달성률(%)',data:rateVals,type:'line',borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#8b5cf6',fill:false,yAxisID:'y2'},
+      {label:jp?'着地予測(百万円)':'착지예측(백만엔)',data:fcVals,type:'line',borderColor:'#0f766e',backgroundColor:'transparent',borderWidth:2,borderDash:[2,3],pointRadius:3,pointStyle:'rectRot',fill:false,yAxisID:'y',spanGaps:false}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+(ctx.parsed.y!==null?ctx.parsed.y+(ctx.datasetIndex===2?'%':'M¥'):'-');}}}},
       scales:{y:{position:'left',ticks:{callback:function(v){return v+'M¥';}},grid:{color:'#f1f5f9'}},y2:{position:'right',min:0,ticks:{callback:function(v){return v+'%';}},grid:{drawOnChartArea:false}}}
@@ -8252,9 +8269,9 @@ window.WT_INV=(function(){
 
 </script>
 <script>
-/* ═══════════ 일본법인 CRM (1단계: 딜 파이프라인 + 매출 예측) ═══════════ */
+/* ═══════════ 일본법인 CRM (딜 파이프라인 · 매출 예측 · 고객사 360 · 활동 · 성과) ═══════════ */
 window.CRM=(function(){
-  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''};
+  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='timeline';
   var STAGES=[
     {k:'lead',   ko:'리드',    jp:'リード',   prob:20, col:'#64748b'},
     {k:'consult',ko:'상담중',  jp:'商談中',   prob:40, col:'#3b82f6'},
@@ -8262,14 +8279,25 @@ window.CRM=(function(){
     {k:'nego',   ko:'협의중',  jp:'交渉中',   prob:80, col:'#f59e0b'},
     {k:'won',    ko:'계약완료',jp:'成約',     prob:100,col:'#16a34a'}
   ];
+  var ATYPES=[
+    {k:'call',ko:'콜',jp:'コール',col:'#3b82f6',ic:'📞'},
+    {k:'meet',ko:'미팅',jp:'ミーティング',col:'#8b5cf6',ic:'🤝'},
+    {k:'visit',ko:'방문',jp:'訪問',col:'#0f766e',ic:'🏥'},
+    {k:'demo',ko:'데모',jp:'デモ',col:'#f59e0b',ic:'🔬'},
+    {k:'as',ko:'AS',jp:'AS',col:'#ef4444',ic:'🛠'},
+    {k:'etc',ko:'기타',jp:'その他',col:'#94a3b8',ic:'📝'}
+  ];
+  var GRADE={A:'#16a34a',B:'#f59e0b',C:'#94a3b8'};
+  var STATUS=[{k:'active',ko:'활성',jp:'活性',col:'#16a34a'},{k:'lead',ko:'잠재',jp:'潜在',col:'#3b82f6'},{k:'dormant',ko:'휴면',jp:'休眠',col:'#94a3b8'}];
   function L(ko,jp){return (typeof lang!=='undefined'&&lang==='jp')?jp:ko;}
   function stg(k){for(var i=0;i<STAGES.length;i++)if(STAGES[i].k===k)return STAGES[i];return STAGES[0];}
+  function aty(k){for(var i=0;i<ATYPES.length;i++)if(ATYPES[i].k===k)return ATYPES[i];return ATYPES[5];}
   function _yen(v){return '¥'+(Math.round(v||0)).toLocaleString();}
-  function _m(v){return Math.round((v||0)/1e6)+'M';}
   function _esc(s){return (typeof esc==='function')?esc(s):String(s==null?'':s);}
   function _tr(s){return (typeof trUser==='function')?trUser(s):_esc(s);}
   function _today(){return new Date().toISOString().slice(0,10);}
-  function _uid(){return 'D'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);}
+  function _uid(p){return (p||'X')+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);}
+  function _av(nm,col){var c=(nm||'-').trim().slice(0,1).toUpperCase();return '<span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:'+(col||'#94a3b8')+';color:#fff;font-weight:800;font-size:13px;flex-shrink:0">'+_esc(c)+'</span>';}
 
   function load(cb){
     if(_loaded){if(cb)cb();return;}
@@ -8282,8 +8310,23 @@ window.CRM=(function(){
   function save(){
     try{_sb.from('wtj_data').upsert({key:'crm',data:_d,updated_at:new Date().toISOString()},{onConflict:'key'}).then(function(r){if(r&&r.error)alert('저장 실패: '+r.error.message);});}catch(e){alert('저장 오류');}
   }
+  function _kc(l,v,s,c){return '<div style="background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:12px 14px;border-left:4px solid '+(c||'#cbd5e1')+'"><div style="font-size:11px;color:#64748b">'+l+'</div><div style="font-size:18px;font-weight:800;color:'+(c||'#0f172a')+'">'+v+'</div><div style="font-size:11px;color:#94a3b8">'+(s||'&nbsp;')+'</div></div>';}
 
-  // ── 예측: open 딜을 예상월별 확률가중 집계 ──
+  // ── 기존 매출 조인(고객사 360) ──
+  function _cliList(){var m={};try{(_consolSales||[]).forEach(function(x){if(x.client)m[x.client]=1;});}catch(e){}_d.clients.forEach(function(c){if(c.name)m[c.name]=1;});_d.deals.forEach(function(d){if(d.client)m[d.client]=1;});return Object.keys(m).sort();}
+  function _cliStats(name){
+    var y=String((new Date()).getFullYear()),sale=0,out=0,cnt=0,last='';
+    try{(_consolSales||[]).forEach(function(x){ if(x.client!==name)return; var n=(x.net!=null?x.net:x.total)||0; var rc=x.recog||x.date||'';
+      if(String(rc).slice(0,4)===y)sale+=n;
+      var paid=(x.collections||[]).reduce(function(s,c){return s+(c&&!c.adv?(c.amount||0):0);},0);
+      out+=Math.max(0,(x.total||0)-paid); cnt++; if((x.date||'')>last)last=x.date||''; });}catch(e){}
+    var deals=_d.deals.filter(function(d){return d.client===name&&d.stage!=='won'&&d.stage!=='lost';});
+    var wsum=deals.reduce(function(s,d){return s+(d.amount||0)*((d.prob!=null?d.prob:stg(d.stage).prob)/100);},0);
+    return {sale:sale,out:out,cnt:cnt,last:last,deals:deals,wsum:wsum};
+  }
+  function _cliMeta(name){for(var i=0;i<_d.clients.length;i++)if(_d.clients[i].name===name)return _d.clients[i];return null;}
+
+  // ── 예측 ──
   function forecast(year){
     var mon={}; for(var m=1;m<=12;m++)mon[m]={w:0,raw:0,n:0};
     _d.deals.forEach(function(dl){
@@ -8295,10 +8338,9 @@ window.CRM=(function(){
     });
     return mon;
   }
-  // 대시보드 등 외부에서 쓸 월별 가중예측 배열(0~11)
   function forecastArr(year){var mon=forecast(year);var a=[];for(var m=1;m<=12;m++)a.push(mon[m].w);return a;}
 
-  // ── 딜 카드 ──
+  /* ═══ 딜 파이프라인 ═══ */
   function _card(dl){
     var s=stg(dl.stage), jp=(lang==='jp');
     var prob=(dl.prob!=null?dl.prob:s.prob);
@@ -8314,7 +8356,6 @@ window.CRM=(function(){
       '</div>'+
       '<div style="font-size:11px;color:#94a3b8;margin-top:3px">'+(jp?'予想':'예상')+' '+(dl.expMonth||'-')+(dl.owner?' · '+_esc(dl.owner):'')+'</div>'+nextTxt+'</div>';
   }
-  // ── 칸반 ──
   function render(){
     var host=document.getElementById('crmPipeBody'); if(!host)return;
     var jp=(lang==='jp');
@@ -8325,7 +8366,6 @@ window.CRM=(function(){
       if(_flt.q){var s=(d.client+' '+d.product+' '+(d.memo||'')).toLowerCase();if(s.indexOf(_flt.q.toLowerCase())<0)return false;}
       return true;
     });
-    // KPI
     var open=deals.filter(function(d){return d.stage!=='won';});
     var wsum=open.reduce(function(s,d){return s+(d.amount||0)*((d.prob!=null?d.prob:stg(d.stage).prob)/100);},0);
     var osum=open.reduce(function(s,d){return s+(d.amount||0);},0);
@@ -8335,46 +8375,36 @@ window.CRM=(function(){
       _kc(jp?'加重予想売上':'가중 예상매출',_yen(wsum),jp?'確率反映':'확률 반영','#0f766e')+
       _kc(jp?'成約(今期)':'계약완료(당기)',_yen(wonSum),'','#16a34a')+
       _kc(jp?'担当':'담당',Object.keys(owners).length+(jp?'名':'명'),'')+'</div>';
-    // 필터바
     var oopt='<option value="">'+(jp?'全担当':'전체 담당')+'</option>'+Object.keys(owners).map(function(o){return '<option value="'+_esc(o)+'"'+(_flt.owner===o?' selected':'')+'>'+_esc(o)+'</option>';}).join('');
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
       '<button class="crm-btn" onclick="CRM._open()">+ '+(jp?'ディール追加':'딜 추가')+'</button>'+
       '<select class="filter-input" style="width:130px" onchange="CRM._setFlt(\'owner\',this.value)">'+oopt+'</select>'+
-      '<input class="filter-input" style="width:150px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_flt.q)+'" oninput="CRM._setFlt(\'q\',this.value)">'+
-      '</div>';
-    // 컬럼
+      '<input class="filter-input" style="width:150px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_flt.q)+'" oninput="CRM._setFlt(\'q\',this.value)"></div>';
     var cols=STAGES.map(function(s){
       var ds=deals.filter(function(d){return d.stage===s.k;});
       var tot=ds.reduce(function(a,d){return a+(d.amount||0);},0);
-      return '<div class="crm-col">'+
-        '<div class="crm-colh" style="border-top:3px solid '+s.col+'"><span>'+L(s.ko,s.jp)+'</span>'+
-          '<span class="crm-colc">'+ds.length+'</span><div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">'+_yen(tot)+'</div></div>'+
+      return '<div class="crm-col"><div class="crm-colh" style="border-top:3px solid '+s.col+'"><span style="font-size:13px;font-weight:800;color:#0f172a">'+L(s.ko,s.jp)+'</span>'+
+        '<span class="crm-colc">'+ds.length+'</span><div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">'+_yen(tot)+'</div></div>'+
         '<div class="crm-collist">'+(ds.length?ds.map(_card).join(''):'<div style="text-align:center;color:#cbd5e1;font-size:12px;padding:20px 0">—</div>')+'</div></div>';
     }).join('');
     host.innerHTML=kpi+bar+'<div class="crm-kanban">'+cols+'</div>';
   }
-  function _kc(l,v,s,c){return '<div style="background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:12px 14px;border-left:4px solid '+(c||'#cbd5e1')+'"><div style="font-size:11px;color:#64748b">'+l+'</div><div style="font-size:18px;font-weight:800;color:'+(c||'#0f172a')+'">'+v+'</div><div style="font-size:11px;color:#94a3b8">'+(s||'&nbsp;')+'</div></div>';}
   function _setFlt(k,v){_flt[k]=v;render();}
 
-  // ── 예측 페이지: 실적 + 가중예측 ──
+  /* ═══ 매출 예측 ═══ */
   function renderForecast(){
     var host=document.getElementById('crmFcBody'); if(!host)return;
     var jp=(lang==='jp'); var year=String((new Date()).getFullYear());
-    // 실적(매출인식) 월별 — 기존 consolCalc 활용
     var act=[]; for(var i=0;i<12;i++)act.push(0);
     try{ if(typeof consolCalc==='function'&&typeof _consolSales!=='undefined'&&_consolSales){ act=consolCalc(year).monthly.slice(); } }catch(e){}
-    var fc=forecast(year);
-    var curM=(new Date()).getMonth()+1;
-    // 목표(annualBudget/monthlyTarget)
+    var fc=forecast(year), curM=(new Date()).getMonth()+1;
     var tgt=[]; try{var dd=(window._data&&_data.dashboard)||{}; for(var m=1;m<=12;m++)tgt.push((dd.monthlyTarget&&dd.monthlyTarget[year+'-'+('0'+m).slice(-2)])||0);}catch(e){for(var m2=0;m2<12;m2++)tgt.push(0);}
-    var actCum=0,fcCum=0,tgtCum=0;
-    var rows='';
-    var projTotal=0, actTotal=0;
+    var rows='',projTotal=0,actTotal=0;
     for(var m=1;m<=12;m++){
-      var a=act[m-1]||0, w=fc[m].w||0, t=tgt[m-1]||0;
-      var proj=(m<curM)?a:(m===curM?Math.max(a,a+w):w); // 지난달=실적, 이번달=실적+잔여예측, 미래=예측
+      var a=act[m-1]||0,w=fc[m].w||0,t=tgt[m-1]||0;
+      var proj=(m<curM)?a:(m===curM?(a+w):w);
       actTotal+=(m<=curM?a:0); projTotal+=proj;
-      var isPast=m<curM, isCur=m===curM;
+      var isCur=m===curM,isPast=m<curM;
       rows+='<tr'+(isCur?' style="background:#f0fdfa"':'')+'><td style="padding:8px 10px;font-weight:'+(isCur?'800':'600')+'">'+m+(jp?'月':'월')+(isCur?' ◀':'')+'</td>'+
         '<td class="num" style="padding:8px 10px">'+(isPast||isCur?_yen(a):'<span style="color:#cbd5e1">-</span>')+'</td>'+
         '<td class="num" style="padding:8px 10px;color:#0f766e">'+(fc[m].n?_yen(w)+'<span style="font-size:10px;color:#94a3b8"> ('+fc[m].n+')</span>':'<span style="color:#cbd5e1">-</span>')+'</td>'+
@@ -8386,26 +8416,107 @@ window.CRM=(function(){
     var hero='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">'+
       _kc(jp?'今期実績(累計)':'당기 실적(누계)',_yen(actTotal),year+(jp?'年':'년'),'#3b82f6')+
       _kc(jp?'年末着地 予測':'연말 착지 전망',_yen(projTotal),jp?'実績+加重予測':'실적+가중예측','#0f766e')+
-      _kc(jp?'目標達成 見込':'목표 달성 전망',(annTgt>0?achv.toFixed(0)+'%':'-'),jp?'目標 ':'목표 '+_yen(annTgt),achv>=100?'#16a34a':achv>=80?'#f59e0b':'#ef4444')+'</div>';
+      _kc(jp?'目標達成 見込':'목표 달성 전망',(annTgt>0?achv.toFixed(0)+'%':'-'),(jp?'目標 ':'목표 ')+_yen(annTgt),achv>=100?'#16a34a':achv>=80?'#f59e0b':'#ef4444')+'</div>';
     host.innerHTML=hero+
-      '<div style="font-size:12px;color:#64748b;margin-bottom:8px">'+(jp?'※ 予測 = パイプラインの確率加重(open ディール)。過去=実績、当月=実績+残予測、未来=加重予測':'※ 예측 = 파이프라인 확률가중(진행 딜). 과거=실적, 당월=실적+잔여예측, 미래=가중예측')+'</div>'+
+      '<div style="font-size:12px;color:#64748b;margin-bottom:8px">'+(jp?'※ 予測=パイプライン確率加重(open)。過去=実績、当月=実績+残予測、未来=加重予測':'※ 예측=파이프라인 확률가중(진행 딜). 과거=실적, 당월=실적+잔여예측, 미래=가중예측')+'</div>'+
       '<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr>'+
-        '<th style="text-align:left;padding:7px 10px">'+(jp?'月':'월')+'</th><th class="num" style="padding:7px 10px">'+(jp?'実績':'실적')+'</th><th class="num" style="padding:7px 10px">'+(jp?'加重予測':'가중예측')+'</th><th class="num" style="padding:7px 10px">'+(jp?'着地予測':'착지전망')+'</th><th class="num" style="padding:7px 10px">'+(jp?'目標':'목표')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+        '<th style="text-align:left;padding:7px 10px">'+(jp?'月':'월')+'</th><th class="num" style="padding:7px 10px">'+(jp?'実績':'실적')+'</th><th class="num" style="padding:7px 10px">'+(jp?'加重予測':'가중예측')+'</th><th class="num" style="padding:7px 10px">'+(jp?'着地':'착지')+'</th><th class="num" style="padding:7px 10px">'+(jp?'目標':'목표')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
 
-  // ── 딜 입력/수정 모달 ──
+  /* ═══ 고객사 360 ═══ */
+  function renderClients(){
+    var host=document.getElementById('crmClBody'); if(!host)return; var jp=(lang==='jp');
+    var names=_cliList();
+    var rowsD=names.map(function(nm){var st=_cliStats(nm),mt=_cliMeta(nm)||{};return {nm:nm,st:st,mt:mt};});
+    if(_clFltV.q){var q=_clFltV.q.toLowerCase();rowsD=rowsD.filter(function(r){return (r.nm+' '+(r.mt.owner||'')+' '+(r.mt.region||'')).toLowerCase().indexOf(q)>=0;});}
+    if(_clFltV.status){rowsD=rowsD.filter(function(r){return (r.mt.status||'')===_clFltV.status;});}
+    rowsD.sort(function(a,b){ if(_clFltV.sort==='out')return b.st.out-a.st.out; if(_clFltV.sort==='deal')return b.st.wsum-a.st.wsum; return b.st.sale-a.st.sale; });
+    var totSale=rowsD.reduce(function(s,r){return s+r.st.sale;},0),totOut=rowsD.reduce(function(s,r){return s+r.st.out;},0);
+    var kpi='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">'+
+      _kc(jp?'取引先':'거래처',rowsD.length+(jp?'社':'개'),'')+
+      _kc(jp?'当期売上(合計)':'당기 매출(합계)',_yen(totSale),'','#3b82f6')+
+      _kc(jp?'未収(合計)':'미수(합계)',_yen(totOut),'','#8b5cf6')+
+      _kc(jp?'進行ディール':'진행 딜',rowsD.reduce(function(s,r){return s+r.st.deals.length;},0)+(jp?'件':'건'),'','#0f766e')+'</div>';
+    var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
+      '<button class="crm-btn" onclick="CRM._openCl()">+ '+(jp?'取引先追加':'거래처 추가')+'</button>'+
+      '<input class="filter-input" style="width:170px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_clFltV.q)+'" oninput="CRM._clFlt(\'q\',this.value)">'+
+      '<select class="filter-input" style="width:110px" onchange="CRM._clFlt(\'status\',this.value)"><option value="">'+(jp?'全状態':'전체 상태')+'</option>'+STATUS.map(function(s){return '<option value="'+s.k+'"'+(_clFltV.status===s.k?' selected':'')+'>'+L(s.ko,s.jp)+'</option>';}).join('')+'</select>'+
+      '<select class="filter-input" style="width:120px" onchange="CRM._clFlt(\'sort\',this.value)"><option value="sale"'+(_clFltV.sort==='sale'?' selected':'')+'>'+(jp?'売上順':'매출순')+'</option><option value="out"'+(_clFltV.sort==='out'?' selected':'')+'>'+(jp?'未収順':'미수순')+'</option><option value="deal"'+(_clFltV.sort==='deal'?' selected':'')+'>'+(jp?'ディール順':'딜순')+'</option></select></div>';
+    var grid=rowsD.map(function(r){
+      var gr=(r.mt.grade||'').toUpperCase(),gc=GRADE[gr]||'#94a3b8';
+      var stObj=null;for(var i=0;i<STATUS.length;i++)if(STATUS[i].k===r.mt.status)stObj=STATUS[i];
+      var badge=stObj?'<span style="font-size:10px;font-weight:700;color:#fff;background:'+stObj.col+';border-radius:5px;padding:1px 7px">'+L(stObj.ko,stObj.jp)+'</span>':'';
+      return '<div class="crm-ccard" onclick="CRM._openClient(\''+_esc(r.nm).replace(/'/g,"")+'\')">'+
+        '<div style="display:flex;align-items:center;gap:9px">'+_av(r.nm,gc)+'<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:13.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tr(r.nm)+'</div><div style="font-size:11px;color:#94a3b8">'+(r.mt.owner?_esc(r.mt.owner)+' · ':'')+(gr?'등급 '+gr:'')+'</div></div>'+badge+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;text-align:center">'+
+          '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'当期売上':'당기매출')+'</div><div style="font-size:12px;font-weight:800;color:#1d4ed8">'+_yen(r.st.sale)+'</div></div>'+
+          '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'未収':'미수')+'</div><div style="font-size:12px;font-weight:800;color:'+(r.st.out>0?'#dc2626':'#94a3b8')+'">'+_yen(r.st.out)+'</div></div>'+
+          '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'ディール':'진행딜')+'</div><div style="font-size:12px;font-weight:800;color:#0f766e">'+r.st.deals.length+'</div></div>'+
+        '</div></div>';
+    }).join('')||'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'データなし':'데이터 없음')+'</div>';
+    host.innerHTML=kpi+bar+'<div class="crm-cgrid">'+grid+'</div>';
+  }
+  function _clFlt(k,v){_clFltV[k]=v;renderClients();}
+  function _openClient(name){
+    var jp=(lang==='jp'),st=_cliStats(name),mt=_cliMeta(name)||{};
+    document.getElementById('crmDwTitle').innerHTML=_tr(name)+' <span style="font-size:12px;color:#94a3b8;font-weight:500">360°</span>';
+    var info='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">'+
+      _kc(jp?'当期売上':'당기 매출',_yen(st.sale),st.cnt+(jp?'件':'건'),'#3b82f6')+
+      _kc(jp?'未収':'미수',_yen(st.out),'',st.out>0?'#dc2626':'#94a3b8')+
+      _kc(jp?'加重予想(ディール)':'가중예상(딜)',_yen(st.wsum),st.deals.length+(jp?'件':'건'),'#0f766e')+'</div>';
+    var meta='';
+    if(mt.phone||mt.email||mt.region||mt.owner||mt.grade||mt.status){
+      meta='<div style="background:#f8fafc;border:1px solid #eef2f7;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#334155">'+
+        [mt.owner?(jp?'担当 ':'담당 ')+_esc(mt.owner):'',mt.grade?(jp?'等級 ':'등급 ')+_esc(mt.grade):'',mt.region?(jp?'地域 ':'지역 ')+_esc(mt.region):'',mt.phone?'☎ '+_esc(mt.phone):'',mt.email?'✉ '+_esc(mt.email):''].filter(Boolean).join(' · ')+
+        (mt.memo?'<div style="margin-top:6px;color:#64748b">'+_tr(mt.memo)+'</div>':'')+'</div>';
+    }
+    var deals=st.deals.length?'<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">🧩 '+(jp?'進行ディール':'진행 딜')+'</div>'+st.deals.map(function(d){var s=stg(d.stage);return '<div onclick="CRM._open(\''+d.id+'\')" style="cursor:pointer;display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;border:1px solid #eef2f7;margin-bottom:5px"><span style="font-size:12.5px"><span style="color:'+s.col+';font-weight:700">●</span> '+_esc(d.product||'-')+' <span style="color:#94a3b8">'+L(s.ko,s.jp)+'</span></span><b style="font-size:12.5px;color:#1d4ed8">'+_yen(d.amount)+'</b></div>';}).join('')+'</div>':'';
+    var acts=_d.acts.filter(function(a){return a.client===name;}).sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;}).slice(0,6);
+    var actH=acts.length?'<div><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">📇 '+(jp?'活動':'활동')+'</div>'+acts.map(function(a){var t=aty(a.type);return '<div style="display:flex;gap:8px;padding:5px 0;font-size:12.5px"><span>'+t.ic+'</span><span style="color:#94a3b8;width:74px;flex-shrink:0">'+(a.date||'')+'</span><span>'+_tr(a.content||'')+'</span></div>';}).join('')+'</div>':'';
+    document.getElementById('crmDwBody').innerHTML=info+meta+
+      '<div style="display:flex;gap:8px;margin-bottom:14px"><button class="crm-btn" style="font-size:12px;padding:6px 12px" onclick="CRM._openCl(\''+_esc(name).replace(/'/g,"")+'\')">'+(jp?'情報編集':'정보 편집')+'</button><button class="crm-btn" style="font-size:12px;padding:6px 12px;background:#334155" onclick="CRM._openAc(null,\''+_esc(name).replace(/'/g,"")+'\')">+ '+(jp?'活動記録':'활동 기록')+'</button></div>'+
+      deals+actH;
+    document.getElementById('crmDw').style.display='flex';
+  }
+  function _closeDw(){document.getElementById('crmDw').style.display='none';}
+  function _openCl(name){
+    var jp=(lang==='jp'),c=name?(_cliMeta(name)||{name:name}):{};var isNew=!c.name||!_cliMeta(c.name);
+    document.getElementById('crmClTitle').textContent=isNew?(jp?'取引先追加':'거래처 추가'):(jp?'取引先編集':'거래처 편집');
+    function fld(lb,html){return '<div style="margin-bottom:11px"><label style="display:block;font-size:12px;color:#64748b;font-weight:600;margin-bottom:4px">'+lb+'</label>'+html+'</div>';}
+    document.getElementById('crmClForm').innerHTML=
+      fld(jp?'取引先名 *':'거래처명 *','<input id="clName" class="filter-input" style="width:100%" value="'+_esc(c.name||'')+'"'+(isNew?'':' readonly')+'>')+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        fld(jp?'担当':'담당','<input id="clOwner" class="filter-input" style="width:100%" value="'+_esc(c.owner||'')+'">')+
+        fld(jp?'地域':'지역','<input id="clRegion" class="filter-input" style="width:100%" value="'+_esc(c.region||'')+'">')+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        fld(jp?'等級':'등급','<select id="clGrade" class="filter-input" style="width:100%"><option value="">-</option>'+['A','B','C'].map(function(g){return '<option'+(c.grade===g?' selected':'')+'>'+g+'</option>';}).join('')+'</select>')+
+        fld(jp?'状態':'상태','<select id="clStatus" class="filter-input" style="width:100%"><option value="">-</option>'+STATUS.map(function(s){return '<option value="'+s.k+'"'+(c.status===s.k?' selected':'')+'>'+L(s.ko,s.jp)+'</option>';}).join('')+'</select>')+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        fld(jp?'電話':'전화','<input id="clPhone" class="filter-input" style="width:100%" value="'+_esc(c.phone||'')+'">')+
+        fld(jp?'メール':'이메일','<input id="clEmail" class="filter-input" style="width:100%" value="'+_esc(c.email||'')+'">')+'</div>'+
+      fld(jp?'メモ':'비고','<textarea id="clMemo" class="filter-input" style="width:100%;height:52px">'+_esc(c.memo||'')+'</textarea>');
+    document.getElementById('crmClDel').style.display=isNew?'none':'inline-block';
+    document.getElementById('crmClModal').style.display='flex';
+  }
+  function _saveCl(){
+    var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+    var nm=g('clName'); if(!nm){alert(L('거래처명을 입력하세요','取引先名を入力してください'));return;}
+    var obj={name:nm,owner:g('clOwner'),region:g('clRegion'),grade:g('clGrade'),status:g('clStatus'),phone:g('clPhone'),email:g('clEmail'),memo:g('clMemo')};
+    var found=false;for(var i=0;i<_d.clients.length;i++)if(_d.clients[i].name===nm){_d.clients[i]=obj;found=true;break;}
+    if(!found)_d.clients.push(obj);
+    save();document.getElementById('crmClModal').style.display='none';renderClients();
+  }
+  function _delCl(){var nm=document.getElementById('clName').value.trim();if(!confirm(L('이 거래처 정보를 삭제할까요?(매출/딜은 유지)','この取引先情報を削除しますか？')))return;_d.clients=_d.clients.filter(function(c){return c.name!==nm;});save();document.getElementById('crmClModal').style.display='none';renderClients();}
+
+  /* ═══ 딜 입력 ═══ */
   function _open(id){
     var jp=(lang==='jp'); var d=id?_d.deals.filter(function(x){return x.id===id;})[0]:null;
-    var isNew=!d; d=d||{id:_uid(),stage:'lead',prob:null,expMonth:(new Date()).toISOString().slice(0,7),createdAt:_today()};
+    var isNew=!d; d=d||{id:_uid('D'),stage:'lead',prob:null,expMonth:(new Date()).toISOString().slice(0,7),createdAt:_today()};
     document.getElementById('crmDlTitle').textContent=isNew?(jp?'ディール追加':'딜 추가'):(jp?'ディール編集':'딜 수정');
-    var f=document.getElementById('crmDlForm');
     var sopt=STAGES.map(function(s){return '<option value="'+s.k+'"'+(d.stage===s.k?' selected':'')+'>'+L(s.ko,s.jp)+' ('+s.prob+'%)</option>';}).join('')+'<option value="lost"'+(d.stage==='lost'?' selected':'')+'>'+(jp?'失注':'실패')+'</option>';
-    // 거래처 자동완성(기존 매출 거래처)
-    var clis={}; try{(_consolSales||[]).forEach(function(x){if(x.client)clis[x.client]=1;});}catch(e){}
-    _d.clients.forEach(function(c){if(c.name)clis[c.name]=1;});
-    var dl=Object.keys(clis).sort().map(function(c){return '<option value="'+_esc(c)+'">';}).join('');
+    var dl=_cliList().map(function(c){return '<option value="'+_esc(c)+'">';}).join('');
     function fld(lb,html){return '<div style="margin-bottom:11px"><label style="display:block;font-size:12px;color:#64748b;font-weight:600;margin-bottom:4px">'+lb+'</label>'+html+'</div>';}
-    f.innerHTML=
+    document.getElementById('crmDlForm').innerHTML=
       fld(jp?'取引先 *':'거래처 *','<input id="dlClient" list="dlClients" class="filter-input" style="width:100%" value="'+_esc(d.client||'')+'"><datalist id="dlClients">'+dl+'</datalist>')+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         fld(jp?'製品':'제품','<input id="dlProduct" class="filter-input" style="width:100%" value="'+_esc(d.product||'')+'">')+
@@ -8416,26 +8527,20 @@ window.CRM=(function(){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         fld(jp?'段階':'단계','<select id="dlStage" class="filter-input" style="width:100%" onchange="CRM._syncProb()">'+sopt+'</select>')+
         fld(jp?'確率(%) 上書':'확률(%) 직접','<input id="dlProb" type="number" min="0" max="100" class="filter-input" style="width:100%" value="'+(d.prob!=null?d.prob:'')+'" placeholder="'+(d.prob!=null?d.prob:stg(d.stage).prob)+'">')+'</div>'+
-        fld(jp?'担当':'담당','<input id="dlOwner" class="filter-input" style="width:100%" value="'+_esc(d.owner||'')+'">')+
+      fld(jp?'担当':'담당','<input id="dlOwner" class="filter-input" style="width:100%" value="'+_esc(d.owner||'')+'">')+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         fld(jp?'次アクション':'다음 액션','<input id="dlNext" class="filter-input" style="width:100%" value="'+_esc(d.next||'')+'">')+
         fld(jp?'期限':'기한','<input id="dlNextDate" type="date" class="filter-input" style="width:100%" value="'+(d.nextDate||'')+'">')+'</div>'+
-        fld(jp?'メモ':'비고','<textarea id="dlMemo" class="filter-input" style="width:100%;height:52px">'+_esc(d.memo||'')+'</textarea>');
+      fld(jp?'メモ':'비고','<textarea id="dlMemo" class="filter-input" style="width:100%;height:52px">'+_esc(d.memo||'')+'</textarea>');
     document.getElementById('crmDlDel').style.display=isNew?'none':'inline-block';
-    document.getElementById('crmDlModal').setAttribute('data-id',d.id);
-    document.getElementById('crmDlModal').setAttribute('data-new',isNew?'1':'0');
-    document.getElementById('crmDlModal').style.display='flex';
+    var mo=document.getElementById('crmDlModal'); mo.setAttribute('data-id',d.id); mo.setAttribute('data-new',isNew?'1':'0'); mo.style.display='flex';
   }
   function _syncProb(){var s=document.getElementById('dlStage').value;var p=document.getElementById('dlProb');if(p&&!p.value)p.placeholder=(stg(s)?stg(s).prob:0);}
   function _saveDl(){
     var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
     var client=g('dlClient'); if(!client){alert(L('거래처를 입력하세요','取引先を入力してください'));return;}
-    var mid=document.getElementById('crmDlModal').getAttribute('data-id');
-    var isNew=document.getElementById('crmDlModal').getAttribute('data-new')==='1';
-    var probRaw=g('dlProb');
-    var obj={id:mid,client:client,product:g('dlProduct'),cat:g('dlCat'),amount:parseFloat(g('dlAmount'))||0,
-      expMonth:g('dlExpMonth'),stage:g('dlStage'),prob:probRaw!==''?parseFloat(probRaw):null,
-      owner:g('dlOwner'),next:g('dlNext'),nextDate:g('dlNextDate'),memo:g('dlMemo'),updatedAt:_today()};
+    var mo=document.getElementById('crmDlModal'),mid=mo.getAttribute('data-id'),isNew=mo.getAttribute('data-new')==='1',probRaw=g('dlProb');
+    var obj={id:mid,client:client,product:g('dlProduct'),cat:g('dlCat'),amount:parseFloat(g('dlAmount'))||0,expMonth:g('dlExpMonth'),stage:g('dlStage'),prob:probRaw!==''?parseFloat(probRaw):null,owner:g('dlOwner'),next:g('dlNext'),nextDate:g('dlNextDate'),memo:g('dlMemo'),updatedAt:_today()};
     if(isNew){obj.createdAt=_today();_d.deals.push(obj);}
     else{for(var i=0;i<_d.deals.length;i++)if(_d.deals[i].id===mid){obj.createdAt=_d.deals[i].createdAt||_today();_d.deals[i]=obj;break;}}
     save(); _closeDl(); render();
@@ -8443,10 +8548,112 @@ window.CRM=(function(){
   function _delDl(){var mid=document.getElementById('crmDlModal').getAttribute('data-id');if(!confirm(L('이 딜을 삭제할까요?','このディールを削除しますか？')))return;_d.deals=_d.deals.filter(function(d){return d.id!==mid;});save();_closeDl();render();}
   function _closeDl(){document.getElementById('crmDlModal').style.display='none';}
 
-  function onPage(id){ load(function(){ if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); }); }
-  function relang(){ var ap=document.querySelector('.page.active'); if(!ap)return; if(ap.id==='page-crm-pipeline')render(); else if(ap.id==='page-crm-forecast')renderForecast(); }
-  return {onPage:onPage, relang:relang, forecastArr:forecastArr,
-    _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt};
+  /* ═══ 활동 기록 ═══ */
+  function renderActs(){
+    var host=document.getElementById('crmAcBody'); if(!host)return; var jp=(lang==='jp');
+    var owners={};_d.acts.forEach(function(a){if(a.owner)owners[a.owner]=1;});
+    var acts=_d.acts.slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
+    if(_acFltV.type)acts=acts.filter(function(a){return a.type===_acFltV.type;});
+    if(_acFltV.owner)acts=acts.filter(function(a){return a.owner===_acFltV.owner;});
+    var today=_today();
+    var late=_d.acts.filter(function(a){return a.next&&a.nextDate&&a.nextDate<today&&!a.done;}).length;
+    var kpi='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'+
+      _kc(jp?'活動(全体)':'활동(전체)',_d.acts.length+(jp?'件':'건'),'')+
+      _kc(jp?'今月':'이번달',_d.acts.filter(function(a){return (a.date||'').slice(0,7)===today.slice(0,7);}).length+(jp?'件':'건'),'','#3b82f6')+
+      _kc(jp?'フォロー遅延':'후속 지연',late+(jp?'件':'건'),'',late>0?'#dc2626':'#94a3b8')+'</div>';
+    var topt='<option value="">'+(jp?'全種類':'전체 유형')+'</option>'+ATYPES.map(function(t){return '<option value="'+t.k+'"'+(_acFltV.type===t.k?' selected':'')+'>'+t.ic+' '+L(t.ko,t.jp)+'</option>';}).join('');
+    var oopt='<option value="">'+(jp?'全担当':'전체 담당')+'</option>'+Object.keys(owners).map(function(o){return '<option value="'+_esc(o)+'"'+(_acFltV.owner===o?' selected':'')+'>'+_esc(o)+'</option>';}).join('');
+    var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
+      '<button class="crm-btn" onclick="CRM._openAc()">+ '+(jp?'活動追加':'활동 추가')+'</button>'+
+      '<select class="filter-input" style="width:130px" onchange="CRM._acFlt(\'type\',this.value)">'+topt+'</select>'+
+      '<select class="filter-input" style="width:120px" onchange="CRM._acFlt(\'owner\',this.value)">'+oopt+'</select></div>';
+    // 세로 레일 타임라인 (일자 그룹)
+    var body='';
+    if(!acts.length){body='<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'記録なし':'기록 없음')+'</div>';}
+    else{
+      body='<div class="crm-tl">'+acts.map(function(a,i){
+        var t=aty(a.type),last=i===acts.length-1;
+        var nx=a.next?'<div style="margin-top:5px;font-size:11.5px;color:'+(a.nextDate&&a.nextDate<today&&!a.done?'#dc2626':'#0f766e')+';background:'+(a.nextDate&&a.nextDate<today&&!a.done?'#fef2f2':'#f0fdfa')+';border-radius:6px;padding:4px 8px">▸ '+_tr(a.next)+(a.nextDate?' ('+a.nextDate+')':'')+'</div>':'';
+        return '<div class="crm-tlrow"><div class="crm-tlrail">'+
+          '<span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:'+t.col+'22;color:'+t.col+';font-size:14px;z-index:1;position:relative">'+t.ic+'</span>'+
+          (last?'':'<span class="crm-tlline"></span>')+'</div>'+
+          '<div class="crm-tlcontent" onclick="CRM._openAc(\''+a.id+'\')" style="cursor:pointer">'+
+            '<div style="font-size:11.5px;color:#94a3b8">'+(a.date||'')+' · <span style="color:'+t.col+';font-weight:700">'+L(t.ko,t.jp)+'</span>'+(a.client?' · '+_tr(a.client):'')+(a.owner?' · '+_esc(a.owner):'')+'</div>'+
+            '<div style="font-size:13.5px;color:#0f172a;margin-top:2px">'+_tr(a.content||'-')+'</div>'+nx+'</div></div>';
+      }).join('')+'</div>';
+    }
+    host.innerHTML=kpi+bar+body;
+  }
+  function _acFlt(k,v){_acFltV[k]=v;renderActs();}
+  function _openAc(id,preClient){
+    var jp=(lang==='jp'); var a=id?_d.acts.filter(function(x){return x.id===id;})[0]:null;
+    var isNew=!a; a=a||{id:_uid('A'),type:'call',date:_today(),client:preClient||''};
+    document.getElementById('crmAcTitle').textContent=isNew?(jp?'活動追加':'활동 추가'):(jp?'活動編集':'활동 수정');
+    var dl=_cliList().map(function(c){return '<option value="'+_esc(c)+'">';}).join('');
+    var dlDeals=_d.deals.filter(function(d){return d.stage!=='won'&&d.stage!=='lost';}).map(function(d){return '<option value="'+d.id+'"'+(a.dealId===d.id?' selected':'')+'>'+_esc(d.client)+' · '+_esc(d.product)+'</option>';}).join('');
+    function fld(lb,html){return '<div style="margin-bottom:11px"><label style="display:block;font-size:12px;color:#64748b;font-weight:600;margin-bottom:4px">'+lb+'</label>'+html+'</div>';}
+    document.getElementById('crmAcForm').innerHTML=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        fld(jp?'種類':'유형','<select id="acType" class="filter-input" style="width:100%">'+ATYPES.map(function(t){return '<option value="'+t.k+'"'+(a.type===t.k?' selected':'')+'>'+t.ic+' '+L(t.ko,t.jp)+'</option>';}).join('')+'</select>')+
+        fld(jp?'日付':'날짜','<input id="acDate" type="date" class="filter-input" style="width:100%" value="'+(a.date||'')+'">')+'</div>'+
+      fld(jp?'取引先':'거래처','<input id="acClient" list="acClients" class="filter-input" style="width:100%" value="'+_esc(a.client||'')+'"><datalist id="acClients">'+dl+'</datalist>')+
+      fld(jp?'関連ディール':'연결 딜','<select id="acDeal" class="filter-input" style="width:100%"><option value="">-</option>'+dlDeals+'</select>')+
+      fld(jp?'内容':'내용','<textarea id="acContent" class="filter-input" style="width:100%;height:60px">'+_esc(a.content||'')+'</textarea>')+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        fld(jp?'次アクション':'다음 조치','<input id="acNext" class="filter-input" style="width:100%" value="'+_esc(a.next||'')+'">')+
+        fld(jp?'期限':'기한','<input id="acNextDate" type="date" class="filter-input" style="width:100%" value="'+(a.nextDate||'')+'">')+'</div>'+
+      fld(jp?'担当':'담당','<input id="acOwner" class="filter-input" style="width:100%" value="'+_esc(a.owner||'')+'">');
+    document.getElementById('crmAcDel').style.display=isNew?'none':'inline-block';
+    var mo=document.getElementById('crmAcModal'); mo.setAttribute('data-id',a.id); mo.setAttribute('data-new',isNew?'1':'0'); mo.style.display='flex';
+  }
+  function _saveAc(){
+    var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+    var mo=document.getElementById('crmAcModal'),mid=mo.getAttribute('data-id'),isNew=mo.getAttribute('data-new')==='1';
+    var obj={id:mid,type:g('acType'),date:g('acDate'),client:g('acClient'),dealId:g('acDeal'),content:g('acContent'),next:g('acNext'),nextDate:g('acNextDate'),owner:g('acOwner')};
+    if(isNew)_d.acts.push(obj); else for(var i=0;i<_d.acts.length;i++)if(_d.acts[i].id===mid){obj.done=_d.acts[i].done;_d.acts[i]=obj;break;}
+    save();document.getElementById('crmAcModal').style.display='none';renderActs();
+  }
+  function _delAc(){var mid=document.getElementById('crmAcModal').getAttribute('data-id');if(!confirm(L('이 활동을 삭제할까요?','この活動を削除しますか？')))return;_d.acts=_d.acts.filter(function(a){return a.id!==mid;});save();document.getElementById('crmAcModal').style.display='none';renderActs();}
+  function _closeAc(){document.getElementById('crmAcModal').style.display='none';}
+
+  /* ═══ 영업 성과 ═══ */
+  function renderPerf(){
+    var host=document.getElementById('crmPfBody'); if(!host)return; var jp=(lang==='jp');
+    var by={};
+    _d.deals.forEach(function(d){var o=d.owner||(jp?'未指定':'미지정');by[o]=by[o]||{o:o,open:0,openAmt:0,w:0,won:0,wonAmt:0,lost:0};var b=by[o];
+      if(d.stage==='won'){b.won++;b.wonAmt+=(d.amount||0);}else if(d.stage==='lost'){b.lost++;}else{b.open++;b.openAmt+=(d.amount||0);b.w+=(d.amount||0)*((d.prob!=null?d.prob:stg(d.stage).prob)/100);}});
+    var arr=Object.keys(by).map(function(k){var b=by[k];b.conv=(b.won+b.lost)>0?(b.won/(b.won+b.lost)*100):(b.won>0?100:0);b.score=b.w+b.wonAmt;return b;}).sort(function(a,b){return b.score-a.score;});
+    var maxScore=arr.length?arr[0].score||1:1;
+    var medal=['🥇','🥈','🥉'];
+    if(!arr.length){host.innerHTML='<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'ディールなし':'딜 없음')+'</div>';return;}
+    host.innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+arr.map(function(b,i){
+      return '<div style="background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:14px 16px">'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div style="width:34px;text-align:center;font-size:'+(i<3?'20px':'14px')+';font-weight:800;color:#64748b">'+(i<3?medal[i]:(i+1))+'</div>'+
+          _av(b.o,'#0f766e')+
+          '<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px;color:#0f172a">'+_esc(b.o)+'</div>'+
+            '<div style="font-size:11px;color:#94a3b8">'+(jp?'進行':'진행')+' '+b.open+' · '+(jp?'成約':'성사')+' '+b.won+' · '+(jp?'成約率':'전환율')+' '+b.conv.toFixed(0)+'%</div></div>'+
+          '<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:#0f766e">'+_yen(b.w)+'</div><div style="font-size:10px;color:#94a3b8">'+(jp?'加重パイプ':'가중 파이프')+'</div></div>'+
+        '</div>'+
+        '<div style="height:7px;background:#f1f5f9;border-radius:4px;margin-top:10px;overflow:hidden"><div style="height:100%;width:'+Math.round(b.score/maxScore*100)+'%;background:linear-gradient(90deg,#0f766e,#14b8a6);border-radius:4px"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-top:5px"><span>'+(jp?'進行額 ':'진행액 ')+_yen(b.openAmt)+'</span><span>'+(jp?'成約額 ':'성사액 ')+_yen(b.wonAmt)+'</span></div>'+
+        '</div>';
+    }).join('')+'</div>';
+  }
+
+  function onPage(id){ load(function(){
+    if(id==='crm-pipeline')render();
+    else if(id==='crm-forecast')renderForecast();
+    else if(id==='crm-clients')renderClients();
+    else if(id==='crm-activities')renderActs();
+    else if(id==='crm-perf')renderPerf();
+  }); }
+  function relang(){ var ap=document.querySelector('.page.active'); if(!ap)return; var id=ap.id.replace('page-','');
+    if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); else if(id==='crm-clients')renderClients(); else if(id==='crm-activities')renderActs(); else if(id==='crm-perf')renderPerf(); }
+  return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;},
+    _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
+    _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt,
+    _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt};
 })();
 </script>
 
