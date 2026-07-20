@@ -4156,8 +4156,9 @@ function _esTrend(year){
   var cVals=mkeys.map(function(k,i){return Math.round(((cbc?cbc.cons[i]:0))/1e6*10)/10;});
   var _curM=(new Date()).getMonth()+1;
   if(window.CRM&&CRM.isLoaded&&!CRM.isLoaded()&&!window._esFcWait){window._esFcWait=1;CRM.ensure(function(){window._esFcWait=0;var ap=document.querySelector('.page.active');if(ap&&ap.id==='page-exec-summary')_esTrend(year);});}
-  var _fc=(window.CRM&&CRM.forecastArr)?CRM.forecastArr(year):null;
-  var fcVals=mkeys.map(function(k,i){var m=i+1;if(!_fc||m<_curM)return null;var f=_fc[i]||0;if(f<=0)return null;return Math.round(((mon?mon[i]:0)+f)/1e6*10)/10;});
+  var _mach=(window.CRM&&CRM.forecastMachArr)?CRM.forecastMachArr(year):null;
+  var _cons=(window.CRM&&CRM.consRunArr)?CRM.consRunArr(year):null;
+  var fcVals=mkeys.map(function(k,i){var m=i+1;if(m<_curM)return null;var f=((_mach?_mach[i]:0)+(_cons?_cons[i]:0));if(f<=0)return null;return Math.round(((mon?mon[i]:0)+f)/1e6*10)/10;});
   var A=document.getElementById('esAchChart');
   if(A){ if(window._esAchChart)window._esAchChart.destroy();
     window._esAchChart=new Chart(A,{type:'bar',data:{labels:mlabels,datasets:[
@@ -8339,6 +8340,9 @@ window.CRM=(function(){
     return mon;
   }
   function forecastArr(year){var mon=forecast(year);var a=[];for(var m=1;m<=12;m++)a.push(mon[m].w);return a;}
+  function forecastMach(year){var mon={};for(var m=1;m<=12;m++)mon[m]=0;_d.deals.forEach(function(dl){if(dl.stage==='won'||dl.stage==='lost')return;if((dl.cat||'')==='소모품')return;var em=String(dl.expMonth||'');if(em.slice(0,4)!==String(year))return;var m=parseInt(em.slice(5,7),10);if(!(m>=1&&m<=12))return;mon[m]+=(dl.amount||0)*((dl.prob!=null?dl.prob:stg(dl.stage).prob)/100);});var a=[];for(var m2=1;m2<=12;m2++)a.push(mon[m2]);return a;}
+  function forecastMachRaw(year){var mon={};for(var m=1;m<=12;m++)mon[m]=0;_d.deals.forEach(function(dl){if(dl.stage==='won'||dl.stage==='lost')return;if((dl.cat||'')==='소모품')return;var em=String(dl.expMonth||'');if(em.slice(0,4)!==String(year))return;var m=parseInt(em.slice(5,7),10);if(!(m>=1&&m<=12))return;mon[m]+=(dl.amount||0);});var a=[];for(var m2=1;m2<=12;m2++)a.push(mon[m2]);return a;}
+  function consRun(year){var cons=[];for(var i=0;i<12;i++)cons.push(0);try{if(typeof consolByCat==='function'&&typeof _consolSales!=='undefined'&&_consolSales)cons=consolByCat(year).cons.slice();}catch(e){}var curM=(new Date()).getMonth()+1,vals=[];for(var m=Math.max(1,curM-3);m<curM;m++)if(cons[m-1]>0)vals.push(cons[m-1]);var avg=vals.length?vals.reduce(function(s,v){return s+v;},0)/vals.length:0;var a=[];for(var m2=1;m2<=12;m2++)a.push(m2>=curM?avg:0);return a;}
 
   /* ═══ 딜 파이프라인 ═══ */
   function _card(dl){
@@ -8397,30 +8401,36 @@ window.CRM=(function(){
     var jp=(lang==='jp'); var year=String((new Date()).getFullYear());
     var act=[]; for(var i=0;i<12;i++)act.push(0);
     try{ if(typeof consolCalc==='function'&&typeof _consolSales!=='undefined'&&_consolSales){ act=consolCalc(year).monthly.slice(); } }catch(e){}
-    var fc=forecast(year), curM=(new Date()).getMonth()+1;
+    var curM=(new Date()).getMonth()+1;
+    var mach=forecastMach(year), machRaw=forecastMachRaw(year), cons=consRun(year), fcAll=forecast(year);
     var tgt=[]; try{var dd=(window._data&&_data.dashboard)||{}; for(var m=1;m<=12;m++)tgt.push((dd.monthlyTarget&&dd.monthlyTarget[year+'-'+('0'+m).slice(-2)])||0);}catch(e){for(var m2=0;m2<12;m2++)tgt.push(0);}
-    var rows='',projTotal=0,actTotal=0;
+    var rows='',sBase=0,sCon=0,sAgg=0,actTot=0;
     for(var m=1;m<=12;m++){
-      var a=act[m-1]||0,w=fc[m].w||0,t=tgt[m-1]||0;
-      var proj=(m<curM)?a:(m===curM?(a+w):w);
-      actTotal+=(m<=curM?a:0); projTotal+=proj;
-      var isCur=m===curM,isPast=m<curM;
-      rows+='<tr'+(isCur?' style="background:#f0fdfa"':'')+'><td style="padding:8px 10px;font-weight:'+(isCur?'800':'600')+'">'+m+(jp?'月':'월')+(isCur?' ◀':'')+'</td>'+
-        '<td class="num" style="padding:8px 10px">'+(isPast||isCur?_yen(a):'<span style="color:#cbd5e1">-</span>')+'</td>'+
-        '<td class="num" style="padding:8px 10px;color:#0f766e">'+(fc[m].n?_yen(w)+'<span style="font-size:10px;color:#94a3b8"> ('+fc[m].n+')</span>':'<span style="color:#cbd5e1">-</span>')+'</td>'+
-        '<td class="num" style="padding:8px 10px;font-weight:700">'+_yen(proj)+'</td>'+
-        '<td class="num" style="padding:8px 10px;color:#94a3b8">'+(t?_yen(t):'-')+'</td></tr>';
+      var a=act[m-1]||0,mw=mach[m-1]||0,mr=machRaw[m-1]||0,cr=cons[m-1]||0,t=tgt[m-1]||0;
+      if(m<curM){sBase+=a;sCon+=a;sAgg+=a;actTot+=a;}
+      else if(m===curM){sBase+=a+mw+cr;sCon+=a+mw*0.75+cr*0.9;sAgg+=a+mr+cr*1.1;actTot+=a;}
+      else{sBase+=mw+cr;sCon+=mw*0.75+cr*0.9;sAgg+=mr+cr*1.1;}
+      var proj=(m<curM)?a:(m===curM?(a+mw+cr):(mw+cr)),isCur=m===curM,isPast=m<curM;
+      rows+='<tr'+(isCur?' style=\"background:#f0fdfa\"':'')+'><td style=\"padding:7px 10px;font-weight:'+(isCur?'800':'600')+'\">'+m+(jp?'月':'월')+(isCur?' ◀':'')+'</td>'+
+        '<td class=\"num\" style=\"padding:7px 10px\">'+(isPast||isCur?_yen(a):'<span style=\"color:#cbd5e1\">-</span>')+'</td>'+
+        '<td class=\"num\" style=\"padding:7px 10px;color:#3b82f6\">'+(!isPast&&mw>0?_yen(mw):'<span style=\"color:#cbd5e1\">-</span>')+'</td>'+
+        '<td class=\"num\" style=\"padding:7px 10px;color:#16a34a\">'+(!isPast&&cr>0?_yen(cr):'<span style=\"color:#cbd5e1\">-</span>')+'</td>'+
+        '<td class=\"num\" style=\"padding:7px 10px;font-weight:700\">'+_yen(proj)+'</td>'+
+        '<td class=\"num\" style=\"padding:7px 10px;color:#94a3b8\">'+(t?_yen(t):'-')+'</td></tr>';
     }
-    var annTgt=tgt.reduce(function(s,v){return s+v;},0);
-    var achv=annTgt>0?(projTotal/annTgt*100):0;
-    var hero='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">'+
-      _kc(jp?'今期実績(累計)':'당기 실적(누계)',_yen(actTotal),year+(jp?'年':'년'),'#3b82f6')+
-      _kc(jp?'年末着地 予測':'연말 착지 전망',_yen(projTotal),jp?'実績+加重予測':'실적+가중예측','#0f766e')+
+    var annTgt=tgt.reduce(function(s,v){return s+v;},0),achv=annTgt>0?(sBase/annTgt*100):0;
+    var hero='<div style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px\">'+
+      _kc(jp?'当期実績(累計)':'당기 실적(누계)',_yen(actTot),year,'#3b82f6')+
+      _kc(jp?'着地予測(基本)':'착지 전망 (기본)',_yen(sBase),jp?'実績+機器+消耗品':'실적+기기+소모품','#0f766e')+
       _kc(jp?'目標達成 見込':'목표 달성 전망',(annTgt>0?achv.toFixed(0)+'%':'-'),(jp?'目標 ':'목표 ')+_yen(annTgt),achv>=100?'#16a34a':achv>=80?'#f59e0b':'#ef4444')+'</div>';
-    host.innerHTML=hero+
-      '<div style="font-size:12px;color:#64748b;margin-bottom:8px">'+(jp?'※ 予測=パイプライン確率加重(open)。過去=実績、当月=実績+残予測、未来=加重予測':'※ 예측=파이프라인 확률가중(진행 딜). 과거=실적, 당월=실적+잔여예측, 미래=가중예측')+'</div>'+
-      '<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr>'+
-        '<th style="text-align:left;padding:7px 10px">'+(jp?'月':'월')+'</th><th class="num" style="padding:7px 10px">'+(jp?'実績':'실적')+'</th><th class="num" style="padding:7px 10px">'+(jp?'加重予測':'가중예측')+'</th><th class="num" style="padding:7px 10px">'+(jp?'着地':'착지')+'</th><th class="num" style="padding:7px 10px">'+(jp?'目標':'목표')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    var scen='<div style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px\">'+
+      _kc(jp?'保守':'보수',_yen(sCon),jp?'確率下方':'확률 하향','#94a3b8')+
+      _kc(jp?'基本':'기본',_yen(sBase),jp?'確率加重':'확률 가중','#0f766e')+
+      _kc(jp?'攻勢':'공격',_yen(sAgg),jp?'パイプ全額':'파이프 전액','#f59e0b')+'</div>';
+    host.innerHTML=hero+scen+
+      '<div style=\"font-size:12px;color:#64748b;margin-bottom:8px\">'+(jp?'※ 機器=パイプライン確率加重 / 消耗品=直近3ヶ月run-rate投影 / 過去=実績':'※ 기기=파이프라인 확률가중 / 소모품=최근 3개월 run-rate 투영 / 과거=실적')+'</div>'+
+      '<div style=\"overflow-x:auto\"><table class=\"estab\" style=\"width:100%\"><thead><tr>'+
+        '<th style=\"text-align:left;padding:7px 10px\">'+(jp?'月':'월')+'</th><th class=\"num\" style=\"padding:7px 10px\">'+(jp?'実績':'실적')+'</th><th class=\"num\" style=\"padding:7px 10px\">'+(jp?'機器予測':'기기 예측')+'</th><th class=\"num\" style=\"padding:7px 10px\">'+(jp?'消耗品予測':'소모품 예측')+'</th><th class=\"num\" style=\"padding:7px 10px\">'+(jp?'着地':'착지')+'</th><th class=\"num\" style=\"padding:7px 10px\">'+(jp?'目標':'목표')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
 
   /* ═══ 고객사 360 ═══ */
@@ -8650,7 +8660,7 @@ window.CRM=(function(){
   }); }
   function relang(){ var ap=document.querySelector('.page.active'); if(!ap)return; var id=ap.id.replace('page-','');
     if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); else if(id==='crm-clients')renderClients(); else if(id==='crm-activities')renderActs(); else if(id==='crm-perf')renderPerf(); }
-  return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;},
+  return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;}, forecastMachArr:forecastMach, consRunArr:consRun,
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
     _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt,
     _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt};
