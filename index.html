@@ -8279,7 +8279,7 @@ window.WT_INV=(function(){
 <script>
 /* ═══════════ 일본법인 CRM (딜 파이프라인 · 매출 예측 · 고객사 360 · 활동 · 성과) ═══════════ */
 window.CRM=(function(){
-  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='timeline';
+  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='timeline', _clView='table';
   var STAGES=[
     {k:'lead',   ko:'리드',    jp:'リード',   prob:20, col:'#64748b'},
     {k:'consult',ko:'상담중',  jp:'商談中',   prob:40, col:'#3b82f6'},
@@ -8447,33 +8447,55 @@ window.CRM=(function(){
     var rowsD=names.map(function(nm){var st=_cliStats(nm),mt=_cliMeta(nm)||{};return {nm:nm,st:st,mt:mt};});
     if(_clFltV.q){var q=_clFltV.q.toLowerCase();rowsD=rowsD.filter(function(r){return (r.nm+' '+(r.mt.owner||'')+' '+(r.mt.region||'')).toLowerCase().indexOf(q)>=0;});}
     if(_clFltV.status){rowsD=rowsD.filter(function(r){return (r.mt.status||'')===_clFltV.status;});}
-    rowsD.sort(function(a,b){ if(_clFltV.sort==='out')return b.st.out-a.st.out; if(_clFltV.sort==='deal')return b.st.wsum-a.st.wsum; return b.st.sale-a.st.sale; });
-    var totSale=rowsD.reduce(function(s,r){return s+r.st.sale;},0),totOut=rowsD.reduce(function(s,r){return s+r.st.out;},0);
-    var kpi='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">'+
+    rowsD.sort(function(a,b){ if(_clFltV.sort==='out')return b.st.out-a.st.out; if(_clFltV.sort==='deal')return b.st.wsum-a.st.wsum; if(_clFltV.sort==='name')return a.nm<b.nm?-1:1; return b.st.sale-a.st.sale; });
+    var totSale=rowsD.reduce(function(s,r){return s+r.st.sale;},0),totOut=rowsD.reduce(function(s,r){return s+r.st.out;},0),withOut=rowsD.filter(function(r){return r.st.out>0;}).length;
+    var kpi='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">'+
       _kc(jp?'取引先':'거래처',rowsD.length+(jp?'社':'개'),'')+
       _kc(jp?'当期売上(合計)':'당기 매출(합계)',_yen(totSale),'','#3b82f6')+
-      _kc(jp?'未収(合計)':'미수(합계)',_yen(totOut),'','#8b5cf6')+
+      _kc(jp?'未収(合計)':'미수(합계)',_yen(totOut),withOut+(jp?'社 未収':'개 미수'),'#8b5cf6')+
       _kc(jp?'進行ディール':'진행 딜',rowsD.reduce(function(s,r){return s+r.st.deals.length;},0)+(jp?'件':'건'),'','#0f766e')+'</div>';
+    function stBadge(mt){var o=null;for(var i=0;i<STATUS.length;i++)if(STATUS[i].k===mt.status)o=STATUS[i];return o?'<span style="font-size:10px;font-weight:700;color:#fff;background:'+o.col+';border-radius:5px;padding:1px 7px">'+L(o.ko,o.jp)+'</span>':'';}
+    var seg='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
+      '<button onclick="CRM._clSetView(\'table\')" style="font-family:inherit;border:none;background:'+(_clView==='table'?'#0f766e':'#fff')+';color:'+(_clView==='table'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'表':'표')+'</button>'+
+      '<button onclick="CRM._clSetView(\'card\')" style="font-family:inherit;border:none;background:'+(_clView==='card'?'#0f766e':'#fff')+';color:'+(_clView==='card'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">▦ '+(jp?'カード':'카드')+'</button></span>';
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
       '<button class="crm-btn" onclick="CRM._openCl()">+ '+(jp?'取引先追加':'거래처 추가')+'</button>'+
-      '<input class="filter-input" style="width:170px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_clFltV.q)+'" oninput="CRM._clFlt(\'q\',this.value)">'+
-      '<select class="filter-input" style="width:110px" onchange="CRM._clFlt(\'status\',this.value)"><option value="">'+(jp?'全状態':'전체 상태')+'</option>'+STATUS.map(function(s){return '<option value="'+s.k+'"'+(_clFltV.status===s.k?' selected':'')+'>'+L(s.ko,s.jp)+'</option>';}).join('')+'</select>'+
-      '<select class="filter-input" style="width:120px" onchange="CRM._clFlt(\'sort\',this.value)"><option value="sale"'+(_clFltV.sort==='sale'?' selected':'')+'>'+(jp?'売上順':'매출순')+'</option><option value="out"'+(_clFltV.sort==='out'?' selected':'')+'>'+(jp?'未収順':'미수순')+'</option><option value="deal"'+(_clFltV.sort==='deal'?' selected':'')+'>'+(jp?'ディール順':'딜순')+'</option></select></div>';
-    var grid=rowsD.map(function(r){
-      var gr=(r.mt.grade||'').toUpperCase(),gc=GRADE[gr]||'#94a3b8';
-      var stObj=null;for(var i=0;i<STATUS.length;i++)if(STATUS[i].k===r.mt.status)stObj=STATUS[i];
-      var badge=stObj?'<span style="font-size:10px;font-weight:700;color:#fff;background:'+stObj.col+';border-radius:5px;padding:1px 7px">'+L(stObj.ko,stObj.jp)+'</span>':'';
-      return '<div class="crm-ccard" onclick="CRM._openClient(\''+_esc(r.nm).replace(/'/g,"")+'\')">'+
-        '<div style="display:flex;align-items:center;gap:9px">'+_av(r.nm,gc)+'<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:13.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tr(r.nm)+'</div><div style="font-size:11px;color:#94a3b8">'+(r.mt.owner?_esc(r.mt.owner)+' · ':'')+(gr?'등급 '+gr:'')+'</div></div>'+badge+'</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;text-align:center">'+
-          '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'当期売上':'당기매출')+'</div><div style="font-size:12px;font-weight:800;color:#1d4ed8">'+_yen(r.st.sale)+'</div></div>'+
-          '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'未収':'미수')+'</div><div style="font-size:12px;font-weight:800;color:'+(r.st.out>0?'#dc2626':'#94a3b8')+'">'+_yen(r.st.out)+'</div></div>'+
-          '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'ディール':'진행딜')+'</div><div style="font-size:12px;font-weight:800;color:#0f766e">'+r.st.deals.length+'</div></div>'+
-        '</div></div>';
-    }).join('')||'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'データなし':'데이터 없음')+'</div>';
-    host.innerHTML=kpi+bar+'<div class="crm-cgrid">'+grid+'</div>';
+      '<input class="filter-input" style="width:150px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_clFltV.q)+'" oninput="CRM._clFlt(\'q\',this.value)">'+
+      '<select class="filter-input" style="width:105px" onchange="CRM._clFlt(\'status\',this.value)"><option value="">'+(jp?'全状態':'전체 상태')+'</option>'+STATUS.map(function(s){return '<option value="'+s.k+'"'+(_clFltV.status===s.k?' selected':'')+'>'+L(s.ko,s.jp)+'</option>';}).join('')+'</select>'+
+      '<select class="filter-input" style="width:110px" onchange="CRM._clFlt(\'sort\',this.value)"><option value="sale"'+(_clFltV.sort==='sale'?' selected':'')+'>'+(jp?'売上順':'매출순')+'</option><option value="out"'+(_clFltV.sort==='out'?' selected':'')+'>'+(jp?'未収順':'미수순')+'</option><option value="deal"'+(_clFltV.sort==='deal'?' selected':'')+'>'+(jp?'ディール順':'딜순')+'</option><option value="name"'+(_clFltV.sort==='name'?' selected':'')+'>'+(jp?'名前順':'이름순')+'</option></select>'+seg+'</div>';
+    var body;
+    if(_clView==='card'){
+      body='<div class="crm-cgrid">'+(rowsD.length?rowsD.map(function(r){
+        var gr=(r.mt.grade||'').toUpperCase(),gc=GRADE[gr]||'#94a3b8';
+        return '<div class="crm-ccard" onclick="CRM._openClient(\''+_esc(r.nm).replace(/\x27/g,'')+'\')">'+
+          '<div style="display:flex;align-items:center;gap:9px">'+_av(r.nm,gc)+'<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:13.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tr(r.nm)+'</div><div style="font-size:11px;color:#94a3b8">'+(r.mt.owner?_esc(r.mt.owner)+' · ':'')+(gr?'등급 '+gr:'')+'</div></div>'+stBadge(r.mt)+'</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;text-align:center">'+
+            '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'当期売上':'당기매출')+'</div><div style="font-size:12px;font-weight:800;color:#1d4ed8">'+_yen(r.st.sale)+'</div></div>'+
+            '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'未収':'미수')+'</div><div style="font-size:12px;font-weight:800;color:'+(r.st.out>0?'#dc2626':'#94a3b8')+'">'+_yen(r.st.out)+'</div></div>'+
+            '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'ディール':'진행딜')+'</div><div style="font-size:12px;font-weight:800;color:#0f766e">'+r.st.deals.length+'</div></div></div></div>';
+      }).join(''):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'データなし':'데이터 없음')+'</div>')+'</div>';
+    }else{
+      body='<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr>'+
+        '<th style="text-align:left;padding:8px 10px">'+(jp?'取引先':'거래처')+'</th>'+
+        '<th class="num" style="padding:8px 10px">'+(jp?'当期売上':'당기 매출')+'</th>'+
+        '<th class="num" style="padding:8px 10px">'+(jp?'未収':'미수')+'</th>'+
+        '<th class="num" style="padding:8px 10px">'+(jp?'進行':'진행딜')+'</th>'+
+        '<th style="padding:8px 10px">'+(jp?'状態':'상태')+'</th></tr></thead><tbody>'+
+        (rowsD.length?rowsD.map(function(r){
+          var gr=(r.mt.grade||'').toUpperCase(),gc=GRADE[gr]||'#cbd5e1';
+          return '<tr class="clk" style="cursor:pointer" onclick="CRM._openClient(\''+_esc(r.nm).replace(/\x27/g,'')+'\')">'+
+            '<td style="padding:8px 10px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+gc+';margin-right:8px;vertical-align:middle"></span><b style="font-weight:600">'+_tr(r.nm)+'</b>'+(r.mt.owner?' <span style="color:#94a3b8;font-size:11px">· '+_esc(r.mt.owner)+'</span>':'')+'</td>'+
+            '<td class="num" style="padding:8px 10px;font-weight:700">'+_yen(r.st.sale)+'</td>'+
+            '<td class="num" style="padding:8px 10px;color:'+(r.st.out>0?'#dc2626':'#cbd5e1')+';font-weight:'+(r.st.out>0?'700':'400')+'">'+(r.st.out>0?_yen(r.st.out):'-')+'</td>'+
+            '<td class="num" style="padding:8px 10px;color:'+(r.st.deals.length?'#0f766e':'#cbd5e1')+';font-weight:'+(r.st.deals.length?'700':'400')+'">'+(r.st.deals.length||'-')+'</td>'+
+            '<td style="padding:8px 10px">'+stBadge(r.mt)+'</td></tr>';
+        }).join(''):'<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">'+(jp?'データなし':'데이터 없음')+'</td></tr>')+
+        '</tbody></table></div>';
+    }
+    host.innerHTML=kpi+bar+body;
   }
   function _clFlt(k,v){_clFltV[k]=v;renderClients();}
+  function _clSetView(v){_clView=v;renderClients();}
   function _openClient(name){
     var jp=(lang==='jp'),st=_cliStats(name),mt=_cliMeta(name)||{};
     document.getElementById('crmDwTitle').innerHTML=_tr(name)+' <span style="font-size:12px;color:#94a3b8;font-weight:500">360°</span>';
@@ -8707,7 +8729,7 @@ window.CRM=(function(){
     if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); else if(id==='crm-clients')renderClients(); else if(id==='crm-activities')renderActs(); else if(id==='crm-perf')renderPerf(); else if(id==='crm-sched')renderSched(); }
   return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;}, forecastMachArr:forecastMach, consRunArr:consRun,
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
-    _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt,
+    _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt, _clSetView:_clSetView,
     _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
 })();
 </script>
