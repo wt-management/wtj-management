@@ -664,6 +664,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
 
     <div class="nav-item" onclick="showPage('inventory')"><span class="nav-icon">📦</span><span id="navInv">재고관리</span></div>
+    <div class="nav-item" onclick="showPage('asset')"><span class="nav-icon">🔧</span><span id="navAsset">장비·AS 관리</span></div>
 
 
 
@@ -2273,6 +2274,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 <div id="crmDw" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1150;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)CRM._closeDw()"><div style="background:#fff;border-radius:14px;max-width:640px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmDwTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="CRM._closeDw()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmDwBody" style="padding:18px 20px"></div></div></div>
 <div id="crmClModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)document.getElementById('crmClModal').style.display='none'"><div style="background:#fff;border-radius:14px;max-width:560px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmClTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="document.getElementById('crmClModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmClForm" style="padding:18px 20px"></div><div style="display:flex;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid #eef2f7;position:sticky;bottom:0;background:#fff"><button id="crmClDel" onclick="CRM._delCl()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">삭제</button><button onclick="CRM._saveCl()" class="crm-btn" style="padding:8px 22px">저장</button></div></div></div>
 <div id="crmAcModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)document.getElementById('crmAcModal').style.display='none'"><div style="background:#fff;border-radius:14px;max-width:560px;width:96vw;max-height:90vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:1"><div id="crmAcTitle" style="font-size:16px;font-weight:800;color:#0f172a"></div><button onclick="document.getElementById('crmAcModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">&#10005;</button></div><div id="crmAcForm" style="padding:18px 20px"></div><div style="display:flex;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid #eef2f7;position:sticky;bottom:0;background:#fff"><button id="crmAcDel" onclick="CRM._delAc()" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer">삭제</button><button onclick="CRM._saveAc()" class="crm-btn" style="padding:8px 22px">저장</button></div></div></div>
+<div class="page" id="page-asset"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:18px;font-weight:700;color:#0f172a">🔧 <span id="assetPageT">장비 · AS 관리</span></div></div><div id="assetBody"></div></div>
 <div class="page" id="page-crm-pipeline">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div style="font-size:18px;font-weight:700;color:#0f172a">🧩 <span id="crmPipeTitle">딜 파이프라인</span></div>
@@ -2636,7 +2638,7 @@ var MENU_ROLES = {
   'customer-analysis':['sales'], 'inventory':['sales'],
   'payments-list':['finance'], 'payment-input':['finance'], 'outstanding':['finance'],
   'fin-report':['finance'], 'fin-ledger':['finance'], 'fin-daily':['finance'], 'fin-assets':['finance'],
-  'excel-upload':['finance'],'crm-pipeline':['sales','finance'],'crm-forecast':['sales','finance'],'crm-clients':['sales','finance'],'crm-activities':['sales','finance'],'crm-perf':['sales','finance'],'crm-sched':['sales','finance']
+  'excel-upload':['finance'],'crm-pipeline':['sales','finance'],'crm-forecast':['sales','finance'],'crm-clients':['sales','finance'],'crm-activities':['sales','finance'],'crm-perf':['sales','finance'],'crm-sched':['sales','finance'],'asset':['sales','finance']
 };
 function _navKey(item){
   var oc=item.getAttribute('onclick')||'';
@@ -3537,7 +3539,7 @@ var T = {
 
     sideTitle:'일본법인<br>경영관리',sideSubtitle:'',
 
-    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'딜 파이프라인',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',navCRMSched:'일정 · 할일',
+    navGroupKr1:'경영 요약',navGroupSales:'영업 · 수주',navGroupPay:'수금 · 채권',navGroupFinTxt:'자금일보',navFinReport:'자금현황 보고서',navFinLedger:'입금·지출 원장',navFinDaily:'매출·매입 일보',navFinAssets:'자산·기준정보',navInv:'재고관리',navAsset:'장비·AS 관리',navGroupKr2:'관리',navCRMGroup:'CRM 영업',navCRMPipe:'딜 파이프라인',navCRMForecast:'매출 예측',navCRMClients:'고객사',navCRMActs:'활동 기록',navCRMPerf:'영업 성과',navCRMSched:'일정 · 할일',
 
     navDash:'대시보드',navExec:'대시보드',navOrdersList:'수주 현황',navPayList:'입금 현황',navBA:'목표 vs 실적',navOutstanding:'미수금 현황',navCustAnalysis:'거래처 분석',caTitle:'🔍 거래처 분석',caSub:'거래처를 선택하면 매입·수금·미수를 다각도로 분석합니다',navOrderIn:'수주 입력',navPayIn:'입금 입력',
 
@@ -3659,7 +3661,7 @@ var T = {
 
     sideTitle:'日本法人<br>経営管理',sideSubtitle:'',
 
-    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'ディール パイプライン',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',navCRMSched:'予定 · タスク',
+    navGroupKr1:'経営サマリー',navGroupSales:'営業 · 受注',navGroupPay:'集金 · 債権',navGroupFinTxt:'資金日報',navFinReport:'資金現況報告',navFinLedger:'入出金元帳',navFinDaily:'売上・買入日報',navFinAssets:'資産・基準情報',navInv:'在庫管理',navAsset:'機器·AS管理',navGroupKr2:'管理',navCRMGroup:'CRM 営業',navCRMPipe:'ディール パイプライン',navCRMForecast:'売上予測',navCRMClients:'取引先',navCRMActs:'活動記録',navCRMPerf:'営業成果',navCRMSched:'予定 · タスク',
 
     navDash:'ダッシュボード',navExec:'ダッシュボード',navOrdersList:'受注一覧',navPayList:'入金一覧',navBA:'目標vs実績',navOutstanding:'未収金一覧',navCustAnalysis:'取引先分析',caTitle:'🔍 取引先分析',caSub:'取引先を選択すると仕入・入金・未収を多角的に分析します',navOrderIn:'受注入力',navPayIn:'入金入力',
 
@@ -3822,7 +3824,7 @@ async function applyUserTr(){
 }
 (function(){var _tt=null;function hook(){if(!document.body){setTimeout(hook,200);return;}try{document.head.insertAdjacentHTML('beforeend','<style>.utr{opacity:.55}</style>');}catch(e){}new MutationObserver(function(){clearTimeout(_tt);_tt=setTimeout(applyUserTr,150);}).observe(document.body,{childList:true,subtree:true});}hook();})();
 function setLang(l){
-  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); if(window.CRM&&CRM.relang)CRM.relang(); try{ var _ap=document.querySelector('.page.active'); if(_ap&&_ap.id==='page-dashboard'&&window._data)renderDashboard(_data.dashboard); if(_ap&&_ap.id==='page-budget-actual'&&window._data)renderBudgetActual(_data.budgetActual); }catch(e){} },0);
+  setTimeout(function(){ if(window.FIN&&FIN.relang)FIN.relang(); if(window.CRM&&CRM.relang)CRM.relang(); if(window.WTAS&&WTAS.relang)WTAS.relang(); try{ var _ap=document.querySelector('.page.active'); if(_ap&&_ap.id==='page-dashboard'&&window._data)renderDashboard(_data.dashboard); if(_ap&&_ap.id==='page-budget-actual'&&window._data)renderBudgetActual(_data.budgetActual); }catch(e){} },0);
 
   lang=l;
 
@@ -3980,6 +3982,7 @@ function showPage(id, fromHistory){
   document.getElementById('pageSubtitle').textContent=pageSubtitles[id]?pageSubtitles[id][lang]:'';
   if(id&&id.indexOf('fin-')===0){ if(window.FIN)FIN.onPage(id); else setTimeout(function(){ if(window.FIN)FIN.onPage(id); },600); }
   if(id&&id.indexOf('crm-')===0){ if(window.CRM)CRM.onPage(id); }
+  if(id==='asset'&&window.WTAS)WTAS.render();
   if(id==='inventory'&&window.WT_INV)WT_INV.render();
 
 
@@ -8487,9 +8490,10 @@ window.CRM=(function(){
     var deals=st.deals.length?'<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">🧩 '+(jp?'進行ディール':'진행 딜')+'</div>'+st.deals.map(function(d){var s=stg(d.stage);return '<div onclick="CRM._open(\''+d.id+'\')" style="cursor:pointer;display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;border:1px solid #eef2f7;margin-bottom:5px"><span style="font-size:12.5px"><span style="color:'+s.col+';font-weight:700">●</span> '+_esc(d.product||'-')+' <span style="color:#94a3b8">'+L(s.ko,s.jp)+'</span></span><b style="font-size:12.5px;color:#1d4ed8">'+_yen(d.amount)+'</b></div>';}).join('')+'</div>':'';
     var acts=_d.acts.filter(function(a){return a.client===name;}).sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;}).slice(0,6);
     var actH=acts.length?'<div><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">📇 '+(jp?'活動':'활동')+'</div>'+acts.map(function(a){var t=aty(a.type);return '<div style="display:flex;gap:8px;padding:5px 0;font-size:12.5px"><span>'+t.ic+'</span><span style="color:#94a3b8;width:74px;flex-shrink:0">'+(a.date||'')+'</span><span>'+_tr(a.content||'')+'</span></div>';}).join('')+'</div>':'';
+    var equipH=(window.WTAS&&WTAS.clientHtml)?WTAS.clientHtml(name):'';
     document.getElementById('crmDwBody').innerHTML=info+meta+
       '<div style="display:flex;gap:8px;margin-bottom:14px"><button class="crm-btn" style="font-size:12px;padding:6px 12px" onclick="CRM._openCl(\''+_esc(name).replace(/'/g,"")+'\')">'+(jp?'情報編集':'정보 편집')+'</button><button class="crm-btn" style="font-size:12px;padding:6px 12px;background:#334155" onclick="CRM._openAc(null,\''+_esc(name).replace(/'/g,"")+'\')">+ '+(jp?'活動記録':'활동 기록')+'</button></div>'+
-      deals+actH;
+      equipH+deals+actH;
     document.getElementById('crmDw').style.display='flex';
   }
   function _closeDw(){document.getElementById('crmDw').style.display='none';}
@@ -8705,6 +8709,57 @@ window.CRM=(function(){
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
     _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt,
     _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
+})();
+</script>
+
+<script>
+/* ═══════════ 설치 장비 · AS 관리 (매출일보 파생, 미국법인 장비이력 적응) ═══════════ */
+window.WTAS=(function(){
+  var _view='clinic';
+  function L(ko,jp){return (typeof lang!=='undefined'&&lang==='jp')?jp:ko;}
+  function _yen(v){return '¥'+(Math.round(v||0)).toLocaleString();}
+  function _esc(s){return (typeof esc==='function')?esc(s):String(s==null?'':s);}
+  function _tr(s){return (typeof trUser==='function')?trUser(s):_esc(s);}
+  function _comm(x){try{return (typeof _isCommRow==='function')&&_isCommRow(x);}catch(e){return false;}}
+  function _kc(l,v,s,c){return '<div style="background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:12px 14px;border-left:4px solid '+(c||'#cbd5e1')+'"><div style="font-size:11px;color:#64748b">'+l+'</div><div style="font-size:18px;font-weight:800;color:'+(c||'#0f172a')+'">'+v+'</div><div style="font-size:11px;color:#94a3b8">'+(s||'&nbsp;')+'</div></div>';}
+  // 설치 기기 (매출일보 cat=기기)
+  function _dev(){var out=[];try{(_consolSales||[]).forEach(function(x){if(x.cat!=='기기'||_comm(x))return;var d=('recog' in x?(x.recog||x.date||''):(x.date||''));out.push({client:x.client||'-',product:x.prod2||x.product||'-',raw:x.product||'',date:d,amount:(x.net!=null?x.net:x.total)||0,qty:x.qty||1,sn:x.sn||''});});}catch(e){}return out;}
+  // AS/수리 (품목명에 修理/수리/AS/repair)
+  function _asr(){var out=[];try{(_consolSales||[]).forEach(function(x){if(_comm(x))return;var s=(String(x.product||'')+' '+String(x.prod2||'')).toLowerCase();if(s.indexOf('修理')>=0||s.indexOf('수리')>=0||s.indexOf('repair')>=0||(x.prod2||'')==='AS'||/\bas\b/.test(s)){var d=('recog' in x?(x.recog||x.date||''):(x.date||''));out.push({client:x.client||'-',product:x.product||x.prod2||'-',date:d,amount:(x.net!=null?x.net:x.total)||0});}});}catch(e){}return out;}
+  function installedFor(name){return _dev().filter(function(d){return d.client===name;});}
+  function clientHtml(name){
+    var jp=(lang==='jp'),ds=installedFor(name);if(!ds.length)return '';
+    ds.sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
+    return '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">🔧 '+(jp?'保有機器':'보유 장비')+' ('+ds.length+(jp?'台':'대')+')</div>'+
+      ds.map(function(d){return '<div style="display:flex;justify-content:space-between;padding:6px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:4px;font-size:12.5px"><span>'+_esc(d.product)+' <span style="color:#94a3b8">· '+(d.date||'')+'</span></span><b style="color:#1d4ed8">'+_yen(d.amount)+'</b></div>';}).join('')+'</div>';
+  }
+  function render(){
+    var host=document.getElementById('assetBody'); if(!host)return; var jp=(lang==='jp'),ym=(new Date()).toISOString().slice(0,7);
+    var dev=_dev(),as=_asr();
+    var kpi='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">'+
+      _kc(jp?'設置機器':'설치 장비',dev.length+(jp?'台':'대'),'','#0f766e')+
+      _kc(jp?'今月設置':'이번달 설치',dev.filter(function(d){return (d.date||'').slice(0,7)===ym;}).length+(jp?'台':'대'),'','#3b82f6')+
+      _kc('AS·'+(jp?'修理':'수리'),as.length+(jp?'件':'건'),'','#f59e0b')+
+      _kc('AS '+(jp?'売上':'매출'),_yen(as.reduce(function(s,x){return s+x.amount;},0)),'','#8b5cf6')+'</div>';
+    var tabs='<div style="display:flex;gap:6px;margin-bottom:14px">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#0f766e':'#e2e8f0')+';background:'+(_view===t[0]?'#0f766e':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
+    var body='';
+    if(_view==='clinic'){
+      var by={};dev.forEach(function(d){by[d.client]=by[d.client]||{n:0,amt:0,items:[]};by[d.client].n++;by[d.client].amt+=d.amount;by[d.client].items.push(d);});
+      var arr=Object.keys(by).map(function(k){return {c:k,d:by[k]};}).sort(function(a,b){return b.d.n-a.d.n;});
+      body='<div class="crm-cgrid">'+arr.map(function(x){return '<div class="crm-ccard" onclick="if(window.CRM)CRM._openClient(\''+_esc(x.c).replace(/\x27/g,"")+'\')"><div style="font-weight:800;font-size:13.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tr(x.c)+'</div><div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:12px;color:#0f766e;font-weight:700">'+x.d.n+(jp?'台':'대')+'</span><span style="font-size:12px;font-weight:700;color:#1d4ed8">'+_yen(x.d.amt)+'</span></div><div style="font-size:11px;color:#94a3b8;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+x.d.items.map(function(i){return _esc(i.product);}).slice(0,3).join(', ')+'</div></div>';}).join('')+'</div>';
+    }else if(_view==='product'){
+      var byp={};dev.forEach(function(d){byp[d.product]=byp[d.product]||{n:0,amt:0,cl:{}};byp[d.product].n++;byp[d.product].amt+=d.amount;byp[d.product].cl[d.client]=1;});
+      var pa=Object.keys(byp).map(function(k){return {p:k,d:byp[k]};}).sort(function(a,b){return b.d.n-a.d.n;});
+      body='<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:8px 10px">'+(jp?'設置台数':'설치 대수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'病院数':'병원 수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'売上':'매출')+'</th></tr></thead><tbody>'+pa.map(function(x){return '<tr><td style="padding:8px 10px;font-weight:600">'+_esc(x.p)+'</td><td class="num" style="padding:8px 10px;font-weight:800;color:#0f766e">'+x.d.n+'</td><td class="num" style="padding:8px 10px">'+Object.keys(x.d.cl).length+'</td><td class="num" style="padding:8px 10px;font-weight:700">'+_yen(x.d.amt)+'</td></tr>';}).join('')+'</tbody></table></div>';
+    }else{
+      as.sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
+      body='<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'日付':'날짜')+'</th><th style="text-align:left;padding:8px 10px">'+(jp?'病院':'병원')+'</th><th style="text-align:left;padding:8px 10px">'+(jp?'内容':'내용')+'</th><th class="num" style="padding:8px 10px">'+(jp?'金額':'금액')+'</th></tr></thead><tbody>'+(as.length?as.map(function(x){return '<tr><td style="padding:7px 10px;color:#94a3b8">'+(x.date||'')+'</td><td style="padding:7px 10px">'+_tr(x.client)+'</td><td style="padding:7px 10px">'+_tr(x.product)+'</td><td class="num" style="padding:7px 10px;font-weight:700">'+_yen(x.amount)+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:16px">-</td></tr>')+'</tbody></table></div>';
+    }
+    host.innerHTML=kpi+tabs+body;
+  }
+  function _v(v){_view=v;render();}
+  function relang(){var ap=document.querySelector('.page.active');if(ap&&ap.id==='page-asset')render();}
+  return {render:render, relang:relang, _v:_v, installedFor:installedFor, clientHtml:clientHtml};
 })();
 </script>
 
