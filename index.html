@@ -1050,7 +1050,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
               </div>
               <div style="flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.2)">
                 <div style="font-size:12px;color:#b8d4ed;margin-bottom:6px" id="lblThisOrdersTitle">수주 금액 (참고)</div>
-                <div style="font-size:28px;font-weight:800;color:#e8f3fc;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisOrders" onclick="_dmThisOrd()">-</div>
+                <div style="font-size:28px;font-weight:800;color:#e8f3fc;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisOrders" onclick="_dmThisPay()">-</div>
               </div>
             </div>
 
@@ -1094,7 +1094,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
               </div>
               <div style="flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.2)">
                 <div style="font-size:12px;color:#c8bfed;margin-bottom:6px" id="lblCumOrdersTitle">수주 누계 (참고)</div>
-                <div style="font-size:28px;font-weight:800;color:#edeaf9;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="sumOrders" onclick="_dmCumOrd()">-</div>
+                <div style="font-size:28px;font-weight:800;color:#edeaf9;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="sumOrders" onclick="_dmCumPay()">-</div>
               </div>
             </div>
 
@@ -4022,8 +4022,6 @@ function _salesTabBar(active){
 }
 function showPage(id, fromHistory){
   if(id==='dashboard')id='exec-summary';
-  // 역할 게이트: 영업/재무는 허용 메뉴만 (공유 대시보드 히어로카드 등으로 재무/영업 전용 페이지 우회 진입 차단)
-  try{ if(typeof MENU_ROLES!=='undefined' && MENU_ROLES[id] && _currentUser && (_currentUser.role==='sales'||_currentUser.role==='finance') && MENU_ROLES[id].indexOf(_currentUser.role)<0){ id='exec-summary'; } }catch(_e){}
 
   _closeSidebar();
 
@@ -4058,8 +4056,7 @@ function showPage(id, fromHistory){
 
     if(_curPage !== id) _prevPage = _curPage;
 
-    if(!window._wtjSeeded){ history.replaceState({p:id},'','#p='+id); window._wtjSeeded=true; }   // 첫 페이지는 replace로 seed → 뒤로가기 팬텀 엔트리 방지
-    else history.pushState({p:id},'','#p='+id);
+    history.pushState({p:id},'','#p='+id);
 
   }
 
@@ -8352,7 +8349,7 @@ window.WT_INV=(function(){
 <script>
 /* ═══════════ 일본법인 CRM (딜 파이프라인 · 매출 예측 · 고객사 360 · 활동 · 성과) ═══════════ */
 window.CRM=(function(){
-  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='timeline', _clView='table';
+  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='week', _acWeekRef=null, _clView='table';
   var STAGES=[
     {k:'lead',   ko:'리드',    jp:'リード',   prob:20, col:'#64748b'},
     {k:'consult',ko:'상담중',  jp:'商談中',   prob:40, col:'#3b82f6'},
@@ -8538,21 +8535,11 @@ window.CRM=(function(){
     if(_clFltV.status){rowsD=rowsD.filter(function(r){return (r.mt.status||'')===_clFltV.status;});}
     rowsD.sort(function(a,b){ if(_clFltV.sort==='out')return b.st.out-a.st.out; if(_clFltV.sort==='deal')return b.st.wsum-a.st.wsum; if(_clFltV.sort==='name')return a.nm<b.nm?-1:1; return b.st.sale-a.st.sale; });
     var totSale=rowsD.reduce(function(s,r){return s+r.st.sale;},0),totOut=rowsD.reduce(function(s,r){return s+r.st.out;},0),withOut=rowsD.filter(function(r){return r.st.out>0;}).length;
-    var _clSorted=rowsD.slice().sort(function(a,b){return b.st.sale-a.st.sale;});
-    var _top5=_clSorted.slice(0,5).reduce(function(s,r){return s+r.st.sale;},0);
-    var _top5p=totSale>0?Math.round(_top5/totSale*100):0;
-    var _avgPer=rowsD.length?totSale/rowsD.length:0;
-    var _outRate=totSale>0?Math.round(totOut/totSale*100):0;
-    var _stC={},_stAny=0; rowsD.forEach(function(r){var s=r.mt.status||'';if(s)_stAny++;_stC[s]=(_stC[s]||0)+1;});
-    var _withSale=rowsD.filter(function(r){return r.st.sale>0;}).length;
-    var _cliSub=_stAny>0?STATUS.map(function(s){return L(s.ko,s.jp)+' '+(_stC[s.k]||0);}).join(' · '):((jp?'当期取引':'당기 거래')+' '+_withSale+(jp?'社':'개'));
-    var _dealCnt=rowsD.reduce(function(s,r){return s+r.st.deals.length;},0);
-    var _pipe=rowsD.reduce(function(s,r){return s+(r.st.wsum||0);},0);
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'当期売上(合計)':'당기 매출(합계)')+'</div><b>'+_yen(totSale)+'</b><div class="s">'+(jp?'上位5社集中':'상위5 집중')+' <b style="color:#16324f">'+_top5p+'%</b> · '+(jp?'平均':'평균')+' '+_yen(_avgPer)+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'取引先':'거래처')+'</div><b>'+rowsD.length+(jp?'社':'개')+'</b><div class="s">'+_cliSub+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'未収(合計)':'미수(합계)')+'</div><b class="rd">'+_yen(totOut)+'</b><div class="s">'+withOut+(jp?'社':'개')+' · '+(jp?'未収率':'미수율')+' <b style="color:#e11d48">'+_outRate+'%</b></div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'進行ディール':'진행 딜')+'</div><b>'+_dealCnt+(jp?'件':'건')+'</b><div class="s">'+(jp?'加重パイプ':'가중 파이프')+' '+_yen(_pipe)+'</div></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'当期売上(合計)':'당기 매출(합계)')+'</div><b>'+_yen(totSale)+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'取引先':'거래처')+'</div><b>'+rowsD.length+(jp?'社':'개')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'未収(合計)':'미수(합계)')+'</div><b class="rd">'+_yen(totOut)+'</b><div class="s">'+withOut+(jp?'社 未収':'개 미수')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'進行ディール':'진행 딜')+'</div><b>'+rowsD.reduce(function(s,r){return s+r.st.deals.length;},0)+(jp?'件':'건')+'</b></div>'+
       '</div>';
     function stBadge(mt){var o=null;for(var i=0;i<STATUS.length;i++)if(STATUS[i].k===mt.status)o=STATUS[i];return o?'<span style="font-size:10px;font-weight:700;color:#fff;background:'+o.col+';border-radius:5px;padding:1px 7px">'+L(o.ko,o.jp)+'</span>':'';}
     var seg='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
@@ -8707,52 +8694,93 @@ window.CRM=(function(){
   function _closeDl(){document.getElementById('crmDlModal').style.display='none';}
 
   /* ═══ 활동 기록 ═══ */
+  function _acWeekRange(ref){
+    var r=ref||_today(),p=r.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]);
+    var dow=(dt.getDay()+6)%7,mon=new Date(dt); mon.setDate(dt.getDate()-dow);
+    var sun=new Date(mon); sun.setDate(mon.getDate()+6);
+    function f(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+    return {start:f(mon),end:f(sun),mon:mon};
+  }
+  function _acEffRef(){ if(_acWeekRef)return _acWeekRef; if(!_d.acts||!_d.acts.length)return _today(); var w=_acWeekRange(null),inCur=_d.acts.some(function(a){return (a.date||'')>=w.start&&(a.date||'')<=w.end;}); if(inCur)return _today(); var ds=_d.acts.map(function(a){return a.date||'';}).filter(Boolean).sort(); return ds[ds.length-1]||_today(); }
+  function _acWeekGrid(acts){
+    var jp=(lang==='jp'),today=_today(),wk=_acWeekRange(_acEffRef()),mon=wk.mon;
+    function f(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+    var WD=jp?['月','火','水','木','金','土','日']:['월','화','수','목','금','토','일'];
+    var byd={}; acts.forEach(function(a){var d=a.date||''; if(d>=wk.start&&d<=wk.end)(byd[d]=byd[d]||[]).push(a);});
+    var cols='';
+    for(var idx=0;idx<7;idx++){
+      var dt=new Date(mon); dt.setDate(mon.getDate()+idx); var ds=f(dt),isT=(ds===today);
+      var its=byd[ds]||[];
+      var cards=its.map(function(a){var t=aty(a.type);
+        return '<div onclick="event.stopPropagation();CRM._openAc(\''+a.id+'\')" title="'+_esc(a.content||'')+'" style="border-left:3px solid '+t.col+';background:'+t.col+'14;border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10.5px;line-height:1.4;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.ic+' <b style="color:#0f172a">'+_tr(a.client||'-')+'</b>'+(a.owner?' <span style="color:#94a3b8">·'+_esc(a.owner)+'</span>':'')+'</div>';
+      }).join('');
+      cols+='<div onclick="CRM._openAc(null,\'\',\''+ds+'\')" title="'+(jp?'この日に活動を追加':'이 날짜에 활동 추가')+'" style="border:1px solid '+(isT?'#99f6e4':'#eef2f7')+';border-radius:9px;min-height:132px;background:'+(isT?'#f0fdfa':'#fff')+';cursor:pointer;overflow:hidden">'+
+        '<div style="padding:5px 8px;font-size:11px;font-weight:800;border-bottom:1px solid #f1f3f7;color:'+(isT?'#0f766e':idx===5?'#2563eb':idx===6?'#dc2626':'#475569')+'">'+WD[idx]+' <span style="font-weight:600;color:#94a3b8">'+parseInt(ds.slice(8),10)+(jp?'':'일')+'</span>'+(isT?' <span style="font-size:9px;color:#0f766e">●'+(jp?'今日':'오늘')+'</span>':'')+'</div>'+
+        '<div style="padding:5px">'+(cards||'<div style="font-size:11px;color:#e2e8f0;text-align:center;padding:12px 0">＋</div>')+'</div></div>';
+    }
+    var lab=wk.start.slice(5).replace('-','/')+' ~ '+wk.end.slice(5).replace('-','/');
+    var navbar='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+
+      '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._acWeekNav(-1)">‹</button>'+
+      '<b style="font-size:13px;min-width:118px;text-align:center">'+lab+'</b>'+
+      '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._acWeekNav(1)">›</button>'+
+      '<button class="crm-btn" style="background:#fff;color:#0f766e;border:1px solid #99f6e4;padding:4px 13px;font-size:12px" onclick="CRM._acWeekNav(0)">'+(jp?'今週':'이번주')+'</button></div>';
+    return navbar+'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div style="display:grid;grid-template-columns:repeat(7,minmax(104px,1fr));gap:6px;min-width:760px">'+cols+'</div></div>';
+  }
+  function _acSetView(v){_acView=v;renderActs();}
+  function _acWeekNav(d){ if(d===0){_acWeekRef=_today();} else { var r=_acWeekRange(_acEffRef()),mon=new Date(r.mon); mon.setDate(mon.getDate()+d*7); _acWeekRef=mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0'); } renderActs(); }
   function renderActs(){
-    var host=document.getElementById('crmAcBody'); if(!host)return; var jp=(lang==='jp');
+    var host=document.getElementById('crmAcBody'); if(!host)return; var jp=(lang==='jp'),today=_today();
     var owners={};_d.acts.forEach(function(a){if(a.owner)owners[a.owner]=1;});
-    var acts=_d.acts.slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
+    var acts=_d.acts.slice();
     if(_acFltV.type)acts=acts.filter(function(a){return a.type===_acFltV.type;});
     if(_acFltV.owner)acts=acts.filter(function(a){return a.owner===_acFltV.owner;});
-    var today=_today();
+    var wk=_acWeekRange(_acEffRef());
+    var wkArr=acts.filter(function(a){return (a.date||'')>=wk.start&&(a.date||'')<=wk.end;});
+    var tdN=acts.filter(function(a){return a.date===today;}).length;
     var late=_d.acts.filter(function(a){return a.next&&a.nextDate&&a.nextDate<today&&!a.done;}).length;
-    var _thisM=today.slice(0,7);
-    var _pm=(function(){var y=+today.slice(0,4),m=+today.slice(5,7)-1;if(m<1){y--;m=12;}return y+'-'+('0'+m).slice(-2);})();
-    var _curCnt=_d.acts.filter(function(a){return (a.date||'').slice(0,7)===_thisM;}).length;
-    var _pmCnt=_d.acts.filter(function(a){return (a.date||'').slice(0,7)===_pm;}).length;
-    var _upc=_d.acts.filter(function(a){return a.next&&a.nextDate&&a.nextDate>=today&&!a.done;}).length;
-    var _ownN=Object.keys(owners).length;
+    var byType={}; acts.forEach(function(a){byType[a.type]=(byType[a.type]||0)+1;});
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'活動(全体)':'활동(전체)')+'</div><b>'+_d.acts.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'担当':'담당')+' '+_ownN+(jp?'名':'명')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'今月活動':'이번달 활동')+'</div><b>'+_curCnt+(jp?'件':'건')+'</b><div class="s">'+(jp?'前月':'전월')+' '+_pmCnt+(jp?'件':'건')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'フォロー遅延':'후속 지연')+'</div><b class="'+(late>0?'rd':'')+'">'+late+(jp?'件':'건')+'</b><div class="s">'+(jp?'予定':'예정')+' '+_upc+(jp?'件':'건')+'</div></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'今週の活動':'이번주 활동')+'</div><b>'+wkArr.length+(jp?'件':'건')+'</b><div class="s">'+wk.start.slice(5).replace('-','/')+'~'+wk.end.slice(5).replace('-','/')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'今日':'오늘')+'</div><b>'+tdN+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'全体':'전체')+'</div><b>'+_d.acts.length+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'フォロー遅延':'후속 지연')+'</div><b class="'+(late>0?'rd':'')+'">'+late+(jp?'件':'건')+'</b></div>'+
       '</div>';
+    var legend=ATYPES.map(function(t){return '<span style="font-size:10.5px;color:#64748b;font-weight:600;margin-right:12px;white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:'+t.col+';margin-right:4px;vertical-align:middle"></span>'+t.ic+L(t.ko,t.jp)+(byType[t.k]?' <span style="color:#94a3b8">'+byType[t.k]+'</span>':'')+'</span>';}).join('');
+    var legendBar='<div style="display:flex;flex-wrap:wrap;gap:2px 0;margin-bottom:12px;padding:9px 13px;background:#f8fafc;border:1px solid #eef2f7;border-radius:9px">'+legend+'</div>';
     var topt='<option value="">'+(jp?'全種類':'전체 유형')+'</option>'+ATYPES.map(function(t){return '<option value="'+t.k+'"'+(_acFltV.type===t.k?' selected':'')+'>'+t.ic+' '+L(t.ko,t.jp)+'</option>';}).join('');
     var oopt='<option value="">'+(jp?'全担当':'전체 담당')+'</option>'+Object.keys(owners).map(function(o){return '<option value="'+_esc(o)+'"'+(_acFltV.owner===o?' selected':'')+'>'+_esc(o)+'</option>';}).join('');
+    var vtoggle='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
+      '<button onclick="CRM._acSetView(\'week\')" style="font-family:inherit;border:none;background:'+(_acView==='week'?'#0f766e':'#fff')+';color:'+(_acView==='week'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">📅 '+(jp?'週間':'주간')+'</button>'+
+      '<button onclick="CRM._acSetView(\'timeline\')" style="font-family:inherit;border:none;background:'+(_acView==='timeline'?'#0f766e':'#fff')+';color:'+(_acView==='timeline'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'リスト':'타임라인')+'</button></span>';
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
       '<button class="crm-btn" onclick="CRM._openAc()">+ '+(jp?'活動追加':'활동 추가')+'</button>'+
       '<select class="filter-input" style="width:130px" onchange="CRM._acFlt(\'type\',this.value)">'+topt+'</select>'+
-      '<select class="filter-input" style="width:120px" onchange="CRM._acFlt(\'owner\',this.value)">'+oopt+'</select></div>';
-    // 세로 레일 타임라인 (일자 그룹)
-    var body='';
-    if(!acts.length){body='<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'記録なし':'기록 없음')+'</div>';}
-    else{
-      body='<div class="crm-tl">'+acts.map(function(a,i){
-        var t=aty(a.type),last=i===acts.length-1;
-        var nx=a.next?'<div style="margin-top:5px;font-size:11.5px;color:'+(a.nextDate&&a.nextDate<today&&!a.done?'#dc2626':'#0f766e')+';background:'+(a.nextDate&&a.nextDate<today&&!a.done?'#fef2f2':'#f0fdfa')+';border-radius:6px;padding:4px 8px">▸ '+_tr(a.next)+(a.nextDate?' ('+a.nextDate+')':'')+'</div>':'';
-        return '<div class="crm-tlrow"><div class="crm-tlrail">'+
-          '<span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:'+t.col+'22;color:'+t.col+';font-size:14px;z-index:1;position:relative">'+t.ic+'</span>'+
-          (last?'':'<span class="crm-tlline"></span>')+'</div>'+
-          '<div class="crm-tlcontent" onclick="CRM._openAc(\''+a.id+'\')" style="cursor:pointer">'+
-            '<div style="font-size:11.5px;color:#94a3b8">'+(a.date||'')+' · <span style="color:'+t.col+';font-weight:700">'+L(t.ko,t.jp)+'</span>'+(a.client?' · '+_tr(a.client):'')+(a.owner?' · '+_esc(a.owner):'')+'</div>'+
-            '<div style="font-size:13.5px;color:#0f172a;margin-top:2px">'+_tr(a.content||'-')+'</div>'+nx+'</div></div>';
-      }).join('')+'</div>';
+      '<select class="filter-input" style="width:120px" onchange="CRM._acFlt(\'owner\',this.value)">'+oopt+'</select>'+vtoggle+'</div>';
+    var body;
+    if(_acView==='timeline'){
+      var tacts=acts.slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
+      if(!tacts.length){body='<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'記録なし':'기록 없음')+'</div>';}
+      else{
+        body='<div class="crm-tl">'+tacts.map(function(a,i){
+          var t=aty(a.type),last=i===tacts.length-1;
+          var nx=a.next?'<div style="margin-top:5px;font-size:11.5px;color:'+(a.nextDate&&a.nextDate<today&&!a.done?'#dc2626':'#0f766e')+';background:'+(a.nextDate&&a.nextDate<today&&!a.done?'#fef2f2':'#f0fdfa')+';border-radius:6px;padding:4px 8px">▸ '+_tr(a.next)+(a.nextDate?' ('+a.nextDate+')':'')+'</div>':'';
+          return '<div class="crm-tlrow"><div class="crm-tlrail">'+
+            '<span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:'+t.col+'22;color:'+t.col+';font-size:14px;z-index:1;position:relative">'+t.ic+'</span>'+
+            (last?'':'<span class="crm-tlline"></span>')+'</div>'+
+            '<div class="crm-tlcontent" onclick="CRM._openAc(\''+a.id+'\')" style="cursor:pointer">'+
+              '<div style="font-size:11.5px;color:#94a3b8">'+(a.date||'')+' · <span style="color:'+t.col+';font-weight:700">'+L(t.ko,t.jp)+'</span>'+(a.client?' · '+_tr(a.client):'')+(a.owner?' · '+_esc(a.owner):'')+'</div>'+
+              '<div style="font-size:13.5px;color:#0f172a;margin-top:2px">'+_tr(a.content||'-')+'</div>'+nx+'</div></div>';
+        }).join('')+'</div>';
+      }
+    } else {
+      body=_acWeekGrid(acts);
     }
-    host.innerHTML=kpi+bar+body;
+    host.innerHTML=kpi+legendBar+bar+body;
   }
   function _acFlt(k,v){_acFltV[k]=v;renderActs();}
-  function _openAc(id,preClient){
+  function _openAc(id,preClient,preDate){
     var jp=(lang==='jp'); var a=id?_d.acts.filter(function(x){return x.id===id;})[0]:null;
-    var isNew=!a; a=a||{id:_uid('A'),type:'call',date:_today(),client:preClient||''};
+    var isNew=!a; a=a||{id:_uid('A'),type:'call',date:preDate||_today(),client:preClient||''};
     document.getElementById('crmAcTitle').textContent=isNew?(jp?'活動追加':'활동 추가'):(jp?'活動編集':'활동 수정');
     var dl=_cliList().map(function(c){return '<option value="'+_esc(c)+'">';}).join('');
     var dlDeals=_d.deals.filter(function(d){return d.stage!=='won'&&d.stage!=='lost';}).map(function(d){return '<option value="'+d.id+'"'+(a.dealId===d.id?' selected':'')+'>'+_esc(d.client)+' · '+_esc(d.product)+'</option>';}).join('');
@@ -8813,13 +8841,10 @@ window.CRM=(function(){
     var items=_schItems(),over=[],td=[],wk=[],later=[];
     items.forEach(function(it){var dd=(new Date(it.date)-new Date(today))/864e5;if(it.date<today)over.push(it);else if(it.date===today)td.push(it);else if(dd<=7)wk.push(it);else later.push(it);});
     function sec(title,arr,col){if(!arr.length)return '';return '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:800;color:'+col+';margin-bottom:6px">'+title+' ('+arr.length+')</div>'+arr.map(function(it){var kk=it.kind==='deal'?'🧩':'📇',fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";return '<div onclick="'+fn+'" style="cursor:pointer;display:flex;gap:10px;padding:8px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:5px"><span style="color:#94a3b8;width:76px;flex-shrink:0;font-size:12px">'+it.date+'</span><span>'+kk+'</span><span style="flex:1;font-size:13px">'+_tr(it.text)+' <span style="color:#94a3b8">· '+_tr(it.client||'')+(it.owner?' · '+_esc(it.owner):'')+'</span></span></div>';}).join('')+'</div>';}
-    var _tdD=td.filter(function(x){return x.kind==='deal';}).length, _tdA=td.length-_tdD;
-    var _oldest=over.length?Math.max.apply(null,over.map(function(x){return Math.round((new Date(today)-new Date(x.date))/864e5);})):0;
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'今日':'오늘')+'</div><b>'+td.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'ディール':'딜')+' '+_tdD+' · '+(jp?'活動':'활동')+' '+_tdA+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'遅延':'지남')+'</div><b class="'+(over.length?'rd':'')+'">'+over.length+(jp?'件':'건')+'</b><div class="s">'+(over.length?(jp?'最長':'최장')+' '+_oldest+(jp?'日':'일'):'-')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'今週':'이번주')+'</div><b>'+wk.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'7日以内':'7일 내')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'以降':'이후')+'</div><b>'+later.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'全体':'전체')+' '+items.length+(jp?'件':'건')+'</div></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'今日':'오늘')+'</div><b>'+td.length+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'遅延':'지남')+'</div><b class="'+(over.length?'rd':'')+'">'+over.length+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'今週':'이번주')+'</div><b>'+wk.length+(jp?'件':'건')+'</b></div>'+
       '</div>';
     host.innerHTML=kpi+(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#0f766e')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
   }
@@ -8862,7 +8887,7 @@ window.CRM=(function(){
   return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;}, forecastMachArr:forecastMach, consRunArr:consRun,
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
     _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt, _clSetView:_clSetView, _fullCa:_fullCa, _fillDemo:_fillDemo, _clearDemo:_clearDemo,
-    _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
+    _openAc:_openAc, _saveAc:_saveAc, _acSetView:_acSetView, _acWeekNav:_acWeekNav, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
 })();
 </script>
 
@@ -8927,18 +8952,11 @@ window.WTAS=(function(){
   function render(){
     var host=document.getElementById('assetBody'); if(!host)return; var jp=(lang==='jp'),ym=(new Date()).toISOString().slice(0,7);
     var dev=_dev(),as=_asr();
-    var _hosp={},_prod={}; dev.forEach(function(d){if(d.client)_hosp[d.client]=1;if(d.product)_prod[d.product]=1;});
-    var _pm2=(function(){var y=+ym.slice(0,4),m=+ym.slice(5,7)-1;if(m<1){y--;m=12;}return y+'-'+('0'+m).slice(-2);})();
-    var _devCur=dev.filter(function(d){return (d.date||'').slice(0,7)===ym;}).length;
-    var _devPm=dev.filter(function(d){return (d.date||'').slice(0,7)===_pm2;}).length;
-    var _asCur=as.filter(function(x){return (x.date||'').slice(0,7)===ym;}).length;
-    var _asTot=as.reduce(function(s,x){return s+x.amount;},0);
-    var _asAvg=as.length?_asTot/as.length:0;
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'設置機器':'설치 장비')+'</div><b>'+dev.length+(jp?'台':'대')+'</b><div class="s">'+(jp?'病院':'병원')+' '+Object.keys(_hosp).length+(jp?'':'개')+' · '+(jp?'製品':'제품')+' '+Object.keys(_prod).length+(jp?'種':'종')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'今月設置':'이번달 설치')+'</div><b>'+_devCur+(jp?'台':'대')+'</b><div class="s">'+(jp?'前月':'전월')+' '+_devPm+(jp?'台':'대')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">AS·'+(jp?'修理':'수리')+'</div><b>'+as.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'今月':'이번달')+' '+_asCur+(jp?'件':'건')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">AS '+(jp?'売上':'매출')+'</div><b class="gr">'+_yen(_asTot)+'</b><div class="s">'+(jp?'件当り':'건당')+' '+_yen(_asAvg)+'</div></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'設置機器':'설치 장비')+'</div><b>'+dev.length+(jp?'台':'대')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'今月設置':'이번달 설치')+'</div><b>'+dev.filter(function(d){return (d.date||'').slice(0,7)===ym;}).length+(jp?'台':'대')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">AS·'+(jp?'修理':'수리')+'</div><b>'+as.length+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">AS '+(jp?'売上':'매출')+'</div><b class="gr">'+_yen(as.reduce(function(s,x){return s+x.amount;},0))+'</b></div>'+
       '</div>';
     var tabs='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#0f766e':'#e2e8f0')+';background:'+(_view===t[0]?'#0f766e':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
     var search='<input id="wtasQ" oninput="WTAS._s(this.value)" value="'+_esc(_q)+'" placeholder="'+(jp?'病院・製品で検索':'병원·제품 검색')+'" style="width:100%;max-width:360px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:9px;font-size:13px;font-family:inherit;margin-bottom:12px;outline:none">';
