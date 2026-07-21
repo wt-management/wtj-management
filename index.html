@@ -8813,10 +8813,13 @@ window.CRM=(function(){
     var items=_schItems(),over=[],td=[],wk=[],later=[];
     items.forEach(function(it){var dd=(new Date(it.date)-new Date(today))/864e5;if(it.date<today)over.push(it);else if(it.date===today)td.push(it);else if(dd<=7)wk.push(it);else later.push(it);});
     function sec(title,arr,col){if(!arr.length)return '';return '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:800;color:'+col+';margin-bottom:6px">'+title+' ('+arr.length+')</div>'+arr.map(function(it){var kk=it.kind==='deal'?'🧩':'📇',fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";return '<div onclick="'+fn+'" style="cursor:pointer;display:flex;gap:10px;padding:8px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:5px"><span style="color:#94a3b8;width:76px;flex-shrink:0;font-size:12px">'+it.date+'</span><span>'+kk+'</span><span style="flex:1;font-size:13px">'+_tr(it.text)+' <span style="color:#94a3b8">· '+_tr(it.client||'')+(it.owner?' · '+_esc(it.owner):'')+'</span></span></div>';}).join('')+'</div>';}
+    var _tdD=td.filter(function(x){return x.kind==='deal';}).length, _tdA=td.length-_tdD;
+    var _oldest=over.length?Math.max.apply(null,over.map(function(x){return Math.round((new Date(today)-new Date(x.date))/864e5);})):0;
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'今日':'오늘')+'</div><b>'+td.length+(jp?'件':'건')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'遅延':'지남')+'</div><b class="'+(over.length?'rd':'')+'">'+over.length+(jp?'件':'건')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'今週':'이번주')+'</div><b>'+wk.length+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'今日':'오늘')+'</div><b>'+td.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'ディール':'딜')+' '+_tdD+' · '+(jp?'活動':'활동')+' '+_tdA+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'遅延':'지남')+'</div><b class="'+(over.length?'rd':'')+'">'+over.length+(jp?'件':'건')+'</b><div class="s">'+(over.length?(jp?'最長':'최장')+' '+_oldest+(jp?'日':'일'):'-')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'今週':'이번주')+'</div><b>'+wk.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'7日以内':'7일 내')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'以降':'이후')+'</div><b>'+later.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'全体':'전체')+' '+items.length+(jp?'件':'건')+'</div></div>'+
       '</div>';
     host.innerHTML=kpi+(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#0f766e')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
   }
@@ -8924,11 +8927,18 @@ window.WTAS=(function(){
   function render(){
     var host=document.getElementById('assetBody'); if(!host)return; var jp=(lang==='jp'),ym=(new Date()).toISOString().slice(0,7);
     var dev=_dev(),as=_asr();
+    var _hosp={},_prod={}; dev.forEach(function(d){if(d.client)_hosp[d.client]=1;if(d.product)_prod[d.product]=1;});
+    var _pm2=(function(){var y=+ym.slice(0,4),m=+ym.slice(5,7)-1;if(m<1){y--;m=12;}return y+'-'+('0'+m).slice(-2);})();
+    var _devCur=dev.filter(function(d){return (d.date||'').slice(0,7)===ym;}).length;
+    var _devPm=dev.filter(function(d){return (d.date||'').slice(0,7)===_pm2;}).length;
+    var _asCur=as.filter(function(x){return (x.date||'').slice(0,7)===ym;}).length;
+    var _asTot=as.reduce(function(s,x){return s+x.amount;},0);
+    var _asAvg=as.length?_asTot/as.length:0;
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'設置機器':'설치 장비')+'</div><b>'+dev.length+(jp?'台':'대')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'今月設置':'이번달 설치')+'</div><b>'+dev.filter(function(d){return (d.date||'').slice(0,7)===ym;}).length+(jp?'台':'대')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">AS·'+(jp?'修理':'수리')+'</div><b>'+as.length+(jp?'件':'건')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">AS '+(jp?'売上':'매출')+'</div><b class="gr">'+_yen(as.reduce(function(s,x){return s+x.amount;},0))+'</b></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'設置機器':'설치 장비')+'</div><b>'+dev.length+(jp?'台':'대')+'</b><div class="s">'+(jp?'病院':'병원')+' '+Object.keys(_hosp).length+(jp?'':'개')+' · '+(jp?'製品':'제품')+' '+Object.keys(_prod).length+(jp?'種':'종')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'今月設置':'이번달 설치')+'</div><b>'+_devCur+(jp?'台':'대')+'</b><div class="s">'+(jp?'前月':'전월')+' '+_devPm+(jp?'台':'대')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">AS·'+(jp?'修理':'수리')+'</div><b>'+as.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'今月':'이번달')+' '+_asCur+(jp?'件':'건')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">AS '+(jp?'売上':'매출')+'</div><b class="gr">'+_yen(_asTot)+'</b><div class="s">'+(jp?'件当り':'건당')+' '+_yen(_asAvg)+'</div></div>'+
       '</div>';
     var tabs='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#0f766e':'#e2e8f0')+';background:'+(_view===t[0]?'#0f766e':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
     var search='<input id="wtasQ" oninput="WTAS._s(this.value)" value="'+_esc(_q)+'" placeholder="'+(jp?'病院・製品で検索':'병원·제품 검색')+'" style="width:100%;max-width:360px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:9px;font-size:13px;font-family:inherit;margin-bottom:12px;outline:none">';
