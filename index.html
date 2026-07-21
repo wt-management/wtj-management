@@ -504,6 +504,14 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 #fxmodal .frow input,#fxmodal .frow select{width:100%}
 
 /* ══ WT 문서 언어 테마(2026-07-21, Madia 스터디) — 전 페이지 공통 오버라이드 ══ */
+/* 자금일보 fx-* 카드(메인 대시보드에도 노출) 그림자 제거 → 헤어라인 */
+.finpage .fx-kpi,.finpage .fx-card,.finpage .fx-acct{box-shadow:none!important;border:1px solid #e4e8ef}
+.finpage .fx-kpi{border-top:1px solid #e4e8ef}
+/* 자금일보·임원요약 표 헤더에 네이비 상단 괘선(특정도 이겨서 명시) */
+.finpage table.fx th,.estab th{border-top:2px solid #16324f;background:#fafbfc}
+.estab th{color:#475569}
+/* 모달 그림자 절제(가장 과한 것들) */
+#fxmodal .mbx,#wtinv-mbg .wm{box-shadow:0 14px 36px rgba(15,23,42,.14)!important}
 .kpi-card,.summary-bar,.chart-card,.table-card,.form-card{box-shadow:none;border:1px solid #e4e8ef}
 .kpi-value{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 table{font-variant-numeric:tabular-nums}
