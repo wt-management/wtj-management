@@ -502,6 +502,19 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 .finpage input,.finpage select{width:auto}
 .finpage .fx-filters label,.finpage .fx-tab{white-space:nowrap}
 #fxmodal .frow input,#fxmodal .frow select{width:100%}
+
+/* ══ WT 문서 언어 테마(2026-07-21, Madia 스터디) — 전 페이지 공통 오버라이드 ══ */
+.kpi-card,.summary-bar,.chart-card,.table-card,.form-card{box-shadow:none;border:1px solid #e4e8ef}
+.kpi-value{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+table{font-variant-numeric:tabular-nums}
+thead th{background:#fafbfc;color:#475569;border-top:2px solid #16324f;border-bottom:1px solid #e4e8ef;text-transform:none;letter-spacing:0}
+tbody tr{border-bottom-color:#eef1f5}
+tbody td{color:#182230}
+tbody tr.total-row{background:#eef3f8}
+.topbar{border-bottom-color:#e4e8ef}
+.topbar h1{color:#182230;font-weight:800;letter-spacing:-.01em}
+.table-title{color:#182230}
+.sec-label{color:#64748b}
 </style>
 
 <script>/* WT_ERRLOG_V1 — 공통 오류수집+요청함 (자동주입 스니펫, 개별 수정 금지) */
@@ -966,7 +979,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
           </select>
 
-          <span style="color:#9ca3af;font-size:13px">~</span>
+          <span style="color:#64748b;font-size:13px">~</span>
 
           <select id="dash-to-sel" class="filter-input" style="width:70px" onchange="_dashPeriodChange()">
 
@@ -982,7 +995,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
             placeholder="100엔→원" oninput="updateJpyRate();">
 
-          <span style="font-size:11px;color:#9ca3af">원/100엔</span>
+          <span style="font-size:11px;color:#64748b">원/100엔</span>
 
         </div>
 
@@ -1360,7 +1373,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
           </select>
 
-          <span style="font-size:13px;color:#9ca3af">~</span>
+          <span style="font-size:13px;color:#64748b">~</span>
 
           <select id="ct-to-sel" class="filter-input" style="width:70px" onchange="_ctPeriodChange()">
 
@@ -1588,7 +1601,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
               </select>
 
-              <span style="color:#9ca3af;font-size:13px">~</span>
+              <span style="color:#64748b;font-size:13px">~</span>
 
               <select class="filter-input" id="orderToMonth" onchange="filterOrders()" style="width:70px">
 
@@ -1705,7 +1718,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
 
               </select>
 
-              <span style="color:#9ca3af;font-size:13px">~</span>
+              <span style="color:#64748b;font-size:13px">~</span>
 
               <select class="filter-input" id="payToMonth" onchange="filterPayments()" style="width:70px">
 
