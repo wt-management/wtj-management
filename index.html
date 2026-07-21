@@ -8832,7 +8832,7 @@ window.CRM=(function(){
 <script>
 /* ═══════════ 설치 장비 · AS 관리 (매출일보 파생, 미국법인 장비이력 적응) ═══════════ */
 window.WTAS=(function(){
-  var _view='clinic';
+  var _view='clinic',_q='',_sort='n';
   function L(ko,jp){return (typeof lang!=='undefined'&&lang==='jp')?jp:ko;}
   function _yen(v){return '¥'+(Math.round(v||0)).toLocaleString();}
   function _esc(s){return (typeof esc==='function')?esc(s):String(s==null?'':s);}
@@ -8850,6 +8850,43 @@ window.WTAS=(function(){
     return '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:6px">🔧 '+(jp?'保有機器':'보유 장비')+' ('+ds.length+(jp?'台':'대')+')</div>'+
       ds.map(function(d){return '<div style="display:flex;justify-content:space-between;padding:6px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:4px;font-size:12.5px"><span>'+_esc(d.product)+' <span style="color:#94a3b8">· '+(d.date||'')+'</span></span><b style="color:#1d4ed8">'+_yen(d.amount)+'</b></div>';}).join('')+'</div>';
   }
+  function _prodSummary(items){
+    var m={},order=[];items.forEach(function(i){var k=_esc(i.product);if(m[k]==null){m[k]=0;order.push(k);}m[k]+=(i.qty||1);});
+    return order.map(function(k){return m[k]>1?k+' <span style="color:#94a3b8">×'+m[k]+'</span>':k;}).join(', ');
+  }
+  function _sortClinic(arr){
+    if(_sort==='amt') arr.sort(function(a,b){return (b.d.amt-a.d.amt)||(b.d.n-a.d.n);});
+    else if(_sort==='name') arr.sort(function(a,b){return String(a.c).localeCompare(String(b.c));});
+    else arr.sort(function(a,b){return (b.d.n-a.d.n)||(b.d.amt-a.d.amt);});
+    return arr;
+  }
+  function _sortbar(jp){
+    var opts=[['n',jp?'台数順':'대수순'],['amt',jp?'売上順':'매출순'],['name',jp?'名前順':'이름순']];
+    return '<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;color:#94a3b8">'+(jp?'並び替え':'정렬')+'</span>'+opts.map(function(o){return '<button onclick="WTAS._so(\''+o[0]+'\')" style="font-family:inherit;border:1px solid '+(_sort===o[0]?'#0f766e':'#e2e8f0')+';background:'+(_sort===o[0]?'#ecfdf5':'#fff')+';color:'+(_sort===o[0]?'#0f766e':'#64748b')+';border-radius:7px;padding:4px 12px;font-size:11.5px;font-weight:700;cursor:pointer">'+o[1]+'</button>';}).join('')+'</div>';
+  }
+  function listHtml(dev,as,jp){
+    var q=_q.trim().toLowerCase();
+    if(_view==='clinic'){
+      var by={};dev.forEach(function(d){by[d.client]=by[d.client]||{n:0,amt:0,items:[]};by[d.client].n++;by[d.client].amt+=d.amount;by[d.client].items.push(d);});
+      var arr=Object.keys(by).map(function(k){return {c:k,d:by[k]};});
+      if(q) arr=arr.filter(function(x){return String(x.c).toLowerCase().indexOf(q)>=0 || x.d.items.some(function(i){return String(i.product).toLowerCase().indexOf(q)>=0;});});
+      _sortClinic(arr);
+      var totN=arr.reduce(function(s,x){return s+x.d.n;},0),totA=arr.reduce(function(s,x){return s+x.d.amt;},0);
+      var rows=arr.length?arr.map(function(x){return '<tr style="cursor:pointer" onclick="if(window.CRM)CRM._openClient(\''+_esc(x.c).replace(/\x27/g,"")+'\')" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:9px 10px;font-weight:700;color:#0f172a">'+_tr(x.c)+'</td><td class="num" style="padding:9px 10px;font-weight:800;color:#0f766e;white-space:nowrap">'+x.d.n+(jp?'台':'대')+'</td><td style="padding:9px 10px;color:#475569;font-size:12px">'+_prodSummary(x.d.items)+'</td><td class="num" style="padding:9px 10px;font-weight:700;white-space:nowrap">'+(x.d.amt?'<span style="color:#1d4ed8">'+_yen(x.d.amt)+'</span>':'<span style="color:#cbd5e1">-</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">'+(jp?'該当なし':'검색 결과 없음')+'</td></tr>';
+      return _sortbar(jp)+'<div style="overflow-x:auto;border:1px solid #eef2f7;border-radius:12px"><table class="estab" style="width:100%;margin:0"><thead><tr><th style="text-align:left;padding:9px 10px">'+(jp?'病院':'병원')+'</th><th class="num" style="padding:9px 10px">'+(jp?'保有':'보유')+'</th><th style="text-align:left;padding:9px 10px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:9px 10px">'+(jp?'売上':'매출')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div><div style="font-size:11.5px;color:#94a3b8;margin-top:8px;text-align:right">'+arr.length+(jp?' 病院':'개 병원')+' · '+totN+(jp?'台':'대')+' · '+_yen(totA)+'</div>';
+    }else if(_view==='product'){
+      var byp={};dev.forEach(function(d){byp[d.product]=byp[d.product]||{n:0,amt:0,cl:{}};byp[d.product].n++;byp[d.product].amt+=d.amount;byp[d.product].cl[d.client]=1;});
+      var pa=Object.keys(byp).map(function(k){return {p:k,d:byp[k]};});
+      if(q) pa=pa.filter(function(x){return String(x.p).toLowerCase().indexOf(q)>=0;});
+      pa.sort(function(a,b){return b.d.n-a.d.n;});
+      var rows=pa.length?pa.map(function(x){return '<tr onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:8px 10px;font-weight:600">'+_esc(x.p)+'</td><td class="num" style="padding:8px 10px;font-weight:800;color:#0f766e">'+x.d.n+'</td><td class="num" style="padding:8px 10px">'+Object.keys(x.d.cl).length+'</td><td class="num" style="padding:8px 10px;font-weight:700">'+(x.d.amt?_yen(x.d.amt):'<span style="color:#cbd5e1">-</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">'+(jp?'該当なし':'검색 결과 없음')+'</td></tr>';
+      return '<div style="overflow-x:auto;border:1px solid #eef2f7;border-radius:12px"><table class="estab" style="width:100%;margin:0"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:8px 10px">'+(jp?'設置台数':'설치 대수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'病院数':'병원 수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'売上':'매출')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    }else{
+      var al=as.slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
+      if(q) al=al.filter(function(x){return (String(x.client)+' '+String(x.product)+' '+String(x.date)).toLowerCase().indexOf(q)>=0;});
+      return '<div style="overflow-x:auto;border:1px solid #eef2f7;border-radius:12px"><table class="estab" style="width:100%;margin:0"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'日付':'날짜')+'</th><th style="text-align:left;padding:8px 10px">'+(jp?'病院':'병원')+'</th><th style="text-align:left;padding:8px 10px">'+(jp?'内容':'내용')+'</th><th class="num" style="padding:8px 10px">'+(jp?'金額':'금액')+'</th></tr></thead><tbody>'+(al.length?al.map(function(x){return '<tr onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:7px 10px;color:#94a3b8;white-space:nowrap">'+(x.date||'')+'</td><td style="padding:7px 10px">'+_tr(x.client)+'</td><td style="padding:7px 10px">'+_tr(x.product)+'</td><td class="num" style="padding:7px 10px;font-weight:700">'+_yen(x.amount)+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">-</td></tr>')+'</tbody></table></div>';
+    }
+  }
   function render(){
     var host=document.getElementById('assetBody'); if(!host)return; var jp=(lang==='jp'),ym=(new Date()).toISOString().slice(0,7);
     var dev=_dev(),as=_asr();
@@ -8859,25 +8896,16 @@ window.WTAS=(function(){
       '<div class="wt-fact"><div class="l">AS·'+(jp?'修理':'수리')+'</div><b>'+as.length+(jp?'件':'건')+'</b></div>'+
       '<div class="wt-fact"><div class="l">AS '+(jp?'売上':'매출')+'</div><b class="gr">'+_yen(as.reduce(function(s,x){return s+x.amount;},0))+'</b></div>'+
       '</div>';
-    var tabs='<div style="display:flex;gap:6px;margin-bottom:14px">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#0f766e':'#e2e8f0')+';background:'+(_view===t[0]?'#0f766e':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
-    var body='';
-    if(_view==='clinic'){
-      var by={};dev.forEach(function(d){by[d.client]=by[d.client]||{n:0,amt:0,items:[]};by[d.client].n++;by[d.client].amt+=d.amount;by[d.client].items.push(d);});
-      var arr=Object.keys(by).map(function(k){return {c:k,d:by[k]};}).sort(function(a,b){return b.d.n-a.d.n;});
-      body='<div class="crm-cgrid">'+arr.map(function(x){return '<div class="crm-ccard" onclick="if(window.CRM)CRM._openClient(\''+_esc(x.c).replace(/\x27/g,"")+'\')"><div style="font-weight:800;font-size:13.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tr(x.c)+'</div><div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:12px;color:#0f766e;font-weight:700">'+x.d.n+(jp?'台':'대')+'</span><span style="font-size:12px;font-weight:700;color:#1d4ed8">'+_yen(x.d.amt)+'</span></div><div style="font-size:11px;color:#94a3b8;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+x.d.items.map(function(i){return _esc(i.product);}).slice(0,3).join(', ')+'</div></div>';}).join('')+'</div>';
-    }else if(_view==='product'){
-      var byp={};dev.forEach(function(d){byp[d.product]=byp[d.product]||{n:0,amt:0,cl:{}};byp[d.product].n++;byp[d.product].amt+=d.amount;byp[d.product].cl[d.client]=1;});
-      var pa=Object.keys(byp).map(function(k){return {p:k,d:byp[k]};}).sort(function(a,b){return b.d.n-a.d.n;});
-      body='<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:8px 10px">'+(jp?'設置台数':'설치 대수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'病院数':'병원 수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'売上':'매출')+'</th></tr></thead><tbody>'+pa.map(function(x){return '<tr><td style="padding:8px 10px;font-weight:600">'+_esc(x.p)+'</td><td class="num" style="padding:8px 10px;font-weight:800;color:#0f766e">'+x.d.n+'</td><td class="num" style="padding:8px 10px">'+Object.keys(x.d.cl).length+'</td><td class="num" style="padding:8px 10px;font-weight:700">'+_yen(x.d.amt)+'</td></tr>';}).join('')+'</tbody></table></div>';
-    }else{
-      as.sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
-      body='<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'日付':'날짜')+'</th><th style="text-align:left;padding:8px 10px">'+(jp?'病院':'병원')+'</th><th style="text-align:left;padding:8px 10px">'+(jp?'内容':'내용')+'</th><th class="num" style="padding:8px 10px">'+(jp?'金額':'금액')+'</th></tr></thead><tbody>'+(as.length?as.map(function(x){return '<tr><td style="padding:7px 10px;color:#94a3b8">'+(x.date||'')+'</td><td style="padding:7px 10px">'+_tr(x.client)+'</td><td style="padding:7px 10px">'+_tr(x.product)+'</td><td class="num" style="padding:7px 10px;font-weight:700">'+_yen(x.amount)+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:16px">-</td></tr>')+'</tbody></table></div>';
-    }
-    host.innerHTML=kpi+tabs+body;
+    var tabs='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#0f766e':'#e2e8f0')+';background:'+(_view===t[0]?'#0f766e':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
+    var search='<input id="wtasQ" oninput="WTAS._s(this.value)" value="'+_esc(_q)+'" placeholder="'+(jp?'病院・製品で検索':'병원·제품 검색')+'" style="width:100%;max-width:360px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:9px;font-size:13px;font-family:inherit;margin-bottom:12px;outline:none">';
+    host.innerHTML=kpi+tabs+search+'<div id="wtasList">'+listHtml(dev,as,jp)+'</div>';
   }
-  function _v(v){_view=v;render();}
+  function _refresh(){var el=document.getElementById('wtasList');if(el)el.innerHTML=listHtml(_dev(),_asr(),lang==='jp');}
+  function _v(v){_view=v;render();var i=document.getElementById('wtasQ');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}}
+  function _s(v){_q=v;_refresh();}
+  function _so(s){_sort=s;_refresh();}
   function relang(){var ap=document.querySelector('.page.active');if(ap&&ap.id==='page-asset')render();}
-  return {render:render, relang:relang, _v:_v, installedFor:installedFor, clientHtml:clientHtml};
+  return {render:render, relang:relang, _v:_v, _s:_s, _so:_so, installedFor:installedFor, clientHtml:clientHtml};
 })();
 </script>
 
