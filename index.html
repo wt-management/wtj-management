@@ -522,6 +522,7 @@ tbody td{color:#182230}
 tbody tr.total-row{background:#eef3f8}
 .topbar{border-bottom-color:#e4e8ef}
 .topbar h1{color:#182230;font-weight:800;letter-spacing:-.01em}
+.mast-kicker{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8;margin-bottom:1px}
 .table-title{color:#182230}
 .sec-label{color:#64748b}
 </style>
@@ -828,6 +829,8 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
       <button id="topbarBackBtn" onclick="goBack()" style="display:none;border:none;background:none;cursor:pointer;padding:4px 6px;color:#64748b;font-size:20px;line-height:1" aria-label="뒤로">‹</button>
 
       <div>
+
+        <div class="mast-kicker">WONTECH JAPAN</div>
 
         <h1 id="pageTitle">대시보드</h1>
 
@@ -4313,9 +4316,9 @@ function renderExecSummary(){
   var top5sum=facArr.slice(0,5).reduce(function(s,x){return s+x.a;},0);
   var agency=facArr.filter(function(x){return x.f.toUpperCase()==='JK JAPAN'||x.f.toUpperCase()==='INFIX';}).reduce(function(s,x){return s+x.a;},0);
   document.getElementById('esConc').innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
-    '<div class="esc" style="border-left-color:#6366f1"><div class="l">'+(jp?'上位5社 比重':'상위 5거래처 비중')+'</div><div class="v">'+(ord26>0?(top5sum/ord26*100).toFixed(0):0)+'%</div><div class="d" style="color:#94a3b8">'+_amt(top5sum)+'</div></div>'+
-    '<div class="esc" style="border-left-color:#f59e0b"><div class="l">'+(jp?'代理店依存(JK/INFIX)':'대리점 의존(JK/INFIX)')+'</div><div class="v">'+(ord26>0?(agency/ord26*100).toFixed(0):0)+'%</div><div class="d" style="color:#94a3b8">'+_amt(agency)+'</div></div>'+
-    '<div class="esc" style="border-left-color:#0ea5e9"><div class="l">'+(jp?'取引先数':'거래처 수')+'</div><div class="v">'+facArr.length+(jp?'社':'개')+'</div><div class="d" style="color:#94a3b8">'+(jp?'当期':'당기')+'</div></div></div>';
+    '<div class="esc" style="border-left-color:#16324f"><div class="l">'+(jp?'上位5社 比重':'상위 5거래처 비중')+'</div><div class="v">'+(ord26>0?(top5sum/ord26*100).toFixed(0):0)+'%</div><div class="d" style="color:#94a3b8">'+_amt(top5sum)+'</div></div>'+
+    '<div class="esc" style="border-left-color:#16324f"><div class="l">'+(jp?'代理店依存(JK/INFIX)':'대리점 의존(JK/INFIX)')+'</div><div class="v">'+(ord26>0?(agency/ord26*100).toFixed(0):0)+'%</div><div class="d" style="color:#94a3b8">'+_amt(agency)+'</div></div>'+
+    '<div class="esc" style="border-left-color:#16324f"><div class="l">'+(jp?'取引先数':'거래처 수')+'</div><div class="v">'+facArr.length+(jp?'社':'개')+'</div><div class="d" style="color:#94a3b8">'+(jp?'当期':'당기')+'</div></div></div>';
   // 클리닉 주력↔재구매
   var clY={},clP={}; orders.forEach(function(o){var c=o.clinic||o.facility||'-';if(inR(o.date,year))clY[c]=(clY[c]||0)+(o.amount||0);else if(inR(o.date,prev))clP[c]=(clP[c]||0)+(o.amount||0);});
   var core=Object.keys(clY).map(function(c){return {c:c,a:clY[c]};}).sort(function(a,b){return b.a-a.a;}).slice(0,6);
@@ -5522,7 +5525,7 @@ function renderCaDetail(fac){
     orders.forEach(function(o){var m=String(o.date||'').slice(0,7);if(m){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].ord+=(o.amount||0);mo[m].cnt++;}});
     paysFac.forEach(function(p){var m=String(p.date||'').slice(0,7);if(m&&(!yr||m.slice(0,4)===yr)){mo[m]=mo[m]||{ord:0,pay:0,cnt:0};mo[m].pay+=(p.amount||0);}});
   }
-  var kpi=[{l:(jp?'受注額':'수주액'),v:'¥'+fmt(Math.round(totOrd)),bc:'#3b82f6'},{l:(jp?'入金額':'수금액'),v:'¥'+fmt(Math.round(totPay)),bc:'#10b981'},{l:(jp?'未収金':'미수금'),v:'¥'+fmt(Math.round(outst)),bc:'#ef4444'},{l:(jp?'取引件数':'거래 건수'),v:_cnt+(jp?'件':'건'),bc:'#8b5cf6'},{l:(jp?'初取引':'첫 거래'),v:ds[0]||'-',bc:'#0ea5e9'},{l:(jp?'最近取引':'최근 거래'),v:ds[ds.length-1]||'-',bc:'#0ea5e9'}];
+  var kpi=[{l:(jp?'受注額':'수주액'),v:'¥'+fmt(Math.round(totOrd)),bc:'#3b82f6'},{l:(jp?'入金額':'수금액'),v:'¥'+fmt(Math.round(totPay)),bc:'#10b981'},{l:(jp?'未収金':'미수금'),v:'¥'+fmt(Math.round(outst)),bc:'#ef4444'},{l:(jp?'取引件数':'거래 건수'),v:_cnt+(jp?'件':'건'),bc:'#16324f'},{l:(jp?'初取引':'첫 거래'),v:ds[0]||'-',bc:'#16324f'},{l:(jp?'最近取引':'최근 거래'),v:ds[ds.length-1]||'-',bc:'#16324f'}];
   document.getElementById('caKpi').innerHTML=kpi.map(function(k){return '<div class="esc" style="border-left-color:'+k.bc+'"><div class="l">'+k.l+'</div><div class="v" style="font-size:15px">'+k.v+'</div></div>';}).join('');
   var mks=Object.keys(mo).sort().reverse();
   document.getElementById('caMonthHead').innerHTML='<tr><th>'+(jp?'年月':'연월')+'</th><th class="num">'+(jp?'受注':'수주')+'</th><th class="num">'+(jp?'入金':'수금')+'</th><th class="num">'+(jp?'件数':'건수')+'</th></tr>';
@@ -5795,7 +5798,7 @@ function renderBudgetActual(d){
 
   // 분기 카드
 
-  var qColors=['#3b82f6','#8b5cf6','#10b981','#f59e0b'];
+  var qColors=['#16324f','#16324f','#16324f','#16324f'];
 
   document.getElementById('baQCards').innerHTML=(d.quarters||[]).map(function(q){
 
