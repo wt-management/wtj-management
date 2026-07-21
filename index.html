@@ -4302,7 +4302,7 @@ function renderExecSummary(){
     '<div class="clk" onclick="showPage(\'fin-daily\')" style="flex:1.35;min-width:300px;padding:22px 26px;background:linear-gradient(135deg,#16324f,#1e3a5f);cursor:pointer">'+
       '<div class="h" style="opacity:.85;color:#b8cbe0">'+perTxt+' · '+(jp?'連結売上(売上認識・受注基準)':'연결 매출 (매출인식·수주기준, 수수료 제외)')+'</div>'+
       '<div class="m">'+_amt(cs26)+' <span style="font-size:14px;opacity:.6;font-weight:500">'+krwC+'</span>'+_ybw(yoyC)+'</div>'+
-      '<div class="s" style="font-weight:500;color:#cdd9e6">'+(topU?(jp?'牽引':'견인')+' <b style="color:#fff">'+topU.k+'</b>'+(topU.g!=null?' (+'+topU.g.toFixed(0)+'%)':'')+(topU.delta?' '+_amt(topU.delta):''):'')+(topD?' · '+(jp?'不振':'부진')+' <b style="color:#fff">'+topD.k+'</b>'+(topD.g!=null?' ('+topD.g.toFixed(0)+'%)':'')+(topD.delta?' '+_amt(topD.delta):''):'')+(!topU&&!topD?(jp?'製品別データなし':'제품별 증감 데이터 없음'):'')+'</div>'+
+      '<div class="s" style="font-weight:500;color:#cdd9e6">'+(topU?(jp?'牽引':'견인')+' <b style="color:#fff">'+topU.k+'</b>'+(topU.g!=null?' (+'+topU.g.toFixed(0)+'%)':'')+(topU.delta?' ▲'+_amt(topU.delta):''):'')+(topD?' · '+(jp?'不振':'부진')+' <b style="color:#fff">'+topD.k+'</b>'+(topD.g!=null?' ('+topD.g.toFixed(0)+'%)':'')+(topD.delta?' ▼'+_amt(Math.abs(topD.delta)):''):'')+(!topU&&!topD?(jp?'製品別データなし':'제품별 증감 데이터 없음'):'')+'</div>'+
     '</div>'+
     '<div class="clk" onclick="showPage(\'payments-list\')" style="flex:1;min-width:260px;padding:22px 26px;background:linear-gradient(135deg,#1e3a5f,#0f2038);border-left:1px solid rgba(255,255,255,.12);cursor:pointer">'+
       '<div class="h" style="opacity:.75">'+(jp?'入金基準(実入金) 参考':'수금 기준 (실입금) · 참고')+'</div>'+
