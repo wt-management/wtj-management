@@ -8715,10 +8715,16 @@ window.CRM=(function(){
     if(_acFltV.owner)acts=acts.filter(function(a){return a.owner===_acFltV.owner;});
     var today=_today();
     var late=_d.acts.filter(function(a){return a.next&&a.nextDate&&a.nextDate<today&&!a.done;}).length;
+    var _thisM=today.slice(0,7);
+    var _pm=(function(){var y=+today.slice(0,4),m=+today.slice(5,7)-1;if(m<1){y--;m=12;}return y+'-'+('0'+m).slice(-2);})();
+    var _curCnt=_d.acts.filter(function(a){return (a.date||'').slice(0,7)===_thisM;}).length;
+    var _pmCnt=_d.acts.filter(function(a){return (a.date||'').slice(0,7)===_pm;}).length;
+    var _upc=_d.acts.filter(function(a){return a.next&&a.nextDate&&a.nextDate>=today&&!a.done;}).length;
+    var _ownN=Object.keys(owners).length;
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'活動(全体)':'활동(전체)')+'</div><b>'+_d.acts.length+(jp?'件':'건')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'今月':'이번달')+'</div><b>'+_d.acts.filter(function(a){return (a.date||'').slice(0,7)===today.slice(0,7);}).length+(jp?'件':'건')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'フォロー遅延':'후속 지연')+'</div><b class="'+(late>0?'rd':'')+'">'+late+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'活動(全体)':'활동(전체)')+'</div><b>'+_d.acts.length+(jp?'件':'건')+'</b><div class="s">'+(jp?'担当':'담당')+' '+_ownN+(jp?'名':'명')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'今月活動':'이번달 활동')+'</div><b>'+_curCnt+(jp?'件':'건')+'</b><div class="s">'+(jp?'前月':'전월')+' '+_pmCnt+(jp?'件':'건')+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'フォロー遅延':'후속 지연')+'</div><b class="'+(late>0?'rd':'')+'">'+late+(jp?'件':'건')+'</b><div class="s">'+(jp?'予定':'예정')+' '+_upc+(jp?'件':'건')+'</div></div>'+
       '</div>';
     var topt='<option value="">'+(jp?'全種類':'전체 유형')+'</option>'+ATYPES.map(function(t){return '<option value="'+t.k+'"'+(_acFltV.type===t.k?' selected':'')+'>'+t.ic+' '+L(t.ko,t.jp)+'</option>';}).join('');
     var oopt='<option value="">'+(jp?'全担当':'전체 담당')+'</option>'+Object.keys(owners).map(function(o){return '<option value="'+_esc(o)+'"'+(_acFltV.owner===o?' selected':'')+'>'+_esc(o)+'</option>';}).join('');
