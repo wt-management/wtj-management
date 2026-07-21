@@ -8543,13 +8543,14 @@ window.CRM=(function(){
     var _top5p=totSale>0?Math.round(_top5/totSale*100):0;
     var _avgPer=rowsD.length?totSale/rowsD.length:0;
     var _outRate=totSale>0?Math.round(totOut/totSale*100):0;
-    var _stC={}; rowsD.forEach(function(r){var s=r.mt.status||'';_stC[s]=(_stC[s]||0)+1;});
-    var _stTxt=STATUS.map(function(s){return L(s.ko,s.jp)+' '+(_stC[s.k]||0);}).join(' · ');
+    var _stC={},_stAny=0; rowsD.forEach(function(r){var s=r.mt.status||'';if(s)_stAny++;_stC[s]=(_stC[s]||0)+1;});
+    var _withSale=rowsD.filter(function(r){return r.st.sale>0;}).length;
+    var _cliSub=_stAny>0?STATUS.map(function(s){return L(s.ko,s.jp)+' '+(_stC[s.k]||0);}).join(' · '):((jp?'当期取引':'당기 거래')+' '+_withSale+(jp?'社':'개'));
     var _dealCnt=rowsD.reduce(function(s,r){return s+r.st.deals.length;},0);
     var _pipe=rowsD.reduce(function(s,r){return s+(r.st.wsum||0);},0);
     var kpi='<div class="wt-band">'+
       '<div class="wt-hero"><div class="l">'+(jp?'当期売上(合計)':'당기 매출(합계)')+'</div><b>'+_yen(totSale)+'</b><div class="s">'+(jp?'上位5社集中':'상위5 집중')+' <b style="color:#16324f">'+_top5p+'%</b> · '+(jp?'平均':'평균')+' '+_yen(_avgPer)+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'取引先':'거래처')+'</div><b>'+rowsD.length+(jp?'社':'개')+'</b><div class="s">'+_stTxt+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'取引先':'거래처')+'</div><b>'+rowsD.length+(jp?'社':'개')+'</b><div class="s">'+_cliSub+'</div></div>'+
       '<div class="wt-fact"><div class="l">'+(jp?'未収(合計)':'미수(합계)')+'</div><b class="rd">'+_yen(totOut)+'</b><div class="s">'+withOut+(jp?'社':'개')+' · '+(jp?'未収率':'미수율')+' <b style="color:#e11d48">'+_outRate+'%</b></div></div>'+
       '<div class="wt-fact"><div class="l">'+(jp?'進行ディール':'진행 딜')+'</div><b>'+_dealCnt+(jp?'件':'건')+'</b><div class="s">'+(jp?'加重パイプ':'가중 파이프')+' '+_yen(_pipe)+'</div></div>'+
       '</div>';
