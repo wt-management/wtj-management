@@ -4320,22 +4320,23 @@ function renderExecSummary(){
     var _mxv=_nz.length?Math.max.apply(null,_nz):0, _mxi=_pv.indexOf(_mxv);
     var _avg=_nz.length?_nz.reduce(function(s,v){return s+v;},0)/_nz.length:0;
     var _rem=Math.max(0,tgt-cs26), _remM=Math.max(1,12-nmon), _need=_rem/_remM;
-    var achCol=achvC>=100?'#059669':(achvC>=80?'#d97706':'#e11d48');
+    var _av=Number(achvC)||0;
+    var achCol=_av>=100?'#059669':(_av>=80?'#d97706':'#e11d48');
     var _spark=_pv.map(function(v,i){return '<div style="flex:1;min-width:0;height:'+(v>0?Math.max(12,Math.round(v/_pmax*100)):5)+'%;background:'+(i===_mxi?'#2563eb':'#aac4e8')+';border-radius:2px 2px 0 0"></div>';}).join('');
     var card=function(ac,label,body){return '<div style="background:#fff;border:1px solid #e4e8ef;border-left:3px solid '+ac+';border-radius:10px;padding:14px 16px;min-width:0">'+'<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:9px">'+label+'</div>'+body+'</div>';};
     document.getElementById('esKpi').innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">'+
       card(achCol,(jp?'目標達成ペース':'목표 달성 페이스'),
-        '<div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:26px;font-weight:800;color:'+achCol+';font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+achvC.toFixed(0)+'%</span><span style="font-size:11px;color:#94a3b8">/ '+_amt(tgt)+'</span></div>'+
-        '<div style="height:6px;background:#eef1f5;border-radius:4px;overflow:hidden;margin:8px 0 7px"><div style="width:'+Math.min(100,Math.max(0,achvC))+'%;height:100%;background:'+achCol+';border-radius:4px"></div></div>'+
+        '<div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:26px;font-weight:800;color:'+achCol+';font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+_av.toFixed(0)+'%</span><span style="font-size:11px;color:#94a3b8">/ '+_amt(tgt)+'</span></div>'+
+        '<div style="height:6px;background:#eef1f5;border-radius:4px;overflow:hidden;margin:8px 0 7px"><div style="width:'+Math.min(100,Math.max(0,_av))+'%;height:100%;background:'+achCol+';border-radius:4px"></div></div>'+
         '<div style="font-size:11px;color:#475569">'+(jp?'残り':'남은')+' <b style="color:#1c2534">'+_amt(_rem)+'</b> · '+(jp?'月':'월')+' '+_amt(_need)+' '+(jp?'必要':'필요')+'</div>')+
       card('#2563eb',(jp?'月次の流れ':'월별 흐름'),
         '<div style="display:flex;align-items:flex-end;gap:2px;height:38px;margin-bottom:8px">'+_spark+'</div>'+
         '<div style="font-size:11px;color:#475569">'+(jp?'月平均':'월평균')+' <b style="color:#1c2534">'+_amt(_avg)+'</b> · '+(jp?'最高':'최고')+' '+(_mxi+1)+(jp?'月':'월')+' '+_amt(_mxv)+'</div>')+
       card('#059669',(jp?'入金・未収':'수금·미수'),
-        '<div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:24px;font-weight:800;color:#1c2534;font-variant-numeric:tabular-nums">'+coll.toFixed(0)+'%</span><span style="font-size:11px;color:#94a3b8">'+(jp?'回収率':'수금률')+'</span></div>'+
+        '<div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:24px;font-weight:800;color:#1c2534;font-variant-numeric:tabular-nums">'+(Number(coll)||0).toFixed(0)+'%</span><span style="font-size:11px;color:#94a3b8">'+(jp?'回収率':'수금률')+'</span></div>'+
         '<div style="font-size:11px;color:#475569;margin-top:10px">'+(jp?'未収':'미수')+' <b style="color:#e11d48">'+_amt(outTot)+'</b> · '+(jp?'受注':'수주')+' '+_amt(ord26)+'</div>')+
       card('#d97706',(jp?'前年対比':'전년 대비'),
-        '<div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:24px;font-weight:800;color:'+(yoyC>=0?'#059669':'#e11d48')+';font-variant-numeric:tabular-nums">'+(yoyC>=0?'+':'')+yoyC.toFixed(0)+'%</span></div>'+
+        '<div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:24px;font-weight:800;color:'+(yoyC==null?'#64748b':(yoyC>=0?'#059669':'#e11d48'))+';font-variant-numeric:tabular-nums">'+(yoyC==null?(jp?'新規':'신규'):((yoyC>=0?'+':'')+Number(yoyC).toFixed(0)+'%'))+'</span></div>'+
         '<div style="font-size:11px;color:#475569;margin-top:10px">'+(jp?'純増':'순증')+' <b style="color:#1c2534">'+_amt(cs26-cs25)+'</b> · '+(jp?'前年':'전년')+' '+_amt(cs25)+'</div>')+
     '</div>';
   })();
