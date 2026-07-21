@@ -1050,7 +1050,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
               </div>
               <div style="flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.2)">
                 <div style="font-size:12px;color:#b8d4ed;margin-bottom:6px" id="lblThisOrdersTitle">수주 금액 (참고)</div>
-                <div style="font-size:28px;font-weight:800;color:#e8f3fc;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisOrders" onclick="_dmThisPay()">-</div>
+                <div style="font-size:28px;font-weight:800;color:#e8f3fc;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="kpiThisOrders" onclick="_dmThisOrd()">-</div>
               </div>
             </div>
 
@@ -1094,7 +1094,7 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
               </div>
               <div style="flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.2)">
                 <div style="font-size:12px;color:#c8bfed;margin-bottom:6px" id="lblCumOrdersTitle">수주 누계 (참고)</div>
-                <div style="font-size:28px;font-weight:800;color:#edeaf9;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="sumOrders" onclick="_dmCumPay()">-</div>
+                <div style="font-size:28px;font-weight:800;color:#edeaf9;line-height:1.15;cursor:pointer;text-decoration:underline dotted rgba(255,255,255,.4)" id="sumOrders" onclick="_dmCumOrd()">-</div>
               </div>
             </div>
 
@@ -4022,6 +4022,8 @@ function _salesTabBar(active){
 }
 function showPage(id, fromHistory){
   if(id==='dashboard')id='exec-summary';
+  // 역할 게이트: 영업/재무는 허용 메뉴만 (공유 대시보드 히어로카드 등으로 재무/영업 전용 페이지 우회 진입 차단)
+  try{ if(typeof MENU_ROLES!=='undefined' && MENU_ROLES[id] && _currentUser && (_currentUser.role==='sales'||_currentUser.role==='finance') && MENU_ROLES[id].indexOf(_currentUser.role)<0){ id='exec-summary'; } }catch(_e){}
 
   _closeSidebar();
 
@@ -4056,7 +4058,8 @@ function showPage(id, fromHistory){
 
     if(_curPage !== id) _prevPage = _curPage;
 
-    history.pushState({p:id},'','#p='+id);
+    if(!window._wtjSeeded){ history.replaceState({p:id},'','#p='+id); window._wtjSeeded=true; }   // 첫 페이지는 replace로 seed → 뒤로가기 팬텀 엔트리 방지
+    else history.pushState({p:id},'','#p='+id);
 
   }
 
@@ -8535,11 +8538,20 @@ window.CRM=(function(){
     if(_clFltV.status){rowsD=rowsD.filter(function(r){return (r.mt.status||'')===_clFltV.status;});}
     rowsD.sort(function(a,b){ if(_clFltV.sort==='out')return b.st.out-a.st.out; if(_clFltV.sort==='deal')return b.st.wsum-a.st.wsum; if(_clFltV.sort==='name')return a.nm<b.nm?-1:1; return b.st.sale-a.st.sale; });
     var totSale=rowsD.reduce(function(s,r){return s+r.st.sale;},0),totOut=rowsD.reduce(function(s,r){return s+r.st.out;},0),withOut=rowsD.filter(function(r){return r.st.out>0;}).length;
+    var _clSorted=rowsD.slice().sort(function(a,b){return b.st.sale-a.st.sale;});
+    var _top5=_clSorted.slice(0,5).reduce(function(s,r){return s+r.st.sale;},0);
+    var _top5p=totSale>0?Math.round(_top5/totSale*100):0;
+    var _avgPer=rowsD.length?totSale/rowsD.length:0;
+    var _outRate=totSale>0?Math.round(totOut/totSale*100):0;
+    var _stC={}; rowsD.forEach(function(r){var s=r.mt.status||'';_stC[s]=(_stC[s]||0)+1;});
+    var _stTxt=STATUS.map(function(s){return L(s.ko,s.jp)+' '+(_stC[s.k]||0);}).join(' · ');
+    var _dealCnt=rowsD.reduce(function(s,r){return s+r.st.deals.length;},0);
+    var _pipe=rowsD.reduce(function(s,r){return s+(r.st.wsum||0);},0);
     var kpi='<div class="wt-band">'+
-      '<div class="wt-hero"><div class="l">'+(jp?'当期売上(合計)':'당기 매출(합계)')+'</div><b>'+_yen(totSale)+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'取引先':'거래처')+'</div><b>'+rowsD.length+(jp?'社':'개')+'</b></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'未収(合計)':'미수(합계)')+'</div><b class="rd">'+_yen(totOut)+'</b><div class="s">'+withOut+(jp?'社 未収':'개 미수')+'</div></div>'+
-      '<div class="wt-fact"><div class="l">'+(jp?'進行ディール':'진행 딜')+'</div><b>'+rowsD.reduce(function(s,r){return s+r.st.deals.length;},0)+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-hero"><div class="l">'+(jp?'当期売上(合計)':'당기 매출(합계)')+'</div><b>'+_yen(totSale)+'</b><div class="s">'+(jp?'上位5社集中':'상위5 집중')+' <b style="color:#16324f">'+_top5p+'%</b> · '+(jp?'平均':'평균')+' '+_yen(_avgPer)+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'取引先':'거래처')+'</div><b>'+rowsD.length+(jp?'社':'개')+'</b><div class="s">'+_stTxt+'</div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'未収(合計)':'미수(합계)')+'</div><b class="rd">'+_yen(totOut)+'</b><div class="s">'+withOut+(jp?'社':'개')+' · '+(jp?'未収率':'미수율')+' <b style="color:#e11d48">'+_outRate+'%</b></div></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'進行ディール':'진행 딜')+'</div><b>'+_dealCnt+(jp?'件':'건')+'</b><div class="s">'+(jp?'加重パイプ':'가중 파이프')+' '+_yen(_pipe)+'</div></div>'+
       '</div>';
     function stBadge(mt){var o=null;for(var i=0;i<STATUS.length;i++)if(STATUS[i].k===mt.status)o=STATUS[i];return o?'<span style="font-size:10px;font-weight:700;color:#fff;background:'+o.col+';border-radius:5px;padding:1px 7px">'+L(o.ko,o.jp)+'</span>':'';}
     var seg='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
