@@ -4378,7 +4378,7 @@ function renderExecSummary(){
     }).join('')||'<tr><td style="color:#94a3b8">-</td></tr>')+
     ctab('⚠️ '+(jp?'再購入必要':'재구매 필요'), churn.map(function(x){
       var cur=clY[x.c]||0;
-      return '<tr class="clk" onclick="openExecDrill(\'clinic\',\''+_dq(x.c)+'\')"><td style="padding:9px 12px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="color:#1c2534">'+x.c+'</span><span style="font-size:11px;white-space:nowrap"><span style="color:#94a3b8">'+(jp?'前年':'전년')+' '+_amt(x.b)+'</span> <span style="color:#cbd5e1">→</span> <b style="color:#e11d48">'+(jp?'当期':'당기')+' '+_amt(cur)+'</b></span></div></td></tr>';
+      return '<tr class="clk" onclick="openExecDrill(\'clinic\',\''+_dq(x.c)+'\')"><td style="padding:9px 12px"><div style="color:#1c2534">'+x.c+'</div><div style="font-size:11px;margin-top:3px"><span style="color:#94a3b8">'+(jp?'前年':'전년')+' '+_amt(x.b)+'</span> <span style="color:#cbd5e1">→</span> <b style="color:#e11d48">'+(jp?'当期':'당기')+' '+_amt(cur)+'</b></div></td></tr>';
     }).join('')||'<tr><td style="color:#94a3b8">-</td></tr>');
   // 미수 에이징 + 장기미수
   var buck=[{l:'0~30',mn:0,mx:30,amt:0,cnt:0},{l:'31~90',mn:31,mx:90,amt:0,cnt:0},{l:'91~180',mn:91,mx:180,amt:0,cnt:0},{l:'180+',mn:181,mx:1e9,amt:0,cnt:0}];
