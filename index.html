@@ -2371,8 +2371,10 @@ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded'
   </div></div>
   <div class="essec"><div class="esst">📋 월별 · 분기 목표 · 실적 · 달성률</div><div id="esMonTable" style="overflow-x:auto"></div></div>
   <div class="essec"><div class="esst">📦 품목별 실적 <span style="font-weight:400;color:#94a3b8;font-size:11px">(제품 / 소모품 · 전년 대비 · 클릭 시 내역)</span></div><div id="esProd" class="esdual"></div></div>
-  <div class="essec"><div class="esst">🏥 거래처 · 클리닉</div><div id="esConc" style="margin-bottom:12px"></div><div id="esClinic" class="esdual"></div></div>
-  <div class="essec"><div class="esst">⚠️ 미수 현황</div><div id="esAge"></div></div>
+  <div class="esdual2" style="grid-template-columns:1.1fr 1fr">
+    <div class="essec" style="margin-bottom:0"><div class="esst">🏥 거래처 · 클리닉</div><div id="esConc" style="margin-bottom:12px"></div><div id="esClinic" style="display:grid;gap:14px"></div></div>
+    <div class="essec" style="margin-bottom:0"><div class="esst">⚠️ 미수 현황</div><div id="esAge"></div></div>
+  </div>
 </div>
 
     <div id="esDrill" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1100;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeEsDrill()">
@@ -4327,25 +4329,36 @@ function renderExecSummary(){
     var _out90p=outTot>0?_out90s/outTot*100:0;
     var _out180=_oa.filter(function(x){return x.el>=180;});
     var _out180s=_out180.reduce(function(s,x){return s+x.out;},0);
+    var _out30=_oa.filter(function(x){return x.el<=30;});
+    var _out30s=_out30.reduce(function(s,x){return s+x.out;},0);
     var _g3=cs25>0?Math.min(100,Math.max(0,cs26/cs25*100)):100;
     var _av=Number(achvC)||0;
     var achCol=_av>=100?'#059669':(_av>=80?'#d97706':'#e11d48');
     var _spark=_pv.map(function(v,i){return '<div style="flex:1;min-width:0;height:'+(v>0?Math.max(12,Math.round(v/_pmax*100)):5)+'%;background:'+(i===_mxpos?'#2563eb':'#aac4e8')+';border-radius:2px 2px 0 0"></div>';}).join('');
     var card=function(ac,label,body){return '<div style="background:#fff;border:1px solid #e4e8ef;border-left:3px solid '+ac+';border-radius:10px;padding:14px 16px;min-width:0">'+'<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:9px">'+label+'</div>'+body+'</div>';};
     var _yc3=(yoyC==null?'#64748b':(yoyC>=0?'#059669':'#e11d48'));
+    var _rw=function(l,r,c){return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;border-top:1px solid #f2f5f9;font-size:12px"><span style="color:#64748b">'+l+'</span><span style="color:'+(c||'#1c2534')+';font-weight:600;white-space:nowrap">'+r+'</span></div>';};
+    var _big=function(col,val,unit){return '<div style="display:flex;align-items:baseline;gap:7px;margin-bottom:11px"><span style="font-size:30px;font-weight:800;color:'+col+';font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+val+'</span><span style="font-size:12px;color:#94a3b8">'+unit+'</span></div>';};
+    var _bar=function(w,col){return '<div style="height:7px;background:#eef1f5;border-radius:4px;overflow:hidden;margin-bottom:8px"><div style="width:'+Math.min(100,Math.max(0,w))+'%;height:100%;background:'+col+';border-radius:4px"></div></div>';};
     document.getElementById('esKpi').innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">'+
       card(achCol,(jp?'目標達成ペース':'목표 달성 페이스'),
-        '<div style="display:flex;align-items:baseline;gap:7px"><span style="font-size:30px;font-weight:800;color:'+achCol+';font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+_av.toFixed(0)+'%</span><span style="font-size:12px;color:#94a3b8">/ '+_amt(tgt)+'</span></div>'+
-        '<div style="height:7px;background:#eef1f5;border-radius:4px;overflow:hidden;margin:11px 0 10px"><div style="width:'+Math.min(100,Math.max(0,_av))+'%;height:100%;background:'+achCol+';border-radius:4px"></div></div>'+
-        '<div style="font-size:12px;color:#475569;line-height:2">'+(jp?'残り':'남은')+' <b style="color:#1c2534">'+_amt(_rem)+'</b> · '+(jp?'月':'월')+' '+_amt(_need)+' '+(jp?'必要':'필요')+'<br>'+(jp?'月平均実績':'월평균 실적')+' <b style="color:#1c2534">'+_amt(_avg)+'</b> · '+(jp?'最高':'최고')+' '+_mxmon+(jp?'月':'월')+' '+_amt(_mxv)+'</div>')+
-      card('#e11d48',(jp?'未収債権':'미수 채권'),
-        '<div style="display:flex;align-items:baseline;gap:7px"><span style="font-size:28px;font-weight:800;color:#e11d48;font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+_amt(outTot)+'</span><span style="font-size:12px;color:#94a3b8">'+_outN+(jp?'件':'건')+'</span></div>'+
-        '<div style="height:7px;background:#eef1f5;border-radius:4px;overflow:hidden;margin:11px 0 10px"><div style="width:'+Math.min(100,Math.max(0,_out90p))+'%;height:100%;background:#e11d48;border-radius:4px"></div></div>'+
-        '<div style="font-size:12px;color:#475569;line-height:2">'+(jp?'90日↑ 長期':'90일↑ 장기')+' <b style="color:#e11d48">'+_amt(_out90s)+'</b> · '+_out90.length+(jp?'件':'건')+' · '+_out90p.toFixed(0)+'%<br>'+(jp?'180日↑ 超長期':'180일↑ 초장기')+' <b style="color:#e11d48">'+_amt(_out180s)+'</b> · '+_out180.length+(jp?'件':'건')+'</div>')+
+        _big(achCol,_av.toFixed(0)+'%','/ '+_amt(tgt))+_bar(_av,achCol)+'<div>'+
+        _rw((jp?'残り目標':'남은 목표'),_amt(_rem))+
+        _rw((jp?'月 必要':'월 필요'),_amt(_need))+
+        _rw((jp?'月平均実績':'월평균 실적'),_amt(_avg))+
+        _rw((jp?'最高月':'최고월'),_mxmon+(jp?'月':'월')+' '+_amt(_mxv))+'</div>')+
       card('#d97706',(jp?'前年対比':'전년 대비'),
-        '<div style="display:flex;align-items:baseline;gap:7px"><span style="font-size:30px;font-weight:800;color:'+_yc3+';font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+(yoyC==null?(jp?'新規':'신규'):((yoyC>=0?'+':'')+Number(yoyC).toFixed(0)+'%'))+'</span><span style="font-size:12px;color:#94a3b8">'+(jp?'前年比':'전년비')+'</span></div>'+
-        '<div style="height:7px;background:#eef1f5;border-radius:4px;overflow:hidden;margin:11px 0 10px"><div style="width:'+_g3+'%;height:100%;background:'+_yc3+';border-radius:4px"></div></div>'+
-        '<div style="font-size:12px;color:#475569;line-height:2">'+(jp?'純増':'순증')+' <b style="color:#1c2534">'+_amt(cs26-cs25)+'</b> · '+(jp?'前年':'전년')+' '+_amt(cs25)+'<br>'+(jp?'当期':'당기')+' <b style="color:#1c2534">'+_amt(cs26)+'</b> · '+(jp?'月平均':'월평균')+' '+_amt(_avg)+'</div>')+
+        _big(_yc3,(yoyC==null?(jp?'新規':'신규'):((yoyC>=0?'+':'')+Number(yoyC).toFixed(0)+'%')),(jp?'前年比':'전년비'))+_bar(_g3,_yc3)+'<div>'+
+        _rw((jp?'純増':'순증'),_amt(cs26-cs25),_yc3)+
+        _rw((jp?'前年':'전년'),_amt(cs25))+
+        _rw((jp?'当期':'당기'),_amt(cs26))+
+        _rw((jp?'月平均':'월평균'),_amt(_avg))+'</div>')+
+      card('#e11d48',(jp?'未収債権':'미수 채권'),
+        _big('#e11d48',_amt(outTot),_outN+(jp?'件':'건'))+_bar(_out90p,'#e11d48')+'<div>'+
+        _rw((jp?'90日↑ 長期':'90일↑ 장기'),_amt(_out90s)+' · '+_out90.length+(jp?'件':'건'),'#e11d48')+
+        _rw((jp?'180日↑ 超長期':'180일↑ 초장기'),_amt(_out180s)+' · '+_out180.length+(jp?'件':'건'),'#e11d48')+
+        _rw((jp?'30日以内':'30일 이내'),_amt(_out30s)+' · '+_out30.length+(jp?'件':'건'))+
+        _rw((jp?'長期比重':'장기 비중'),_out90p.toFixed(0)+'%')+'</div>')+
     '</div>';
   })();
   // 제품별 실적 표 (전년/올해/성장률, 클릭)
@@ -4384,12 +4397,15 @@ function renderExecSummary(){
   var buck=[{l:'0~30',mn:0,mx:30,amt:0,cnt:0},{l:'31~90',mn:31,mx:90,amt:0,cnt:0},{l:'91~180',mn:91,mx:180,amt:0,cnt:0},{l:'180+',mn:181,mx:1e9,amt:0,cnt:0}];
   outAll.forEach(function(x){for(var i=0;i<buck.length;i++){if(x.el>=buck[i].mn&&x.el<=buck[i].mx){buck[i].amt+=x.out;buck[i].cnt++;break;}}});
   var bcol=['#16a34a','#eab308','#f97316','#ef4444'];
-  var ag='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">'+buck.map(function(b,i){return '<div class="esc" style="border-left-color:'+bcol[i]+'"><div class="l">'+(jp?'経過':'경과')+' '+b.l+(jp?'日':'일')+'</div><div class="v">'+_amt(b.amt)+'</div><div class="d" style="color:#94a3b8">'+b.cnt+(jp?'件':'건')+'</div></div>';}).join('')+'</div>';
+  var btot=buck.reduce(function(s,b){return s+b.amt;},0)||1;
+  var ag='<div class="esdl" style="margin-bottom:14px"><div class="t">🕐 '+(jp?'エイジング':'미수 에이징')+' <span style="font-weight:400;color:#94a3b8;font-size:11px">'+_amt(outTot)+' · '+outAll.length+(jp?'件':'건')+'</span></div>'+
+    '<div style="display:flex;height:16px;border-radius:8px;overflow:hidden;margin-bottom:14px;background:#eef1f5">'+buck.map(function(b,i){return b.amt>0?'<div style="width:'+(b.amt/btot*100)+'%;background:'+bcol[i]+'"></div>':'';}).join('')+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 18px">'+buck.map(function(b,i){return '<div style="display:flex;align-items:center;gap:7px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:'+bcol[i]+';flex-shrink:0"></span><span style="color:#64748b">'+b.l+(jp?'日':'일')+'</span><b style="margin-left:auto;color:#1c2534;white-space:nowrap">'+_amt(b.amt)+'</b><span style="color:#94a3b8;font-size:10px;white-space:nowrap">'+b.cnt+(jp?'件':'건')+'</span></div>';}).join('')+'</div></div>';
   var facP={}; orders.forEach(function(o){if(inR(o.date,prev)){var f=o.facility||'-';facP[f]=(facP[f]||0)+(o.amount||0);}});
   var lmap={}; outAll.forEach(function(x){var f=x.o.facility||'-';if(!lmap[f])lmap[f]={f:f,clinic:(x.o.clinic||''),out:0,el:0,cnt:0};lmap[f].out+=x.out;if(x.el>lmap[f].el)lmap[f].el=x.el;lmap[f].cnt++;});
   var longO=Object.keys(lmap).map(function(k){return lmap[k];}).sort(function(a,b){return b.el-a.el||b.out-a.out;}).slice(0,8);
-  ag+='<div class="esdl"><div class="t">📋 '+(jp?'長期未収 TOP':'장기 미수 TOP')+' <span style="font-weight:400;color:#94a3b8;font-size:11px">('+(jp?'クリックで明細':'클릭 시 내역')+')</span></div><table class="estab"><thead><tr><th>'+(jp?'取引先':'거래처')+'</th><th class="num">'+(jp?'未収':'미수')+'</th><th class="num">'+(jp?'件数':'건수')+'</th><th class="num">'+(jp?'当期売上':'당기 매출')+'</th><th class="num">'+(jp?'前年売上':'전년 매출')+'</th><th class="num">'+(jp?'経過':'경과')+'</th></tr></thead><tbody>'+
-    longO.map(function(x){var cl=(x.clinic&&x.clinic!==x.f)?'<div style="font-size:10px;color:#94a3b8;margin-top:1px">'+x.clinic+'</div>':'';return '<tr class="clk" onclick="openExecDrill(\'facility\',\''+_dq(x.f)+'\')"><td><b style="font-weight:600">'+x.f+'</b>'+cl+'</td><td class="num" style="color:#e11d48;font-weight:700">'+_amt(x.out)+'</td><td class="num" style="color:#64748b">'+x.cnt+(jp?'件':'건')+'</td><td class="num">'+_amt(facY[x.f]||0)+'</td><td class="num" style="color:#94a3b8">'+_amt(facP[x.f]||0)+'</td><td class="num" style="color:'+(x.el>=180?'#e11d48':x.el>=90?'#f97316':'#64748b')+';font-weight:700">'+x.el+(jp?'日':'일')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  ag+='<div class="esdl"><div class="t">📋 '+(jp?'長期未収 TOP':'장기 미수 TOP')+' <span style="font-weight:400;color:#94a3b8;font-size:11px">('+(jp?'クリックで明細':'클릭 시 내역')+')</span></div><table class="estab"><thead><tr><th>'+(jp?'取引先':'거래처')+'</th><th class="num">'+(jp?'未収':'미수')+'</th><th class="num">'+(jp?'件':'건')+'</th><th class="num">'+(jp?'当期':'당기')+'</th><th class="num">'+(jp?'経過':'경과')+'</th></tr></thead><tbody>'+
+    longO.map(function(x){var cl=(x.clinic&&x.clinic!==x.f)?'<div style="font-size:10px;color:#94a3b8;margin-top:1px">'+x.clinic+'</div>':'';return '<tr class="clk" onclick="openExecDrill(\'facility\',\''+_dq(x.f)+'\')"><td><b style="font-weight:600">'+x.f+'</b>'+cl+'</td><td class="num" style="color:#e11d48;font-weight:700">'+_amt(x.out)+'</td><td class="num" style="color:#64748b">'+x.cnt+'</td><td class="num" style="color:#475569">'+_amt(facY[x.f]||0)+'</td><td class="num" style="color:'+(x.el>=180?'#e11d48':x.el>=90?'#f97316':'#64748b')+';font-weight:700">'+x.el+(jp?'日':'일')+'</td></tr>';}).join('')+'</tbody></table></div>';
   document.getElementById('esAge').innerHTML=ag;
   try{_esTrend(year);}catch(_e){}
 }
