@@ -542,7 +542,7 @@ tbody tr.total-row{background:#eef3f8}
 .esst{border-bottom:2px solid #16324f;padding-bottom:8px;color:#182230;font-weight:800}
 </style>
 
-<script>/* WT_ERRLOG_V1 rev3 — 공통 오류수집+요청함 (자동주입 스니펫, 개별 수정 금지) */
+<script>/* WT_ERRLOG_V1 — 공통 오류수집+요청함 (자동주입 스니펫, 개별 수정 금지) */
 (function(){
 var U='https://mhfacbsittfdkknwybhc.supabase.co/rest/v1/';
 var K='sb_publishable_aPMOOWAlyJlMcP1ZM_gpPA_jlrcvCRd';
@@ -560,12 +560,11 @@ b.style.cssText='position:fixed;right:18px;bottom:64px;z-index:99990;background:
 b.onmouseover=function(){b.style.opacity='1';};b.onmouseout=function(){b.style.opacity='.85';};
 var p=document.createElement('div');p.id='wt-fb-panel';
 p.style.cssText='display:none;position:fixed;right:18px;bottom:108px;z-index:99991;width:min(320px,90vw);background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px;box-shadow:0 12px 32px rgba(0,0,0,.5);font-family:inherit';
-var needName=!wtEmail();
-p.innerHTML='<div style="font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:8px">\uC694\uCCAD \u00B7 \uBD88\uD3B8\uC2E0\uACE0</div>'+(needName?'<input id="wt-fb-name" placeholder="\uC774\uB984 \u00B7 \uBD80\uC11C (\uD544\uC218, \uC608: \uD64D\uAE38\uB3D9 \uC601\uC5C5\uD300)" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:12px;padding:7px 8px;margin-bottom:6px;box-sizing:border-box">':'')+'<textarea id="wt-fb-msg" placeholder="\uBD88\uD3B8\uD55C \uC810\uC774\uB098 \uC694\uCCAD\uC0AC\uD56D\uC744 \uC801\uC5B4\uC8FC\uC138\uC694" style="width:100%;height:80px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:12px;padding:8px;resize:none;box-sizing:border-box"></textarea>'+(needName?'<div style="font-size:10px;color:#64748b;margin-top:4px">\uB85C\uADF8\uC778 \uD6C4 \uC81C\uCD9C\uD558\uBA74 \uC774\uB984\uC774 \uC790\uB3D9 \uC785\uB825\uB429\uB2C8\uB2E4</div>':'')+'<div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button id="wt-fb-cancel" style="background:none;border:1px solid #475569;color:#94a3b8;padding:5px 12px;border-radius:7px;font-size:12px;cursor:pointer">\uB2EB\uAE30</button><button id="wt-fb-send" style="background:#0d9488;border:none;color:#fff;padding:5px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600">\uC804\uC1A1</button></div>';
+p.innerHTML='<div style="font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:8px">\uC694\uCCAD \u00B7 \uBD88\uD3B8\uC2E0\uACE0</div><textarea id="wt-fb-msg" placeholder="\uBD88\uD3B8\uD55C \uC810\uC774\uB098 \uC694\uCCAD\uC0AC\uD56D\uC744 \uC801\uC5B4\uC8FC\uC138\uC694" style="width:100%;height:88px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:12px;padding:8px;resize:none;box-sizing:border-box"></textarea><div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button id="wt-fb-cancel" style="background:none;border:1px solid #475569;color:#94a3b8;padding:5px 12px;border-radius:7px;font-size:12px;cursor:pointer">\uB2EB\uAE30</button><button id="wt-fb-send" style="background:#0d9488;border:none;color:#fff;padding:5px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600">\uC804\uC1A1</button></div>';
 document.body.appendChild(b);document.body.appendChild(p);
-b.onclick=function(){p.style.display=p.style.display==='none'?'block':'none';if(p.style.display==='block'){var t=document.getElementById(needName?'wt-fb-name':'wt-fb-msg');if(t)t.focus();}};
+b.onclick=function(){p.style.display=p.style.display==='none'?'block':'none';if(p.style.display==='block'){var t=document.getElementById('wt-fb-msg');if(t)t.focus();}};
 document.getElementById('wt-fb-cancel').onclick=function(){p.style.display='none';};
-document.getElementById('wt-fb-send').onclick=function(){var t=document.getElementById('wt-fb-msg');var m=(t&&t.value||'').trim();var em=wtEmail();var nmEl=document.getElementById('wt-fb-name');var nm=(nmEl&&nmEl.value||'').trim();if(!em && !nm){ if(nmEl){ nmEl.style.borderColor='#ef4444'; nmEl.focus(); } return; }if(!m){ if(t){ t.style.borderColor='#ef4444'; t.focus(); } return; }wtPost('site_feedback',{site:SITE,page:PAGE,message:m.slice(0,2000),reporter:em||nm.slice(0,100)});p.innerHTML='<div style="color:#5eead4;font-size:13px;text-align:center;padding:14px 4px">\uC811\uC218\uB418\uC5C8\uC2B5\uB2C8\uB2E4! \uAC10\uC0AC\uD569\uB2C8\uB2E4 \uD83D\uDE4F</div>';setTimeout(function(){p.style.display='none';p.remove();b.remove();wtFb();},1600);};
+document.getElementById('wt-fb-send').onclick=function(){var t=document.getElementById('wt-fb-msg');var m=(t&&t.value||'').trim();if(!m)return;wtPost('site_feedback',{site:SITE,page:PAGE,message:m.slice(0,2000),reporter:wtEmail()||null});p.innerHTML='<div style="color:#5eead4;font-size:13px;text-align:center;padding:14px 4px">\uC811\uC218\uB418\uC5C8\uC2B5\uB2C8\uB2E4! \uAC10\uC0AC\uD569\uB2C8\uB2E4 \uD83D\uDE4F</div>';setTimeout(function(){p.style.display='none';p.remove();b.remove();wtFb();},1600);};
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',wtFb);}else{wtFb();}
 })();</script>
@@ -8409,6 +8408,7 @@ window.CRM=(function(){
   function forecast(year){
     var mon={}; for(var m=1;m<=12;m++)mon[m]={w:0,raw:0,n:0};
     _d.deals.forEach(function(dl){
+      if(dl._demo)return;
       if(dl.stage==='won'||dl.stage==='lost')return;
       var em=String(dl.expMonth||''); if(em.slice(0,4)!==String(year))return;
       var m=parseInt(em.slice(5,7),10); if(!(m>=1&&m<=12))return;
@@ -8418,8 +8418,8 @@ window.CRM=(function(){
     return mon;
   }
   function forecastArr(year){var mon=forecast(year);var a=[];for(var m=1;m<=12;m++)a.push(mon[m].w);return a;}
-  function forecastMach(year){var mon={};for(var m=1;m<=12;m++)mon[m]=0;_d.deals.forEach(function(dl){if(dl.stage==='won'||dl.stage==='lost')return;if((dl.cat||'')==='소모품')return;var em=String(dl.expMonth||'');if(em.slice(0,4)!==String(year))return;var m=parseInt(em.slice(5,7),10);if(!(m>=1&&m<=12))return;mon[m]+=(dl.amount||0)*((dl.prob!=null?dl.prob:stg(dl.stage).prob)/100);});var a=[];for(var m2=1;m2<=12;m2++)a.push(mon[m2]);return a;}
-  function forecastMachRaw(year){var mon={};for(var m=1;m<=12;m++)mon[m]=0;_d.deals.forEach(function(dl){if(dl.stage==='won'||dl.stage==='lost')return;if((dl.cat||'')==='소모품')return;var em=String(dl.expMonth||'');if(em.slice(0,4)!==String(year))return;var m=parseInt(em.slice(5,7),10);if(!(m>=1&&m<=12))return;mon[m]+=(dl.amount||0);});var a=[];for(var m2=1;m2<=12;m2++)a.push(mon[m2]);return a;}
+  function forecastMach(year){var mon={};for(var m=1;m<=12;m++)mon[m]=0;_d.deals.forEach(function(dl){if(dl._demo)return;if(dl.stage==='won'||dl.stage==='lost')return;if((dl.cat||'')==='소모품')return;var em=String(dl.expMonth||'');if(em.slice(0,4)!==String(year))return;var m=parseInt(em.slice(5,7),10);if(!(m>=1&&m<=12))return;mon[m]+=(dl.amount||0)*((dl.prob!=null?dl.prob:stg(dl.stage).prob)/100);});var a=[];for(var m2=1;m2<=12;m2++)a.push(mon[m2]);return a;}
+  function forecastMachRaw(year){var mon={};for(var m=1;m<=12;m++)mon[m]=0;_d.deals.forEach(function(dl){if(dl._demo)return;if(dl.stage==='won'||dl.stage==='lost')return;if((dl.cat||'')==='소모품')return;var em=String(dl.expMonth||'');if(em.slice(0,4)!==String(year))return;var m=parseInt(em.slice(5,7),10);if(!(m>=1&&m<=12))return;mon[m]+=(dl.amount||0);});var a=[];for(var m2=1;m2<=12;m2++)a.push(mon[m2]);return a;}
   function consRun(year){var cons=[];for(var i=0;i<12;i++)cons.push(0);try{if(typeof consolByCat==='function'&&typeof _consolSales!=='undefined'&&_consolSales)cons=consolByCat(year).cons.slice();}catch(e){}var curM=(new Date()).getMonth()+1,vals=[];for(var m=Math.max(1,curM-3);m<curM;m++)if(cons[m-1]>0)vals.push(cons[m-1]);var avg=vals.length?vals.reduce(function(s,v){return s+v;},0)/vals.length:0;var a=[];for(var m2=1;m2<=12;m2++)a.push(m2>=curM?avg:0);return a;}
 
   /* ═══ 딜 파이프라인 ═══ */
@@ -8437,6 +8437,20 @@ window.CRM=(function(){
         '<span style="font-size:10px;font-weight:700;color:'+(prob>=80?'#16a34a':prob>=50?'#f59e0b':'#94a3b8')+'">'+prob+'%</span>'+
       '</div>'+
       '<div style="font-size:11px;color:#94a3b8;margin-top:3px">'+(jp?'予想':'예상')+' '+(dl.expMonth||'-')+(dl.owner?' · '+_esc(dl.owner):'')+'</div>'+nextTxt+'</div>';
+  }
+  var _DEMO_DEALS=[{"id": "DMO1", "client": "Yuki Skin Clinic", "product": "OligioX", "cat": "기기", "amount": 6000000, "expMonth": "2026-08", "stage": "nego", "prob": null, "owner": "田中", "next": "견적 최종 조율", "nextDate": "2026-07-23", "createdAt": "2026-07-10", "_demo": true}, {"id": "DMO2", "client": "XENO CLINIC", "product": "Oligiokiss", "cat": "기기", "amount": 5500000, "expMonth": "2026-08", "stage": "quote", "prob": null, "owner": "佐藤", "next": "데모 일정 확정", "nextDate": "2026-07-22", "createdAt": "2026-07-15", "_demo": true}, {"id": "DMO3", "client": "NaA Clinic", "product": "OligioX", "cat": "기기", "amount": 6000000, "expMonth": "2026-09", "stage": "consult", "prob": null, "owner": "鈴木", "next": "재방문 상담", "nextDate": "2026-07-28", "createdAt": "2026-07-18", "_demo": true}, {"id": "DMO4", "client": "CROWN BEAUTY CLINIC", "product": "OligioX", "cat": "기기", "amount": 6000000, "expMonth": "2026-08", "stage": "nego", "prob": null, "owner": "田中", "next": "원장 결재 대기", "nextDate": "2026-07-18", "createdAt": "2026-06-25", "_demo": true}, {"id": "DMO5", "client": "Lūna Beauty Clinic", "product": "Oligiokiss", "cat": "기기", "amount": 5500000, "expMonth": "2026-09", "stage": "lead", "prob": null, "owner": "佐藤", "next": "첫 컨택", "nextDate": "2026-07-30", "createdAt": "2026-07-19", "_demo": true}, {"id": "DMO6", "client": "Setagaya Skincare", "product": "OligioX Tip 정기", "cat": "소모품", "amount": 1200000, "expMonth": "2026-08", "stage": "quote", "prob": null, "owner": "鈴木", "next": "단가 회신", "nextDate": "2026-07-25", "createdAt": "2026-07-12", "_demo": true}, {"id": "DMO7", "client": "Vands Clinic", "product": "소모품 정기공급", "cat": "소모품", "amount": 800000, "expMonth": "2026-07", "stage": "won", "prob": null, "owner": "田中", "createdAt": "2026-07-05", "_demo": true}, {"id": "DMO8", "client": "Harmo Ladies Clinic", "product": "Oligiokiss", "cat": "기기", "amount": 5500000, "expMonth": "2026-08", "stage": "won", "prob": null, "owner": "鈴木", "createdAt": "2026-07-08", "_demo": true}, {"id": "DMO9", "client": "PIONE BEAUTY CLINIC", "product": "Oligiokiss", "cat": "기기", "amount": 5500000, "expMonth": "2026-08", "stage": "lead", "prob": null, "owner": "佐藤", "next": "니즈 파악", "nextDate": "2026-08-01", "createdAt": "2026-07-20", "_demo": true}];
+  var _DEMO_ACTS=[{"id": "AMO1", "client": "Yuki Skin Clinic", "type": "meet", "content": "원장 미팅 — 견적 긍정적, 예산 확인", "date": "2026-07-18", "owner": "田中", "next": "견적서 발송", "nextDate": "2026-07-23", "dealId": "DMO1", "_demo": true}, {"id": "AMO2", "client": "XENO CLINIC", "type": "demo", "content": "OligioX 데모 시연, 반응 양호", "date": "2026-07-16", "owner": "佐藤", "next": "데모 후속 콜", "nextDate": "2026-07-22", "dealId": "DMO2", "_demo": true}, {"id": "AMO3", "client": "NaA Clinic", "type": "visit", "content": "병원 방문 상담 — 경쟁장비 비교 문의", "date": "2026-07-15", "owner": "鈴木", "next": "재방문 상담", "nextDate": "2026-07-28", "dealId": "DMO3", "_demo": true}, {"id": "AMO4", "client": "CROWN BEAUTY CLINIC", "type": "call", "content": "원장 결재 진행상황 확인", "date": "2026-07-13", "owner": "田中", "next": "재확인 콜", "nextDate": "2026-07-17", "dealId": "DMO4", "_demo": true}, {"id": "AMO5", "client": "Lūna Beauty Clinic", "type": "call", "content": "인바운드 문의 응대", "date": "2026-07-19", "owner": "佐藤", "_demo": true}, {"id": "AMO6", "client": "Setagaya Skincare", "type": "meet", "content": "소모품 정기공급 협의", "date": "2026-07-17", "owner": "鈴木", "next": "단가표 송부", "nextDate": "2026-07-25", "dealId": "DMO6", "_demo": true}, {"id": "AMO7", "client": "Vands Clinic", "type": "as", "content": "OligioX 정기 점검 완료", "date": "2026-07-12", "owner": "田中", "_demo": true}, {"id": "AMO8", "client": "Harmo Ladies Clinic", "type": "visit", "content": "계약 체결 방문", "date": "2026-07-10", "owner": "鈴木", "_demo": true}];
+  function _fillDemo(){
+    if(!confirm('데모(샘플) 데이터를 채웁니다.\n\n· 딜 9건 · 활동 8건이 추가됩니다.\n· 대시보드/매출예측에는 반영되지 않습니다.\n· "데모 비우기"로 언제든 제거됩니다.\n\n진행할까요?'))return;
+    _d.deals=(_d.deals||[]).filter(function(d){return !d._demo;}).concat(JSON.parse(JSON.stringify(_DEMO_DEALS)));
+    _d.acts=(_d.acts||[]).filter(function(a){return !a._demo;}).concat(JSON.parse(JSON.stringify(_DEMO_ACTS)));
+    save(); render(); alert('데모 데이터를 채웠습니다.\n활동 · 일정 · 성과 탭도 눌러 확인해 보세요.');
+  }
+  function _clearDemo(){
+    if(!confirm('데모(샘플) 데이터를 모두 제거합니다.\n실제 입력 데이터는 유지됩니다. 진행할까요?'))return;
+    _d.deals=(_d.deals||[]).filter(function(d){return !d._demo;});
+    _d.acts=(_d.acts||[]).filter(function(a){return !a._demo;});
+    save(); render(); alert('데모 데이터를 비웠습니다.');
   }
   function render(){
     var host=document.getElementById('crmPipeBody'); if(!host)return;
@@ -8462,7 +8476,7 @@ window.CRM=(function(){
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
       '<button class="crm-btn" onclick="CRM._open()">+ '+(jp?'ディール追加':'딜 추가')+'</button>'+
       '<select class="filter-input" style="width:130px" onchange="CRM._setFlt(\'owner\',this.value)">'+oopt+'</select>'+
-      '<input class="filter-input" style="width:150px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_flt.q)+'" oninput="CRM._setFlt(\'q\',this.value)"></div>';
+      '<input class="filter-input" style="width:150px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_flt.q)+'" oninput="CRM._setFlt(\'q\',this.value)">'+(function(){var r=(typeof _currentUser!=='undefined'&&_currentUser)?(_currentUser.role||''):'';if(r==='sales'||r==='finance')return '';return '<span style="margin-left:auto;display:inline-flex;gap:6px"><button class="crm-btn" style="background:#7c3aed" onclick="CRM._fillDemo()">🎭 '+(jp?'デモ投入':'데모 채우기')+'</button><button class="crm-btn" style="background:#94a3b8" onclick="CRM._clearDemo()">🧹 '+(jp?'クリア':'비우기')+'</button></span>';})()+'</div>';
     var cols=STAGES.map(function(s){
       var ds=deals.filter(function(d){return d.stage===s.k;}); if(s.k==='won'){ds=ds.filter(function(d){return (d.expMonth||d.createdAt||'').slice(0,4)===_today().slice(0,4);});}
       var tot=ds.reduce(function(a,d){return a+(d.amount||0);},0);
@@ -8825,7 +8839,7 @@ window.CRM=(function(){
     if(id==='crm-pipeline')render(); else if(id==='crm-forecast')renderForecast(); else if(id==='crm-clients')renderClients(); else if(id==='crm-activities')renderActs(); else if(id==='crm-perf')renderPerf(); else if(id==='crm-sched')renderSched(); }
   return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;}, forecastMachArr:forecastMach, consRunArr:consRun,
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
-    _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt, _clSetView:_clSetView, _fullCa:_fullCa,
+    _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt, _clSetView:_clSetView, _fullCa:_fullCa, _fillDemo:_fillDemo, _clearDemo:_clearDemo,
     _openAc:_openAc, _saveAc:_saveAc, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
 })();
 </script>
