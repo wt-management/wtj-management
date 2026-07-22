@@ -8349,7 +8349,7 @@ window.WT_INV=(function(){
 <script>
 /* ═══════════ 일본법인 CRM (딜 파이프라인 · 매출 예측 · 고객사 360 · 활동 · 성과) ═══════════ */
 window.CRM=(function(){
-  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='week', _acWeekRef=null, _clView='table';
+  var _d={deals:[],clients:[],acts:[]}, _loaded=false, _flt={owner:'',q:''}, _clFltV={q:'',sort:'sale',status:''}, _acFltV={type:'',owner:''}, _acView='week', _acWeekRef=null, _clView='table', _schView='week', _schWeekRef=null;
   var STAGES=[
     {k:'lead',   ko:'리드',    jp:'リード',   prob:20, col:'#64748b'},
     {k:'consult',ko:'상담중',  jp:'商談中',   prob:40, col:'#3b82f6'},
@@ -8836,17 +8836,65 @@ window.CRM=(function(){
 
   /* ═══ 일정/할일 ═══ */
   function _schItems(){var items=[],seen={};function add(it){var k=(it.client||'')+'|'+it.date+'|'+(it.text||'').replace(/\s+/g,'');if(seen[k])return;seen[k]=1;items.push(it);}_d.deals.forEach(function(d){if(d.stage==='won'||d.stage==='lost')return;if(d.next&&d.nextDate)add({date:d.nextDate,kind:'deal',id:d.id,client:d.client,text:d.next,owner:d.owner});});_d.acts.forEach(function(a){if(a.next&&a.nextDate&&!a.done)add({date:a.nextDate,kind:'act',id:a.id,client:a.client,text:a.next,owner:a.owner});});items.sort(function(a,b){return a.date<b.date?-1:1;});return items;}
+  function _schEffRef(){
+    if(_schWeekRef)return _schWeekRef;
+    var its=_schItems(); if(!its.length)return _today();
+    var w=_acWeekRange(null); if(its.some(function(i){return i.date>=w.start&&i.date<=w.end;}))return _today();
+    var td=_today(),best=its[0].date,bd=1e15;
+    its.forEach(function(i){var d=Math.abs((new Date(i.date)-new Date(td))/864e5); if(d<bd){bd=d;best=i.date;}});
+    return best;
+  }
+  function _schWeekGrid(items){
+    var jp=(lang==='jp'),today=_today(),wk=_acWeekRange(_schEffRef()),mon=wk.mon;
+    function f(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+    var WD=jp?['月','火','水','木','金','土','日']:['월','화','수','목','금','토','일'];
+    var byd={}; items.forEach(function(i){if(i.date>=wk.start&&i.date<=wk.end)(byd[i.date]=byd[i.date]||[]).push(i);});
+    var cols='';
+    for(var idx=0;idx<7;idx++){
+      var dt=new Date(mon); dt.setDate(mon.getDate()+idx); var ds=f(dt),isT=(ds===today);
+      var its=(byd[ds]||[]).sort(function(a,b){return (a.owner||'')<(b.owner||'')?-1:1;});
+      var cards=its.map(function(it){
+        var od=(it.date<today),col=od?'#dc2626':(it.kind==='deal'?'#0f766e':'#3b82f6'),ic=it.kind==='deal'?'🧩':'📇';
+        var fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";
+        return '<div onclick="event.stopPropagation();'+fn+'" title="'+_esc(it.text||'')+'" style="border-left:3px solid '+col+';background:'+col+'14;border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10.5px;line-height:1.4;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ic+' <b style="color:#0f172a">'+_tr(it.text||'-')+'</b> <span style="color:#94a3b8">·'+_tr(it.client||'')+(it.owner?' '+_esc(it.owner):'')+'</span></div>';
+      }).join('');
+      cols+='<div style="border:1px solid '+(isT?'#99f6e4':'#eef2f7')+';border-radius:9px;min-height:132px;background:'+(isT?'#f0fdfa':'#fff')+';overflow:hidden">'+
+        '<div style="padding:5px 8px;font-size:11px;font-weight:800;border-bottom:1px solid #f1f3f7;color:'+(isT?'#0f766e':idx===5?'#2563eb':idx===6?'#dc2626':'#475569')+'">'+WD[idx]+' <span style="font-weight:600;color:#94a3b8">'+parseInt(ds.slice(8),10)+(jp?'':'일')+'</span>'+(isT?' <span style="font-size:9px;color:#0f766e">●'+(jp?'今日':'오늘')+'</span>':'')+'</div>'+
+        '<div style="padding:5px">'+(cards||'<div style="font-size:11px;color:#e2e8f0;text-align:center;padding:12px 0">·</div>')+'</div></div>';
+    }
+    var lab=wk.start.slice(5).replace('-','/')+' ~ '+wk.end.slice(5).replace('-','/');
+    var navbar='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+
+      '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._schWeekNav(-1)">‹</button>'+
+      '<b style="font-size:13px;min-width:118px;text-align:center">'+lab+'</b>'+
+      '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._schWeekNav(1)">›</button>'+
+      '<button class="crm-btn" style="background:#fff;color:#0f766e;border:1px solid #99f6e4;padding:4px 13px;font-size:12px" onclick="CRM._schWeekNav(0)">'+(jp?'今週':'이번주')+'</button>'+
+      '<span style="margin-left:12px;font-size:10.5px;color:#64748b"><span style="color:#0f766e">🧩'+(jp?'ディール':'딜')+'</span> · <span style="color:#3b82f6">📇'+(jp?'活動':'활동')+'</span> · <span style="color:#dc2626">'+(jp?'遅延':'지남')+'</span></span></div>';
+    return navbar+'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div style="display:grid;grid-template-columns:repeat(7,minmax(104px,1fr));gap:6px;min-width:760px">'+cols+'</div></div>';
+  }
+  function _schSetView(v){_schView=v;renderSched();}
+  function _schWeekNav(d){ if(d===0){_schWeekRef=_today();} else { var r=_acWeekRange(_schEffRef()),mon=new Date(r.mon); mon.setDate(mon.getDate()+d*7); _schWeekRef=mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0'); } renderSched(); }
   function renderSched(){
     var host=document.getElementById('crmScBody'); if(!host)return; var jp=(lang==='jp'),today=_today();
     var items=_schItems(),over=[],td=[],wk=[],later=[];
     items.forEach(function(it){var dd=(new Date(it.date)-new Date(today))/864e5;if(it.date<today)over.push(it);else if(it.date===today)td.push(it);else if(dd<=7)wk.push(it);else later.push(it);});
-    function sec(title,arr,col){if(!arr.length)return '';return '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:800;color:'+col+';margin-bottom:6px">'+title+' ('+arr.length+')</div>'+arr.map(function(it){var kk=it.kind==='deal'?'🧩':'📇',fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";return '<div onclick="'+fn+'" style="cursor:pointer;display:flex;gap:10px;padding:8px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:5px"><span style="color:#94a3b8;width:76px;flex-shrink:0;font-size:12px">'+it.date+'</span><span>'+kk+'</span><span style="flex:1;font-size:13px">'+_tr(it.text)+' <span style="color:#94a3b8">· '+_tr(it.client||'')+(it.owner?' · '+_esc(it.owner):'')+'</span></span></div>';}).join('')+'</div>';}
     var kpi='<div class="wt-band">'+
       '<div class="wt-hero"><div class="l">'+(jp?'今日':'오늘')+'</div><b>'+td.length+(jp?'件':'건')+'</b></div>'+
       '<div class="wt-fact"><div class="l">'+(jp?'遅延':'지남')+'</div><b class="'+(over.length?'rd':'')+'">'+over.length+(jp?'件':'건')+'</b></div>'+
       '<div class="wt-fact"><div class="l">'+(jp?'今週':'이번주')+'</div><b>'+wk.length+(jp?'件':'건')+'</b></div>'+
+      '<div class="wt-fact"><div class="l">'+(jp?'以降':'이후')+'</div><b>'+later.length+(jp?'件':'건')+'</b></div>'+
       '</div>';
-    host.innerHTML=kpi+(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#0f766e')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
+    var vtoggle='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
+      '<button onclick="CRM._schSetView(\'week\')" style="font-family:inherit;border:none;background:'+(_schView==='week'?'#0f766e':'#fff')+';color:'+(_schView==='week'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">📅 '+(jp?'週間':'주간')+'</button>'+
+      '<button onclick="CRM._schSetView(\'list\')" style="font-family:inherit;border:none;background:'+(_schView==='list'?'#0f766e':'#fff')+';color:'+(_schView==='list'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'リスト':'리스트')+'</button></span>';
+    var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+vtoggle+'</div>';
+    var body;
+    if(_schView==='list'){
+      function sec(title,arr,col){if(!arr.length)return '';return '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:800;color:'+col+';margin-bottom:6px">'+title+' ('+arr.length+')</div>'+arr.map(function(it){var kk=it.kind==='deal'?'🧩':'📇',fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";return '<div onclick="'+fn+'" style="cursor:pointer;display:flex;gap:10px;padding:8px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:5px"><span style="color:#94a3b8;width:76px;flex-shrink:0;font-size:12px">'+it.date+'</span><span>'+kk+'</span><span style="flex:1;font-size:13px">'+_tr(it.text)+' <span style="color:#94a3b8">· '+_tr(it.client||'')+(it.owner?' · '+_esc(it.owner):'')+'</span></span></div>';}).join('')+'</div>';}
+      body=(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#0f766e')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
+    } else {
+      body=items.length?_schWeekGrid(items):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>';
+    }
+    host.innerHTML=kpi+bar+body;
   }
   /* ═══ 대시보드 알림 ═══ */
   function renderAlerts(){
@@ -8887,7 +8935,7 @@ window.CRM=(function(){
   return {onPage:onPage, relang:relang, forecastArr:forecastArr, ensure:function(cb){load(cb);}, isLoaded:function(){return _loaded;}, forecastMachArr:forecastMach, consRunArr:consRun,
     _open:_open, _saveDl:_saveDl, _delDl:_delDl, _closeDl:_closeDl, _syncProb:_syncProb, _setFlt:_setFlt,
     _openClient:_openClient, _closeDw:_closeDw, _openCl:_openCl, _saveCl:_saveCl, _delCl:_delCl, _clFlt:_clFlt, _clSetView:_clSetView, _fullCa:_fullCa, _fillDemo:_fillDemo, _clearDemo:_clearDemo,
-    _openAc:_openAc, _saveAc:_saveAc, _acSetView:_acSetView, _acWeekNav:_acWeekNav, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
+    _openAc:_openAc, _saveAc:_saveAc, _acSetView:_acSetView, _acWeekNav:_acWeekNav, _schSetView:_schSetView, _schWeekNav:_schWeekNav, _delAc:_delAc, _closeAc:_closeAc, _acFlt:_acFlt, renderAlerts:renderAlerts, _snap:_snap};
 })();
 </script>
 
