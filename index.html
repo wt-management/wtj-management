@@ -3471,9 +3471,9 @@ function renderRanking(d, tab){
 
     var pAmt=prevAmt(mrP,r.product);
 
-    return '<tr style="cursor:pointer" onclick="showProductDetail(\''+r.product.replace(/'/g,"\\'")+"','"+cy+"','"+cm+"')\">"
+    return '<tr style="cursor:pointer" onclick="showProductDetail(\''+_jsq(r.product)+"','"+cy+"','"+cm+"')\">"
 
-      +'<td><strong>'+(i+1)+'</strong></td><td>'+r.product+'</td>'
+      +'<td><strong>'+(i+1)+'</strong></td><td>'+esc(r.product)+'</td>'
 
       +'<td class="amount">'+fmt(r.count)+(lang==='jp'?'件':'건')+'</td>'
 
@@ -3495,9 +3495,9 @@ function renderRanking(d, tab){
 
     var pAmt=prevAmt(crP,r.product);
 
-    return '<tr style="cursor:pointer" onclick="showProductDetail(\''+r.product.replace(/'/g,"\\'")+"','"+cy+"','"+cm+"')\">"
+    return '<tr style="cursor:pointer" onclick="showProductDetail(\''+_jsq(r.product)+"','"+cy+"','"+cm+"')\">"
 
-      +'<td><strong>'+(i+1)+'</strong></td><td>'+r.product+'</td>'
+      +'<td><strong>'+(i+1)+'</strong></td><td>'+esc(r.product)+'</td>'
 
       +'<td class="amount">'+fmt(r.qty)+(lang==='jp'?'個':'개')+'</td>'
 
@@ -3553,11 +3553,11 @@ function showProductDetail(product, year, maxMonth){
 
       return '<tr style="border-bottom:1px solid #f1f5f9">'
 
-        +'<td style="padding:7px 8px">'+r.date+'</td>'
+        +'<td style="padding:7px 8px">'+esc(r.date)+'</td>'
 
-        +'<td style="padding:7px 8px">'+r.facility+'</td>'
+        +'<td style="padding:7px 8px">'+esc(r.facility)+'</td>'
 
-        +'<td style="padding:7px 8px">'+r.product+'</td>'
+        +'<td style="padding:7px 8px">'+esc(r.product)+'</td>'
 
         +'<td style="padding:7px 8px;text-align:right">'+r.qty+'</td>'
 
@@ -4140,6 +4140,8 @@ window.addEventListener('popstate', function(e){
 function fmt(n){if(!n&&n!==0)return '-';return Number(n).toLocaleString('ja-JP');}
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function _jsq(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function fmtY(n){
 
@@ -6257,7 +6259,7 @@ function applyFilter(){
 
     body.innerHTML=filtered.slice(0,200).map(function(o){
 
-      return '<tr><td>'+o.date+'</td><td>'+o.facility+'</td><td>'+o.product+'</td>'+
+      return '<tr><td>'+esc(o.date)+'</td><td>'+esc(o.facility)+'</td><td>'+esc(o.product)+'</td>'+
 
         '<td>'+catBadge(o.category)+'</td>'+
 
@@ -6581,9 +6583,9 @@ function renderOutstanding(data){
 
   document.getElementById('outstandingBody').innerHTML=data.map(function(o){
 
-    return '<tr style="cursor:pointer" onclick="selectOrder(\''+o.stableId+'\',\''+o.facility+'\',\''+o.product+'\','+o.remaining+')">'+
+    return '<tr style="cursor:pointer" onclick="selectOrder(\''+_jsq(o.stableId)+'\',\''+_jsq(o.facility)+'\',\''+_jsq(o.product)+'\','+o.remaining+')">'+
 
-      '<td>'+o.date+'</td><td>'+o.facility+'</td><td>'+o.product+'</td>'+
+      '<td>'+esc(o.date)+'</td><td>'+esc(o.facility)+'</td><td>'+esc(o.product)+'</td>'+
 
       '<td class="amount">¥'+fmt(o.amount)+'</td>'+
 
@@ -6591,7 +6593,7 @@ function renderOutstanding(data){
 
       '<td class="amount" style="color:#ef4444;font-weight:700">¥'+fmt(o.remaining)+'</td>'+
 
-      '<td><button class="edit-btn" onclick="event.stopPropagation();selectOrder(\''+o.stableId+'\',\''+o.facility+'\',\''+o.product+'\','+o.remaining+')">선택</button></td>'+
+      '<td><button class="edit-btn" onclick="event.stopPropagation();selectOrder(\''+_jsq(o.stableId)+'\',\''+_jsq(o.facility)+'\',\''+_jsq(o.product)+'\','+o.remaining+')">선택</button></td>'+
 
     '</tr>';
 
@@ -6886,7 +6888,7 @@ function openCtDetail(prod){
 
   document.getElementById('ctDetailBody').innerHTML=rows.map(function(r){
 
-    return '<tr><td>'+r.date+'</td><td>'+r.facility+'</td>'+
+    return '<tr><td>'+esc(r.date)+'</td><td>'+esc(r.facility)+'</td>'+
 
       '<td style="text-align:right">'+(r.qty?fmt(r.qty)+(jp2?'個':'개'):'-')+'</td>'+
 
@@ -7050,11 +7052,11 @@ function renderConsumableTrend(d){
 
     var hasDetail=(details[r.product]&&details[r.product].length>0);
 
-    var rowStyle=hasDetail?'cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'" onclick="openCtDetail(\''+r.product.replace(/'/g,"\\'")+'\')"':'';
+    var rowStyle=hasDetail?'cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'" onclick="openCtDetail(\''+_jsq(r.product)+'\')"':'';
 
     return '<tr style="'+rowStyle+'"><td style="text-align:center;font-weight:700;color:#64748b">'+(i+1)+'</td>'+
 
-      '<td>'+(hasDetail?'<span style="color:#16324f;text-decoration:underline;text-underline-offset:2px">'+r.product+'</span>':r.product)+'</td>'+
+      '<td>'+(hasDetail?'<span style="color:#16324f;text-decoration:underline;text-underline-offset:2px">'+esc(r.product)+'</span>':esc(r.product))+'</td>'+
 
       '<td class="amount">'+fmt(r.qty)+'</td><td class="amount">'+r.count+(lang==='jp'?'件':'건')+'</td>'+
 
@@ -7072,7 +7074,7 @@ function renderConsumableTrend(d){
 
     return '<tr style="cursor:pointer" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'" onclick="openDrill({facility:\''+_dq(r.facility)+'\',title:\''+_dq(r.facility)+'\'})"><td style="text-align:center;font-weight:700;color:#64748b">'+(i+1)+'</td>'+
 
-      '<td><span style="color:#16324f;text-decoration:underline;text-underline-offset:2px">'+r.facility+'</span></td><td class="amount">'+r.count+(lang==='jp'?'件':'건')+'</td>'+
+      '<td><span style="color:#16324f;text-decoration:underline;text-underline-offset:2px">'+esc(r.facility)+'</span></td><td class="amount">'+r.count+(lang==='jp'?'件':'건')+'</td>'+
 
       '<td class="amount">¥'+fmt(r.amount)+'</td><td class="amount">'+pct+'%</td></tr>';
 
@@ -7769,7 +7771,7 @@ function openEntry(id,kindOpt){
     '<div class="frow"><label>일자</label><input type="date" id="fxmDate" value="'+esc(x.date)+'"></div>'+
     '<div class="frow"><label>구분</label><div class="f2"><select id="fxmMethod" onchange="document.getElementById(\'fxmAccWrap\').style.display=this.value===\'bank\'?\'\':\'none\'"><option value="bank"'+(x.method==='bank'?' selected':'')+'>예금</option><option value="cash"'+(x.method==='cash'?' selected':'')+'>현금</option></select>'+
     '<span id="fxmAccWrap" style="display:'+(x.method==='bank'?'':'none')+'"><select id="fxmAcc">'+accSel+'</select></span></div></div>'+
-    '<div class="frow"><label>내용</label><input type="text" id="fxmDesc" value="'+trUser(x.desc)+'"></div>'+
+    '<div class="frow"><label>내용</label><input type="text" id="fxmDesc" value="'+esc(x.desc)+'"></div>'+
     '<div class="frow"><label>금액 (JPY)</label><input type="number" id="fxmAmt" value="'+esc(x.amount)+'"></div>';
   $('fxmFoot').innerHTML='<button class="fx-btn gray" onclick="FIN.closeModal()">취소</button><button class="fx-btn green" onclick="FIN.saveEntry()">저장</button>';
   $('fxmodal').classList.add('on');
