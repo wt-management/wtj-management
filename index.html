@@ -21,6 +21,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -40,7 +42,7 @@ body{font-family:'Pretendard','Pretendard Variable','Segoe UI','Noto Sans JP',sa
 
 .lang-btn{flex:1;padding:5px;border:1px solid #334155;background:transparent;color:#94a3b8;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
 
-.lang-btn.active{background:#0f766e;border-color:#0f766e;color:#fff}
+.lang-btn.active{background:#2563eb;border-color:#2563eb;color:#fff}
 
 .nav-section{padding:12px 8px;flex:1;overflow-y:auto}
 .salesTabHost + div{display:none!important}
@@ -51,7 +53,7 @@ body{font-family:'Pretendard','Pretendard Variable','Segoe UI','Noto Sans JP',sa
 
 .nav-item:hover{background:#1e293b;color:#e2e8f0}
 
-.nav-item.active{background:#0f766e;color:#fff}
+.nav-item.active{background:#2563eb;color:#fff}
 
 .nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
 
@@ -420,14 +422,14 @@ input:focus,select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,2
 .essec{margin-bottom:22px}.esst{font-size:13px;font-weight:700;color:#334155;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .esdual{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .esdual2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start}
-.crm-btn{font-family:inherit;background:#0f766e;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer}.crm-btn:hover{background:#115e59}
+.crm-btn{font-family:inherit;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer}.crm-btn:hover{background:#1d4ed8}
 .crm-kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start}@media(max-width:1100px){.crm-kanban{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.crm-kanban{grid-template-columns:1fr}}
 .crm-col{background:#f6f8f9;border:1px solid #e8edf3;border-radius:12px;padding:8px;min-height:80px}
 .crm-colh{padding:8px 6px;display:flex;flex-direction:column;position:relative}.crm-colh .crm-colc{position:absolute;right:6px;top:8px;background:#e2e8f0;color:#475569;border-radius:999px;font-size:11px;padding:1px 8px}
 .crm-collist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.crm-card{background:#fff;border:1px solid #e8edf3;border-radius:10px;padding:10px 11px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}.crm-card:hover{border-color:#0f766e;box-shadow:0 3px 8px rgba(15,118,110,.12)}
+.crm-card{background:#fff;border:1px solid #e8edf3;border-radius:10px;padding:10px 11px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}.crm-card:hover{border-color:#2563eb;box-shadow:0 3px 8px rgba(15,118,110,.12)}
 .crm-cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-.crm-ccard{background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:13px 14px;cursor:pointer}.crm-ccard:hover{border-color:#0f766e;box-shadow:0 3px 8px rgba(15,118,110,.12)}
+.crm-ccard{background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:13px 14px;cursor:pointer}.crm-ccard:hover{border-color:#2563eb;box-shadow:0 3px 8px rgba(15,118,110,.12)}
 .crm-tl{padding:4px 0}.crm-tlrow{display:flex;gap:12px}.crm-tlrail{position:relative;width:30px;display:flex;flex-direction:column;align-items:center}.crm-tlline{position:absolute;top:30px;bottom:-4px;width:2px;background:#e8edf3}.crm-tlcontent{flex:1;min-width:0;padding-bottom:16px}
 .esdl{background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:18px}
 .esdl .t{font-size:13px;font-weight:700;margin-bottom:12px}
@@ -549,6 +551,44 @@ table{font-variant-numeric:tabular-nums}
 .btn{border-radius:8px}
 /* WT-DEEP-v3 프리미엄 타이포 일관 */
 .kpi-value,.lux-num,.stat-num,.stat-value,.metric-value,.metric-num,.big-num,.num-lg,.hero-num,.summary-num,.card-num{font-variant-numeric:tabular-nums;letter-spacing:-.018em}
+/* == 한국영업 사이트 디자인 정렬(2026-07-31) - 토큰/라이트 사이드바/블루 액센트 == */
+:root{--blue:#2563eb;--blue-light:#eff6ff;--sidebar-bg:#f1f5f9;--sidebar-hover:#eef2f7;--sidebar-active:#eaf1fd;--text:#111827;--text-2:#64748b;--border:#e4e8ef;--bg:#f3f4f6;--white:#fff;--brand:#2563eb}
+body{font-family:'Noto Sans KR','Noto Sans JP','Pretendard','Pretendard Variable',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+/* 사이드바: 다크 -> 라이트(한국영업 톤) */
+.sidebar{background:var(--sidebar-bg);color:var(--text);border-right:1px solid #d8e0ea;box-shadow:3px 0 16px rgba(16,42,67,.06)}
+.sidebar-logo{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo h2{color:#1c2534;font-size:15px;font-weight:700;letter-spacing:-.3px}
+.sidebar-logo span{color:#94a3b8;font-size:10px}
+.nav-label{color:#475569;font-size:10px;font-weight:600;letter-spacing:.08em;padding:6px 20px}
+.nav-item{color:#475569;font-size:13px;font-weight:500;padding:8px 18px;margin:1px 8px;border-radius:6px}
+.nav-item:hover{background:var(--sidebar-hover);color:#1c2534}
+.nav-item.active{background:var(--sidebar-active);color:var(--blue);font-weight:600}
+.lang-toggle{border-bottom:1px solid var(--border)}
+.lang-btn{background:#fff;border:1px solid #dbe3ec;color:#475569;font-weight:600}
+.lang-btn:hover{background:#eff4fb;border-color:#a9c4e8;color:var(--blue)}
+.lang-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+#sidebar-avatar{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important}
+#sidebar-user-name{color:#1c2534!important}
+#sidebar-user-email,#sidebar-user-dept{color:#94a3b8!important}
+#site-switcher-btn{background:#fff!important;border:1px solid #d5dde8!important;color:#475569!important}
+#site-switcher-btn:hover{background:#eff4fb!important;border-color:#a9c4e8!important;color:var(--blue)!important}
+#site-dropdown{background:#fff!important;border:1px solid var(--border)!important;box-shadow:0 -8px 24px rgba(16,42,67,.14)!important}
+#site-dropdown>div>div{color:#475569!important}
+#site-dropdown>div>div:hover{background:var(--sidebar-hover)!important}
+/* 상단바 */
+.topbar{background:#fff;border-bottom:1px solid var(--border)}
+.topbar h1{color:#111827;font-size:18px;font-weight:700;letter-spacing:-.2px}
+.topbar-sub{color:var(--text-2)}
+/* 카드: 한국영업 라운드(12) */
+.card,.kpi-card,.stat-card,.chart-card,.table-card,.form-card,.crm-ccard{border-radius:12px!important;box-shadow:none!important;border:1px solid var(--border)!important}
+.kpi-card{padding:20px 22px}
+/* 버튼: 한국영업 톤 */
+.crm-btn{background:var(--blue);border-radius:8px}
+.crm-btn:hover{background:#1d4ed8}
+.btn-outline-secondary{border-color:#dbe3ec;color:#475569;background:#fff;border-radius:8px;font-weight:600}
+.btn-outline-secondary:hover,.btn-outline-secondary:focus{background:#eff4fb;border-color:#a9c4e8;color:var(--blue)}
+.btn-primary{background:var(--blue);border-color:var(--blue)}
+.btn-primary:hover{background:#1d4ed8;border-color:#1d4ed8}
 </style>
 
 <script>/* WT_ERRLOG_V1 — 공통 오류수집+요청함 (자동주입 스니펫, 개별 수정 금지) */
@@ -1854,7 +1894,7 @@ window.addEventListener('pageshow', function(e){
 
     <div class="page" id="page-budget-actual">
       <div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;margin-bottom:14px">
-        <button onclick="showPage('budget-actual')" style="font-family:inherit;border:none;background:#0f766e;color:#fff;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">📊 <span id="planBA1">실적·달성</span></button>
+        <button onclick="showPage('budget-actual')" style="font-family:inherit;border:none;background:#2563eb;color:#fff;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">📊 <span id="planBA1">실적·달성</span></button>
         <button onclick="showPage('crm-forecast')" style="font-family:inherit;border:none;background:#fff;color:#64748b;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">🔮 <span id="planFC1">예측·착지</span></button>
       </div>
 
@@ -2377,7 +2417,7 @@ window.addEventListener('pageshow', function(e){
   </div>
   <div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;margin-bottom:14px">
     <button onclick="showPage('budget-actual')" style="font-family:inherit;border:none;background:#fff;color:#64748b;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">📊 <span id="planBA2">실적·달성</span></button>
-    <button onclick="showPage('crm-forecast')" style="font-family:inherit;border:none;background:#0f766e;color:#fff;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">🔮 <span id="planFC2">예측·착지</span></button>
+    <button onclick="showPage('crm-forecast')" style="font-family:inherit;border:none;background:#2563eb;color:#fff;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">🔮 <span id="planFC2">예측·착지</span></button>
   </div>
   <div id="crmFcBody"></div><div id="crmSnapBody" style="margin-top:20px"></div>
 </div>
@@ -2472,7 +2512,7 @@ window.addEventListener('pageshow', function(e){
               <input type="file" id="finFile" accept=".xlsx" style="display:none" onchange="handleFinFile(this)">
             </div>
             <div id="finPreview" style="display:none">
-              <div id="finStats" style="background:#fff;border:1px solid #99f6e4;border-radius:10px;padding:16px 18px;margin-bottom:12px"></div>
+              <div id="finStats" style="background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin-bottom:12px"></div>
               <div style="display:flex;gap:10px;justify-content:flex-end">
                 <button class="btn btn-secondary" onclick="resetFinUpload()" data-jp="キャンセル">취소</button>
                 <button class="btn btn-primary" id="btnFinCommit" onclick="commitFinSales()" style="background:#0d9488">이 내용으로 매출일보 갱신</button>
@@ -4063,12 +4103,12 @@ var _prevPage = null;
 function _finTabBar(active){
   var jp=(lang==='jp');
   var tabs=[['fin-report','📒',jp?'報告書':'보고서'],['fin-ledger','🏦',jp?'元帳':'원장'],['fin-daily','🧾',jp?'売上·仕入':'매출·매입'],['outstanding','⚠️',jp?'未収·債権':'미수·채권']];
-  return '<div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;flex-wrap:wrap;margin-bottom:2px">'+tabs.map(function(x){var on=(x[0]===active);return '<button onclick="showPage(\''+x[0]+'\')" style="font-family:inherit;border:none;background:'+(on?'#0f766e':'#fff')+';color:'+(on?'#fff':'#64748b')+';padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer">'+x[1]+' '+x[2]+'</button>';}).join('')+'</div>';
+  return '<div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;flex-wrap:wrap;margin-bottom:2px">'+tabs.map(function(x){var on=(x[0]===active);return '<button onclick="showPage(\''+x[0]+'\')" style="font-family:inherit;border:none;background:'+(on?'#2563eb':'#fff')+';color:'+(on?'#fff':'#64748b')+';padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer">'+x[1]+' '+x[2]+'</button>';}).join('')+'</div>';
 }
 function _salesTabBar(active){
   var jp=(lang==='jp');
   var tabs=[['crm-pipeline','🧩',jp?'パイプライン':'파이프라인'],['crm-activities','📇',jp?'活動':'활동'],['crm-sched','🗓',jp?'日程':'일정'],['crm-perf','🏆',jp?'成果':'성과']];
-  return '<div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;flex-wrap:wrap;margin-bottom:2px">'+tabs.map(function(x){var on=(x[0]===active);return '<button onclick="showPage(\''+x[0]+'\')" style="font-family:inherit;border:none;background:'+(on?'#0f766e':'#fff')+';color:'+(on?'#fff':'#64748b')+';padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer">'+x[1]+' '+x[2]+'</button>';}).join('')+'</div>';
+  return '<div style="display:inline-flex;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;flex-wrap:wrap;margin-bottom:2px">'+tabs.map(function(x){var on=(x[0]===active);return '<button onclick="showPage(\''+x[0]+'\')" style="font-family:inherit;border:none;background:'+(on?'#2563eb':'#fff')+';color:'+(on?'#fff':'#64748b')+';padding:7px 15px;font-size:13px;font-weight:700;cursor:pointer">'+x[1]+' '+x[2]+'</button>';}).join('')+'</div>';
 }
 function showPage(id, fromHistory){
   if(id==='dashboard')id='exec-summary';
@@ -4287,7 +4327,7 @@ function _esTrend(year){
       {label:jp?'売上実績(百万円)':'매출 실적(백만엔)',data:payVals,backgroundColor:'rgba(22,50,79,0.85)',borderRadius:5,yAxisID:'y'},
       {label:jp?'目標(百万円)':'목표(백만엔)',data:tgtVals,type:'line',borderColor:'#f59e0b',backgroundColor:'transparent',borderWidth:2,borderDash:[6,3],pointRadius:3,yAxisID:'y'},
       {label:jp?'達成率(%)':'달성률(%)',data:rateVals,type:'line',borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#8b5cf6',fill:false,yAxisID:'y2'},
-      {label:jp?'着地予測(百万円)':'착지예측(백만엔)',data:fcVals,type:'line',borderColor:'#0f766e',backgroundColor:'transparent',borderWidth:2,borderDash:[2,3],pointRadius:3,pointStyle:'rectRot',fill:false,yAxisID:'y',spanGaps:false}
+      {label:jp?'着地予測(百万円)':'착지예측(백만엔)',data:fcVals,type:'line',borderColor:'#2563eb',backgroundColor:'transparent',borderWidth:2,borderDash:[2,3],pointRadius:3,pointStyle:'rectRot',fill:false,yAxisID:'y',spanGaps:false}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+(ctx.parsed.y!==null?ctx.parsed.y+(ctx.datasetIndex===2?'%':'M¥'):'-');}}}},
       scales:{y:{position:'left',ticks:{callback:function(v){return v+'M¥';}},grid:{color:'#f1f5f9'}},y2:{position:'right',min:0,ticks:{callback:function(v){return v+'%';}},grid:{drawOnChartArea:false}}}
@@ -8414,7 +8454,7 @@ window.CRM=(function(){
   var ATYPES=[
     {k:'call',ko:'콜',jp:'コール',col:'#3b82f6',ic:'📞'},
     {k:'meet',ko:'미팅',jp:'ミーティング',col:'#8b5cf6',ic:'🤝'},
-    {k:'visit',ko:'방문',jp:'訪問',col:'#0f766e',ic:'🏥'},
+    {k:'visit',ko:'방문',jp:'訪問',col:'#2563eb',ic:'🏥'},
     {k:'demo',ko:'데모',jp:'デモ',col:'#f59e0b',ic:'🔬'},
     {k:'as',ko:'AS',jp:'AS',col:'#ef4444',ic:'🛠'},
     {k:'etc',ko:'기타',jp:'その他',col:'#94a3b8',ic:'📝'}
@@ -8482,7 +8522,7 @@ window.CRM=(function(){
     var prob=(dl.prob!=null?dl.prob:s.prob);
     var days=0; try{days=Math.floor((new Date(_today())-new Date(dl.updatedAt||dl.createdAt||_today()))/864e5);}catch(e){}
     var stale=(dl.stage!=='won'&&days>=14)?'<span style="font-size:10px;color:#b45309;background:#fef3c7;border-radius:4px;padding:1px 5px;margin-left:4px">'+days+(jp?'日':'일')+'</span>':'';
-    var nextTxt=dl.next?'<div style="font-size:11px;color:#0f766e;background:#f0fdfa;border-radius:5px;padding:3px 6px;margin-top:5px">▸ '+_tr(dl.next)+(dl.nextDate?' <span style="color:#94a3b8">('+dl.nextDate+')</span>':'')+'</div>':'';
+    var nextTxt=dl.next?'<div style="font-size:11px;color:#2563eb;background:#eff6ff;border-radius:5px;padding:3px 6px;margin-top:5px">▸ '+_tr(dl.next)+(dl.nextDate?' <span style="color:#94a3b8">('+dl.nextDate+')</span>':'')+'</div>':'';
     return '<div class="crm-card" onclick="CRM._open(\''+dl.id+'\')" style="border-left:3px solid '+s.col+'">'+
       '<div style="display:flex;justify-content:space-between;gap:6px"><b style="font-size:13px;color:#0f172a">'+_tr(dl.client||'-')+'</b>'+stale+'</div>'+
       '<div style="font-size:11.5px;color:#64748b;margin:2px 0">'+_esc(dl.product||'-')+(dl.cat?' · '+_esc(dl.cat):'')+'</div>'+
@@ -8558,7 +8598,7 @@ window.CRM=(function(){
       else if(m===curM){sBase+=a+mw+cr;sCon+=a+mw*0.75+cr*0.9;sAgg+=a+mr+cr*1.1;actTot+=a;}
       else{sBase+=mw+cr;sCon+=mw*0.75+cr*0.9;sAgg+=mr+cr*1.1;}
       var proj=(m<curM)?a:(m===curM?(a+mw+cr):(mw+cr)),isCur=m===curM,isPast=m<curM;
-      rows+='<tr'+(isCur?' style=\"background:#f0fdfa\"':'')+'><td style=\"padding:7px 10px;font-weight:'+(isCur?'800':'600')+'\">'+m+(jp?'月':'월')+(isCur?' ◀':'')+'</td>'+
+      rows+='<tr'+(isCur?' style=\"background:#eff6ff\"':'')+'><td style=\"padding:7px 10px;font-weight:'+(isCur?'800':'600')+'\">'+m+(jp?'月':'월')+(isCur?' ◀':'')+'</td>'+
         '<td class=\"num\" style=\"padding:7px 10px\">'+(isPast||isCur?_yen(a):'<span style=\"color:#cbd5e1\">-</span>')+'</td>'+
         '<td class=\"num\" style=\"padding:7px 10px;color:#3b82f6\">'+(!isPast&&mw>0?_yen(mw):'<span style=\"color:#cbd5e1\">-</span>')+'</td>'+
         '<td class=\"num\" style=\"padding:7px 10px;color:#16a34a\">'+(!isPast&&cr>0?_yen(cr):'<span style=\"color:#cbd5e1\">-</span>')+'</td>'+
@@ -8568,11 +8608,11 @@ window.CRM=(function(){
     var annTgt=tgt.reduce(function(s,v){return s+v;},0),achv=annTgt>0?(sBase/annTgt*100):0;
     var hero='<div style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px\">'+
       _kc(jp?'当期実績(累計)':'당기 실적(누계)',_yen(actTot),year,'#3b82f6')+
-      _kc(jp?'着地予測(基本)':'착지 전망 (기본)',_yen(sBase),jp?'実績+機器+消耗品':'실적+기기+소모품','#0f766e')+
+      _kc(jp?'着地予測(基本)':'착지 전망 (기본)',_yen(sBase),jp?'実績+機器+消耗品':'실적+기기+소모품','#2563eb')+
       _kc(jp?'目標達成 見込':'목표 달성 전망',(annTgt>0?achv.toFixed(0)+'%':'-'),(jp?'目標 ':'목표 ')+_yen(annTgt),achv>=100?'#16a34a':achv>=80?'#f59e0b':'#ef4444')+'</div>';
     var scen='<div style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px\">'+
       _kc(jp?'保守':'보수',_yen(sCon),jp?'確率下方':'확률 하향','#94a3b8')+
-      _kc(jp?'基本':'기본',_yen(sBase),jp?'確率加重':'확률 가중','#0f766e')+
+      _kc(jp?'基本':'기본',_yen(sBase),jp?'確率加重':'확률 가중','#2563eb')+
       _kc(jp?'攻勢':'공격',_yen(sAgg),jp?'パイプ全額':'파이프 전액','#f59e0b')+'</div>';
     host.innerHTML=hero+scen+
       '<div style=\"font-size:12px;color:#64748b;margin-bottom:8px\">'+(jp?'※ 機器=パイプライン確率加重 / 消耗品=直近3ヶ月run-rate投影 / 過去=実績':'※ 기기=파이프라인 확률가중 / 소모품=최근 3개월 run-rate 투영 / 과거=실적')+'</div>'+
@@ -8597,8 +8637,8 @@ window.CRM=(function(){
       '</div>';
     function stBadge(mt){var o=null;for(var i=0;i<STATUS.length;i++)if(STATUS[i].k===mt.status)o=STATUS[i];return o?'<span style="font-size:10px;font-weight:700;color:#fff;background:'+o.col+';border-radius:5px;padding:1px 7px">'+L(o.ko,o.jp)+'</span>':'';}
     var seg='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
-      '<button onclick="CRM._clSetView(\'table\')" style="font-family:inherit;border:none;background:'+(_clView==='table'?'#0f766e':'#fff')+';color:'+(_clView==='table'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'表':'표')+'</button>'+
-      '<button onclick="CRM._clSetView(\'card\')" style="font-family:inherit;border:none;background:'+(_clView==='card'?'#0f766e':'#fff')+';color:'+(_clView==='card'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">▦ '+(jp?'カード':'카드')+'</button></span>';
+      '<button onclick="CRM._clSetView(\'table\')" style="font-family:inherit;border:none;background:'+(_clView==='table'?'#2563eb':'#fff')+';color:'+(_clView==='table'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'表':'표')+'</button>'+
+      '<button onclick="CRM._clSetView(\'card\')" style="font-family:inherit;border:none;background:'+(_clView==='card'?'#2563eb':'#fff')+';color:'+(_clView==='card'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">▦ '+(jp?'カード':'카드')+'</button></span>';
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
       '<button class="crm-btn" onclick="CRM._openCl()">+ '+(jp?'取引先追加':'거래처 추가')+'</button>'+
       '<input class="filter-input" style="width:150px" placeholder="'+(jp?'検索':'검색')+'" value="'+_esc(_clFltV.q)+'" oninput="CRM._clFlt(\'q\',this.value)">'+
@@ -8613,7 +8653,7 @@ window.CRM=(function(){
           '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;text-align:center">'+
             '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'当期売上':'당기매출')+'</div><div style="font-size:12px;font-weight:800;color:#1d4ed8">'+_yen(r.st.sale)+'</div></div>'+
             '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'未収':'미수')+'</div><div style="font-size:12px;font-weight:800;color:'+(r.st.out>0?'#dc2626':'#94a3b8')+'">'+_yen(r.st.out)+'</div></div>'+
-            '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'ディール':'진행딜')+'</div><div style="font-size:12px;font-weight:800;color:#0f766e">'+r.st.deals.length+'</div></div></div></div>';
+            '<div><div style="font-size:9px;color:#94a3b8">'+(jp?'ディール':'진행딜')+'</div><div style="font-size:12px;font-weight:800;color:#2563eb">'+r.st.deals.length+'</div></div></div></div>';
       }).join(''):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'データなし':'데이터 없음')+'</div>')+'</div>';
     }else{
       body='<div style="overflow-x:auto"><table class="estab" style="width:100%"><thead><tr>'+
@@ -8628,7 +8668,7 @@ window.CRM=(function(){
             '<td style="padding:8px 10px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+gc+';margin-right:8px;vertical-align:middle"></span><b style="font-weight:600">'+_tr(r.nm)+'</b>'+(r.mt.owner?' <span style="color:#94a3b8;font-size:11px">· '+_esc(r.mt.owner)+'</span>':'')+'</td>'+
             '<td class="num" style="padding:8px 10px;font-weight:700">'+_yen(r.st.sale)+'</td>'+
             '<td class="num" style="padding:8px 10px;color:'+(r.st.out>0?'#dc2626':'#cbd5e1')+';font-weight:'+(r.st.out>0?'700':'400')+'">'+(r.st.out>0?_yen(r.st.out):'-')+'</td>'+
-            '<td class="num" style="padding:8px 10px;color:'+(r.st.deals.length?'#0f766e':'#cbd5e1')+';font-weight:'+(r.st.deals.length?'700':'400')+'">'+(r.st.deals.length||'-')+'</td>'+
+            '<td class="num" style="padding:8px 10px;color:'+(r.st.deals.length?'#2563eb':'#cbd5e1')+';font-weight:'+(r.st.deals.length?'700':'400')+'">'+(r.st.deals.length||'-')+'</td>'+
             '<td style="padding:8px 10px">'+stBadge(r.mt)+'</td></tr>';
         }).join(''):'<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">'+(jp?'データなし':'데이터 없음')+'</td></tr>')+
         '</tbody></table></div>';
@@ -8651,7 +8691,7 @@ window.CRM=(function(){
     var mks=Object.keys(mo).sort().reverse().slice(0,6),prk=Object.keys(pr).sort(function(a,b){return pr[b].amt-pr[a].amt;}).slice(0,6);
     var moH='<div style="font-size:12px;font-weight:800;color:#334155;margin:2px 0 6px">📅 '+(jp?'月別 受注·入金':'월별 수주·수금')+'</div><div style="overflow-x:auto"><table class="estab" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left;padding:4px 8px">'+(jp?'年月':'연월')+'</th><th class="num" style="padding:4px 8px">'+(jp?'受注':'수주')+'</th><th class="num" style="padding:4px 8px">'+(jp?'入金':'수금')+'</th></tr></thead><tbody>'+mks.map(function(m){return '<tr><td style="padding:4px 8px">'+m+'</td><td class="num" style="padding:4px 8px">'+_yen(mo[m].ord)+'</td><td class="num" style="padding:4px 8px;color:#059669">'+_yen(mo[m].pay)+'</td></tr>';}).join('')+'</tbody></table></div>';
     var prH='<div style="font-size:12px;font-weight:800;color:#334155;margin:12px 0 6px">📦 '+(jp?'製品別':'제품별')+'</div><div style="overflow-x:auto"><table class="estab" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left;padding:4px 8px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:4px 8px">'+(jp?'数量':'수량')+'</th><th class="num" style="padding:4px 8px">'+(jp?'金額':'금액')+'</th></tr></thead><tbody>'+prk.map(function(k){return '<tr><td style="padding:4px 8px">'+_esc(k)+'</td><td class="num" style="padding:4px 8px">'+(pr[k].qty||'-')+'</td><td class="num" style="padding:4px 8px;font-weight:700">'+_yen(pr[k].amt)+'</td></tr>';}).join('')+'</tbody></table></div>';
-    return '<div style="margin-top:2px;margin-bottom:14px;border-top:1px solid #eef2f7;padding-top:12px"><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:8px">📊 '+(jp?'売上分析':'매출 분석')+'</div>'+moH+prH+'<button class="crm-btn" style="font-size:12px;padding:6px 12px;margin-top:10px;background:#0f766e" onclick="CRM._fullCa(\''+_esc(name).replace(/\x27/g,'')+'\')">📊 '+(jp?'全体 詳細分析':'전체 상세 분석')+' →</button></div>';
+    return '<div style="margin-top:2px;margin-bottom:14px;border-top:1px solid #eef2f7;padding-top:12px"><div style="font-size:12px;font-weight:800;color:#334155;margin-bottom:8px">📊 '+(jp?'売上分析':'매출 분석')+'</div>'+moH+prH+'<button class="crm-btn" style="font-size:12px;padding:6px 12px;margin-top:10px;background:#2563eb" onclick="CRM._fullCa(\''+_esc(name).replace(/\x27/g,'')+'\')">📊 '+(jp?'全体 詳細分析':'전체 상세 분석')+' →</button></div>';
   }
   function _fullCa(name){_closeDw();if(typeof showPage==='function')showPage('customer-analysis');if(typeof selectCa==='function')setTimeout(function(){try{selectCa(name);}catch(e){}},80);}
   function _openClient(name){
@@ -8660,7 +8700,7 @@ window.CRM=(function(){
     var info='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">'+
       _kc(jp?'当期売上':'당기 매출',_yen(st.sale),st.cnt+(jp?'件':'건'),'#3b82f6')+
       _kc(jp?'未収':'미수',_yen(st.out),'',st.out>0?'#dc2626':'#94a3b8')+
-      _kc(jp?'加重予想(ディール)':'가중예상(딜)',_yen(st.wsum),st.deals.length+(jp?'件':'건'),'#0f766e')+'</div>';
+      _kc(jp?'加重予想(ディール)':'가중예상(딜)',_yen(st.wsum),st.deals.length+(jp?'件':'건'),'#2563eb')+'</div>';
     var meta='';
     if(mt.phone||mt.email||mt.region||mt.owner||mt.grade||mt.status){
       meta='<div style="background:#f8fafc;border:1px solid #eef2f7;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#334155">'+
@@ -8768,8 +8808,8 @@ window.CRM=(function(){
       var cards=its.map(function(a){var t=aty(a.type);
         return '<div onclick="event.stopPropagation();CRM._openAc(\''+a.id+'\')" title="'+_esc(a.content||'')+'" style="border-left:3px solid '+t.col+';background:'+t.col+'14;border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10.5px;line-height:1.4;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.ic+' <b style="color:#0f172a">'+_tr(a.client||'-')+'</b>'+(a.owner?' <span style="color:#94a3b8">·'+_esc(a.owner)+'</span>':'')+'</div>';
       }).join('');
-      cols+='<div onclick="CRM._openAc(null,\'\',\''+ds+'\')" title="'+(jp?'この日に活動を追加':'이 날짜에 활동 추가')+'" style="border:1px solid '+(isT?'#99f6e4':'#eef2f7')+';border-radius:9px;min-height:132px;background:'+(isT?'#f0fdfa':'#fff')+';cursor:pointer;overflow:hidden">'+
-        '<div style="padding:5px 8px;font-size:11px;font-weight:800;border-bottom:1px solid #f1f3f7;color:'+(isT?'#0f766e':idx===5?'#2563eb':idx===6?'#dc2626':'#475569')+'">'+WD[idx]+' <span style="font-weight:600;color:#94a3b8">'+parseInt(ds.slice(8),10)+(jp?'':'일')+'</span>'+(isT?' <span style="font-size:9px;color:#0f766e">●'+(jp?'今日':'오늘')+'</span>':'')+'</div>'+
+      cols+='<div onclick="CRM._openAc(null,\'\',\''+ds+'\')" title="'+(jp?'この日に活動を追加':'이 날짜에 활동 추가')+'" style="border:1px solid '+(isT?'#bfdbfe':'#eef2f7')+';border-radius:9px;min-height:132px;background:'+(isT?'#eff6ff':'#fff')+';cursor:pointer;overflow:hidden">'+
+        '<div style="padding:5px 8px;font-size:11px;font-weight:800;border-bottom:1px solid #f1f3f7;color:'+(isT?'#2563eb':idx===5?'#2563eb':idx===6?'#dc2626':'#475569')+'">'+WD[idx]+' <span style="font-weight:600;color:#94a3b8">'+parseInt(ds.slice(8),10)+(jp?'':'일')+'</span>'+(isT?' <span style="font-size:9px;color:#2563eb">●'+(jp?'今日':'오늘')+'</span>':'')+'</div>'+
         '<div style="padding:5px">'+(cards||'<div style="font-size:11px;color:#e2e8f0;text-align:center;padding:12px 0">＋</div>')+'</div></div>';
     }
     var lab=wk.start.slice(5).replace('-','/')+' ~ '+wk.end.slice(5).replace('-','/');
@@ -8777,7 +8817,7 @@ window.CRM=(function(){
       '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._acWeekNav(-1)">‹</button>'+
       '<b style="font-size:13px;min-width:118px;text-align:center">'+lab+'</b>'+
       '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._acWeekNav(1)">›</button>'+
-      '<button class="crm-btn" style="background:#fff;color:#0f766e;border:1px solid #99f6e4;padding:4px 13px;font-size:12px" onclick="CRM._acWeekNav(0)">'+(jp?'今週':'이번주')+'</button></div>';
+      '<button class="crm-btn" style="background:#fff;color:#2563eb;border:1px solid #bfdbfe;padding:4px 13px;font-size:12px" onclick="CRM._acWeekNav(0)">'+(jp?'今週':'이번주')+'</button></div>';
     return navbar+'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div style="display:grid;grid-template-columns:repeat(7,minmax(104px,1fr));gap:6px;min-width:760px">'+cols+'</div></div>';
   }
   function _acSetView(v){_acView=v;renderActs();}
@@ -8804,8 +8844,8 @@ window.CRM=(function(){
     var topt='<option value="">'+(jp?'全種類':'전체 유형')+'</option>'+ATYPES.map(function(t){return '<option value="'+t.k+'"'+(_acFltV.type===t.k?' selected':'')+'>'+t.ic+' '+L(t.ko,t.jp)+'</option>';}).join('');
     var oopt='<option value="">'+(jp?'全担当':'전체 담당')+'</option>'+Object.keys(owners).map(function(o){return '<option value="'+_esc(o)+'"'+(_acFltV.owner===o?' selected':'')+'>'+_esc(o)+'</option>';}).join('');
     var vtoggle='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
-      '<button onclick="CRM._acSetView(\'week\')" style="font-family:inherit;border:none;background:'+(_acView==='week'?'#0f766e':'#fff')+';color:'+(_acView==='week'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">📅 '+(jp?'週間':'주간')+'</button>'+
-      '<button onclick="CRM._acSetView(\'timeline\')" style="font-family:inherit;border:none;background:'+(_acView==='timeline'?'#0f766e':'#fff')+';color:'+(_acView==='timeline'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'リスト':'타임라인')+'</button></span>';
+      '<button onclick="CRM._acSetView(\'week\')" style="font-family:inherit;border:none;background:'+(_acView==='week'?'#2563eb':'#fff')+';color:'+(_acView==='week'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">📅 '+(jp?'週間':'주간')+'</button>'+
+      '<button onclick="CRM._acSetView(\'timeline\')" style="font-family:inherit;border:none;background:'+(_acView==='timeline'?'#2563eb':'#fff')+';color:'+(_acView==='timeline'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'リスト':'타임라인')+'</button></span>';
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+
       '<button class="crm-btn" onclick="CRM._openAc()">+ '+(jp?'活動追加':'활동 추가')+'</button>'+
       '<select class="filter-input" style="width:130px" onchange="CRM._acFlt(\'type\',this.value)">'+topt+'</select>'+
@@ -8817,7 +8857,7 @@ window.CRM=(function(){
       else{
         body='<div class="crm-tl">'+tacts.map(function(a,i){
           var t=aty(a.type),last=i===tacts.length-1;
-          var nx=a.next?'<div style="margin-top:5px;font-size:11.5px;color:'+(a.nextDate&&a.nextDate<today&&!a.done?'#dc2626':'#0f766e')+';background:'+(a.nextDate&&a.nextDate<today&&!a.done?'#fef2f2':'#f0fdfa')+';border-radius:6px;padding:4px 8px">▸ '+_tr(a.next)+(a.nextDate?' ('+a.nextDate+')':'')+'</div>':'';
+          var nx=a.next?'<div style="margin-top:5px;font-size:11.5px;color:'+(a.nextDate&&a.nextDate<today&&!a.done?'#dc2626':'#2563eb')+';background:'+(a.nextDate&&a.nextDate<today&&!a.done?'#fef2f2':'#eff6ff')+';border-radius:6px;padding:4px 8px">▸ '+_tr(a.next)+(a.nextDate?' ('+a.nextDate+')':'')+'</div>':'';
           return '<div class="crm-tlrow"><div class="crm-tlrail">'+
             '<span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:'+t.col+'22;color:'+t.col+';font-size:14px;z-index:1;position:relative">'+t.ic+'</span>'+
             (last?'':'<span class="crm-tlline"></span>')+'</div>'+
@@ -8877,12 +8917,12 @@ window.CRM=(function(){
       return '<div style="background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:14px 16px">'+
         '<div style="display:flex;align-items:center;gap:12px">'+
           '<div style="width:34px;text-align:center;font-size:'+(i<3?'20px':'14px')+';font-weight:800;color:#64748b">'+(i<3?medal[i]:(i+1))+'</div>'+
-          _av(b.o,'#0f766e')+
+          _av(b.o,'#2563eb')+
           '<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px;color:#0f172a">'+_esc(b.o)+'</div>'+
             '<div style="font-size:11px;color:#94a3b8">'+(jp?'進行':'진행')+' '+b.open+' · '+(jp?'成約':'성사')+' '+b.won+' · '+(jp?'成約率':'전환율')+' '+b.conv.toFixed(0)+'%</div></div>'+
-          '<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:#0f766e">'+_yen(b.score)+'</div><div style="font-size:10px;color:#94a3b8">'+(jp?'総合(成約+加重)':'종합(성사+가중)')+'</div></div>'+
+          '<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:#2563eb">'+_yen(b.score)+'</div><div style="font-size:10px;color:#94a3b8">'+(jp?'総合(成約+加重)':'종합(성사+가중)')+'</div></div>'+
         '</div>'+
-        '<div style="height:7px;background:#f1f5f9;border-radius:4px;margin-top:10px;overflow:hidden"><div style="height:100%;width:'+Math.round(b.score/maxScore*100)+'%;background:linear-gradient(90deg,#0f766e,#14b8a6);border-radius:4px"></div></div>'+
+        '<div style="height:7px;background:#f1f5f9;border-radius:4px;margin-top:10px;overflow:hidden"><div style="height:100%;width:'+Math.round(b.score/maxScore*100)+'%;background:linear-gradient(90deg,#2563eb,#14b8a6);border-radius:4px"></div></div>'+
         '<div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-top:5px"><span>'+(jp?'進行額 ':'진행액 ')+_yen(b.openAmt)+'</span><span>'+(jp?'加重 ':'가중 ')+_yen(b.w)+'</span><span>'+(jp?'成約額 ':'성사액 ')+_yen(b.wonAmt)+'</span></div>'+
         '</div>';
     }).join('')+'</div>';
@@ -8908,12 +8948,12 @@ window.CRM=(function(){
       var dt=new Date(mon); dt.setDate(mon.getDate()+idx); var ds=f(dt),isT=(ds===today);
       var its=(byd[ds]||[]).sort(function(a,b){return (a.owner||'')<(b.owner||'')?-1:1;});
       var cards=its.map(function(it){
-        var od=(it.date<today),col=od?'#dc2626':(it.kind==='deal'?'#0f766e':'#3b82f6'),ic=it.kind==='deal'?'🧩':'📇';
+        var od=(it.date<today),col=od?'#dc2626':(it.kind==='deal'?'#2563eb':'#3b82f6'),ic=it.kind==='deal'?'🧩':'📇';
         var fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";
         return '<div onclick="event.stopPropagation();'+fn+'" title="'+_esc(it.text||'')+'" style="border-left:3px solid '+col+';background:'+col+'14;border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10.5px;line-height:1.4;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ic+' <b style="color:#0f172a">'+_tr(it.text||'-')+'</b> <span style="color:#94a3b8">·'+_tr(it.client||'')+(it.owner?' '+_esc(it.owner):'')+'</span></div>';
       }).join('');
-      cols+='<div style="border:1px solid '+(isT?'#99f6e4':'#eef2f7')+';border-radius:9px;min-height:132px;background:'+(isT?'#f0fdfa':'#fff')+';overflow:hidden">'+
-        '<div style="padding:5px 8px;font-size:11px;font-weight:800;border-bottom:1px solid #f1f3f7;color:'+(isT?'#0f766e':idx===5?'#2563eb':idx===6?'#dc2626':'#475569')+'">'+WD[idx]+' <span style="font-weight:600;color:#94a3b8">'+parseInt(ds.slice(8),10)+(jp?'':'일')+'</span>'+(isT?' <span style="font-size:9px;color:#0f766e">●'+(jp?'今日':'오늘')+'</span>':'')+'</div>'+
+      cols+='<div style="border:1px solid '+(isT?'#bfdbfe':'#eef2f7')+';border-radius:9px;min-height:132px;background:'+(isT?'#eff6ff':'#fff')+';overflow:hidden">'+
+        '<div style="padding:5px 8px;font-size:11px;font-weight:800;border-bottom:1px solid #f1f3f7;color:'+(isT?'#2563eb':idx===5?'#2563eb':idx===6?'#dc2626':'#475569')+'">'+WD[idx]+' <span style="font-weight:600;color:#94a3b8">'+parseInt(ds.slice(8),10)+(jp?'':'일')+'</span>'+(isT?' <span style="font-size:9px;color:#2563eb">●'+(jp?'今日':'오늘')+'</span>':'')+'</div>'+
         '<div style="padding:5px">'+(cards||'<div style="font-size:11px;color:#e2e8f0;text-align:center;padding:12px 0">·</div>')+'</div></div>';
     }
     var lab=wk.start.slice(5).replace('-','/')+' ~ '+wk.end.slice(5).replace('-','/');
@@ -8921,8 +8961,8 @@ window.CRM=(function(){
       '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._schWeekNav(-1)">‹</button>'+
       '<b style="font-size:13px;min-width:118px;text-align:center">'+lab+'</b>'+
       '<button class="crm-btn" style="background:#fff;color:#475569;border:1px solid #e2e8f0;padding:4px 11px" onclick="CRM._schWeekNav(1)">›</button>'+
-      '<button class="crm-btn" style="background:#fff;color:#0f766e;border:1px solid #99f6e4;padding:4px 13px;font-size:12px" onclick="CRM._schWeekNav(0)">'+(jp?'今週':'이번주')+'</button>'+
-      '<span style="margin-left:12px;font-size:10.5px;color:#64748b"><span style="color:#0f766e">🧩'+(jp?'ディール':'딜')+'</span> · <span style="color:#3b82f6">📇'+(jp?'活動':'활동')+'</span> · <span style="color:#dc2626">'+(jp?'遅延':'지남')+'</span></span></div>';
+      '<button class="crm-btn" style="background:#fff;color:#2563eb;border:1px solid #bfdbfe;padding:4px 13px;font-size:12px" onclick="CRM._schWeekNav(0)">'+(jp?'今週':'이번주')+'</button>'+
+      '<span style="margin-left:12px;font-size:10.5px;color:#64748b"><span style="color:#2563eb">🧩'+(jp?'ディール':'딜')+'</span> · <span style="color:#3b82f6">📇'+(jp?'活動':'활동')+'</span> · <span style="color:#dc2626">'+(jp?'遅延':'지남')+'</span></span></div>';
     return navbar+'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div style="display:grid;grid-template-columns:repeat(7,minmax(104px,1fr));gap:6px;min-width:760px">'+cols+'</div></div>';
   }
   function _schSetView(v){_schView=v;renderSched();}
@@ -8938,13 +8978,13 @@ window.CRM=(function(){
       '<div class="wt-fact"><div class="l">'+(jp?'以降':'이후')+'</div><b>'+later.length+(jp?'件':'건')+'</b></div>'+
       '</div>';
     var vtoggle='<span style="margin-left:auto;display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">'+
-      '<button onclick="CRM._schSetView(\'week\')" style="font-family:inherit;border:none;background:'+(_schView==='week'?'#0f766e':'#fff')+';color:'+(_schView==='week'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">📅 '+(jp?'週間':'주간')+'</button>'+
-      '<button onclick="CRM._schSetView(\'list\')" style="font-family:inherit;border:none;background:'+(_schView==='list'?'#0f766e':'#fff')+';color:'+(_schView==='list'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'リスト':'리스트')+'</button></span>';
+      '<button onclick="CRM._schSetView(\'week\')" style="font-family:inherit;border:none;background:'+(_schView==='week'?'#2563eb':'#fff')+';color:'+(_schView==='week'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">📅 '+(jp?'週間':'주간')+'</button>'+
+      '<button onclick="CRM._schSetView(\'list\')" style="font-family:inherit;border:none;background:'+(_schView==='list'?'#2563eb':'#fff')+';color:'+(_schView==='list'?'#fff':'#64748b')+';padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer">☰ '+(jp?'リスト':'리스트')+'</button></span>';
     var bar='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">'+vtoggle+'</div>';
     var body;
     if(_schView==='list'){
       function sec(title,arr,col){if(!arr.length)return '';return '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:800;color:'+col+';margin-bottom:6px">'+title+' ('+arr.length+')</div>'+arr.map(function(it){var kk=it.kind==='deal'?'🧩':'📇',fn=it.kind==='deal'?"CRM._open('"+it.id+"')":"CRM._openAc('"+it.id+"')";return '<div onclick="'+fn+'" style="cursor:pointer;display:flex;gap:10px;padding:8px 10px;border:1px solid #eef2f7;border-radius:8px;margin-bottom:5px"><span style="color:#94a3b8;width:76px;flex-shrink:0;font-size:12px">'+it.date+'</span><span>'+kk+'</span><span style="flex:1;font-size:13px">'+_tr(it.text)+' <span style="color:#94a3b8">· '+_tr(it.client||'')+(it.owner?' · '+_esc(it.owner):'')+'</span></span></div>';}).join('')+'</div>';}
-      body=(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#0f766e')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
+      body=(items.length?(sec(jp?'⚠ 遅延':'⚠ 지남',over,'#dc2626')+sec(jp?'今日':'오늘',td,'#2563eb')+sec(jp?'今週(7日)':'이번주(7일)',wk,'#3b82f6')+sec(jp?'以降':'이후',later,'#94a3b8')):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>');
     } else {
       body=items.length?_schWeekGrid(items):'<div style="color:#94a3b8;padding:20px;text-align:center">'+(jp?'予定なし':'예정 없음')+'</div>';
     }
@@ -9026,7 +9066,7 @@ window.WTAS=(function(){
   }
   function _sortbar(jp){
     var opts=[['n',jp?'台数順':'대수순'],['amt',jp?'売上順':'매출순'],['name',jp?'名前順':'이름순']];
-    return '<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;color:#94a3b8">'+(jp?'並び替え':'정렬')+'</span>'+opts.map(function(o){return '<button onclick="WTAS._so(\''+o[0]+'\')" style="font-family:inherit;border:1px solid '+(_sort===o[0]?'#0f766e':'#e2e8f0')+';background:'+(_sort===o[0]?'#ecfdf5':'#fff')+';color:'+(_sort===o[0]?'#0f766e':'#64748b')+';border-radius:7px;padding:4px 12px;font-size:11.5px;font-weight:700;cursor:pointer">'+o[1]+'</button>';}).join('')+'</div>';
+    return '<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;color:#94a3b8">'+(jp?'並び替え':'정렬')+'</span>'+opts.map(function(o){return '<button onclick="WTAS._so(\''+o[0]+'\')" style="font-family:inherit;border:1px solid '+(_sort===o[0]?'#2563eb':'#e2e8f0')+';background:'+(_sort===o[0]?'#ecfdf5':'#fff')+';color:'+(_sort===o[0]?'#2563eb':'#64748b')+';border-radius:7px;padding:4px 12px;font-size:11.5px;font-weight:700;cursor:pointer">'+o[1]+'</button>';}).join('')+'</div>';
   }
   function listHtml(dev,as,jp){
     var q=_q.trim().toLowerCase();
@@ -9036,14 +9076,14 @@ window.WTAS=(function(){
       if(q) arr=arr.filter(function(x){return String(x.c).toLowerCase().indexOf(q)>=0 || x.d.items.some(function(i){return String(i.product).toLowerCase().indexOf(q)>=0;});});
       _sortClinic(arr);
       var totN=arr.reduce(function(s,x){return s+x.d.n;},0),totA=arr.reduce(function(s,x){return s+x.d.amt;},0);
-      var rows=arr.length?arr.map(function(x){return '<tr style="cursor:pointer" onclick="if(window.CRM)CRM._openClient(\''+_esc(x.c).replace(/\x27/g,"")+'\')" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:9px 10px;font-weight:700;color:#0f172a">'+_tr(x.c)+'</td><td class="num" style="padding:9px 10px;font-weight:800;color:#0f766e;white-space:nowrap">'+x.d.n+(jp?'台':'대')+'</td><td style="padding:9px 10px;color:#475569;font-size:12px">'+_prodSummary(x.d.items)+'</td><td class="num" style="padding:9px 10px;font-weight:700;white-space:nowrap">'+(x.d.amt?'<span style="color:#1d4ed8">'+_yen(x.d.amt)+'</span>':'<span style="color:#cbd5e1">-</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">'+(jp?'該当なし':'검색 결과 없음')+'</td></tr>';
+      var rows=arr.length?arr.map(function(x){return '<tr style="cursor:pointer" onclick="if(window.CRM)CRM._openClient(\''+_esc(x.c).replace(/\x27/g,"")+'\')" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:9px 10px;font-weight:700;color:#0f172a">'+_tr(x.c)+'</td><td class="num" style="padding:9px 10px;font-weight:800;color:#2563eb;white-space:nowrap">'+x.d.n+(jp?'台':'대')+'</td><td style="padding:9px 10px;color:#475569;font-size:12px">'+_prodSummary(x.d.items)+'</td><td class="num" style="padding:9px 10px;font-weight:700;white-space:nowrap">'+(x.d.amt?'<span style="color:#1d4ed8">'+_yen(x.d.amt)+'</span>':'<span style="color:#cbd5e1">-</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">'+(jp?'該当なし':'검색 결과 없음')+'</td></tr>';
       return _sortbar(jp)+'<div style="overflow-x:auto;border:1px solid #eef2f7;border-radius:12px"><table class="estab" style="width:100%;margin:0"><thead><tr><th style="text-align:left;padding:9px 10px">'+(jp?'病院':'병원')+'</th><th class="num" style="padding:9px 10px">'+(jp?'保有':'보유')+'</th><th style="text-align:left;padding:9px 10px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:9px 10px">'+(jp?'売上':'매출')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div><div style="font-size:11.5px;color:#94a3b8;margin-top:8px;text-align:right">'+arr.length+(jp?' 病院':'개 병원')+' · '+totN+(jp?'台':'대')+' · '+_yen(totA)+'</div>';
     }else if(_view==='product'){
       var byp={};dev.forEach(function(d){byp[d.product]=byp[d.product]||{n:0,amt:0,cl:{}};byp[d.product].n++;byp[d.product].amt+=d.amount;byp[d.product].cl[d.client]=1;});
       var pa=Object.keys(byp).map(function(k){return {p:k,d:byp[k]};});
       if(q) pa=pa.filter(function(x){return String(x.p).toLowerCase().indexOf(q)>=0;});
       pa.sort(function(a,b){return b.d.n-a.d.n;});
-      var rows=pa.length?pa.map(function(x){return '<tr onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:8px 10px;font-weight:600">'+_esc(x.p)+'</td><td class="num" style="padding:8px 10px;font-weight:800;color:#0f766e">'+x.d.n+'</td><td class="num" style="padding:8px 10px">'+Object.keys(x.d.cl).length+'</td><td class="num" style="padding:8px 10px;font-weight:700">'+(x.d.amt?_yen(x.d.amt):'<span style="color:#cbd5e1">-</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">'+(jp?'該当なし':'검색 결과 없음')+'</td></tr>';
+      var rows=pa.length?pa.map(function(x){return '<tr onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'"><td style="padding:8px 10px;font-weight:600">'+_esc(x.p)+'</td><td class="num" style="padding:8px 10px;font-weight:800;color:#2563eb">'+x.d.n+'</td><td class="num" style="padding:8px 10px">'+Object.keys(x.d.cl).length+'</td><td class="num" style="padding:8px 10px;font-weight:700">'+(x.d.amt?_yen(x.d.amt):'<span style="color:#cbd5e1">-</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:22px">'+(jp?'該当なし':'검색 결과 없음')+'</td></tr>';
       return '<div style="overflow-x:auto;border:1px solid #eef2f7;border-radius:12px"><table class="estab" style="width:100%;margin:0"><thead><tr><th style="text-align:left;padding:8px 10px">'+(jp?'製品':'제품')+'</th><th class="num" style="padding:8px 10px">'+(jp?'設置台数':'설치 대수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'病院数':'병원 수')+'</th><th class="num" style="padding:8px 10px">'+(jp?'売上':'매출')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
     }else{
       var al=as.slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1;});
@@ -9060,7 +9100,7 @@ window.WTAS=(function(){
       '<div class="wt-fact"><div class="l">AS·'+(jp?'修理':'수리')+'</div><b>'+as.length+(jp?'件':'건')+'</b></div>'+
       '<div class="wt-fact"><div class="l">AS '+(jp?'売上':'매출')+'</div><b class="gr">'+_yen(as.reduce(function(s,x){return s+x.amount;},0))+'</b></div>'+
       '</div>';
-    var tabs='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#0f766e':'#e2e8f0')+';background:'+(_view===t[0]?'#0f766e':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
+    var tabs='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+[['clinic',jp?'病院別':'병원별'],['product',jp?'製品別':'제품별'],['as','AS·'+(jp?'修理履歴':'수리 이력')]].map(function(t){return '<button onclick="WTAS._v(\''+t[0]+'\')" style="font-family:inherit;border:1px solid '+(_view===t[0]?'#2563eb':'#e2e8f0')+';background:'+(_view===t[0]?'#2563eb':'#fff')+';color:'+(_view===t[0]?'#fff':'#475569')+';border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer">'+t[1]+'</button>';}).join('')+'</div>';
     var search='<input id="wtasQ" oninput="WTAS._s(this.value)" value="'+_esc(_q)+'" placeholder="'+(jp?'病院・製品で検索':'병원·제품 검색')+'" style="width:100%;max-width:360px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:9px;font-size:13px;font-family:inherit;margin-bottom:12px;outline:none">';
     host.innerHTML=kpi+tabs+search+'<div id="wtasList">'+listHtml(dev,as,jp)+'</div>';
   }
