@@ -2632,7 +2632,10 @@ async function _getWtjMember(email, userId) {
 
     var r2 = await _sb.from('crm_profiles').select('*').eq('id', userId).maybeSingle();
 
-    if (r2.data && (r2.data.role === 'admin' || (r2.data.access && r2.data.access.includes('jp')))) {
+    // access 값은 'japan' — 기존 조건 includes('jp')는 'japan'에 'jp'가 없어 정상 권한자가 오히려 막혔음
+    var _ac = String((r2.data && r2.data.access) || '').split(',').map(function(s){ return s.trim(); });
+
+    if (r2.data && (r2.data.role === 'admin' || _ac.indexOf('japan') >= 0 || _ac.indexOf('jp') >= 0)) {
 
       return {
 
@@ -7445,15 +7448,25 @@ window.onload = async function() {
 
   if (res.data && res.data.session) {
 
-    // 세션이 있으면 무조건 입장 (wtj_members 없어도 OK)
+    // 접근 권한 검사 — 세션만 있으면 통과시키던 구멍을 막음(타 법인 직원이 URL 직접 입력 시 열람 가능했음)
 
     var sUser = res.data.session.user;
 
     var wtjM = await _getWtjMember(sUser.email, sUser.id);
 
-    var displayName = (wtjM && wtjM.display_name) || sUser.email.split('@')[0];
+    if (!wtjM || !wtjM.is_active) {
 
-    var role = (wtjM && wtjM.role) || 'general';
+      alert('일본법인 시스템 접근 권한이 없습니다. / 日本法人システムへのアクセス権限がありません。');
+
+      location.replace('https://wt-management.github.io/wontech/');   // signOut 금지(타 사이트 세션 유지) · ret 없이(무한루프 방지)
+
+      return;
+
+    }
+
+    var displayName = wtjM.display_name || sUser.email.split('@')[0];
+
+    var role = wtjM.role || 'general';
 
     _currentUser = {email: sUser.email, name: displayName, role: sUser.email === 'pmw0406@gmail.com' ? 'master' : role, id: sUser.id};
 
