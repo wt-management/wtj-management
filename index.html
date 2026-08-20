@@ -2996,6 +2996,22 @@ var DATA_URL = 'https://raw.githubusercontent.com/wt-management/wtj-management/m
 var GAS_API_KEY = 'wtj2026';
 
 var _data = null; // data.json 캐시
+// 연도 셀렉터 채우기 — 2025/2026 이 HTML 에 못박혀 있어 2027이 되면 그 해를 볼 방법이 없다.
+// 데이터가 말하는 올해(curYear, 없으면 달력)와 그 전년으로 다시 만든다. 고른 값은 지킨다.
+function _wtjFillYearSels(){
+  var Y=Number((_data&&_data.dashboard&&_data.dashboard.curYear)||(_data&&_data.curYear)||0)||new Date().getFullYear();
+  ['dash-year-sel','ct-year-sel','esYear','orderYearFilter','payYearFilter','fxLYear','fxDYear','caYear'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var keep=el.value;
+    var hasAll=Array.prototype.some.call(el.options,function(o){ return o.value===''; });
+    var allTxt=hasAll?(el.options[0].textContent||'전체'):'';
+    var h=hasAll?('<option value="">'+allTxt+'</option>'):'';
+    for(var y=Y;y>=Y-2;y--) h+='<option value="'+y+'">'+y+'년</option>';
+    el.innerHTML=h;
+    if(keep && Array.prototype.some.call(el.options,function(o){return o.value===keep;})) el.value=keep;
+    else el.value=hasAll?'':String(Y);
+  });
+}
 
 
 
@@ -3331,6 +3347,7 @@ function gasGetWithPush(action, data, cb) {
 
       if(_mp.length&&!(_data.manualPayments&&_data.manualPayments.length)) _data.manualPayments=_mp;
 
+      try{ _wtjFillYearSels(); }catch(e){}   // 연도 셀렉터를 데이터 연도로 다시 채운다
       allOrders = (_data.orders||[]).concat(_data.manualOrders||[]);
 
       allPayments = (_data.payments||[]).concat(_data.manualPayments||[]);
@@ -4136,7 +4153,11 @@ function showPage(id, fromHistory){
 
   document.getElementById('pageTitle').textContent=pageTitles[id]?pageTitles[id][lang]:'';
 
-  document.getElementById('pageSubtitle').textContent=pageSubtitles[id]?pageSubtitles[id][lang]:'';
+  // 부제의 연도(2026년도/2026年度)는 못박힌 값이라 해가 바뀌면 지난해를 가리킨다 → 데이터 연도로 바꿔 끼운다
+  var _sub=pageSubtitles[id]?pageSubtitles[id][lang]:'';
+  try{ var _Y=Number((_data&&_data.dashboard&&_data.dashboard.curYear)||(_data&&_data.curYear)||0); if(_Y) _sub=String(_sub).replace(/20\d{2}(?=년도|年度)/g,String(_Y)); }catch(e){}
+  document.getElementById('pageSubtitle').textContent=_sub;
+  try{ var _ss=document.getElementById('sideSubtitle'); var _Y2=Number((_data&&_data.dashboard&&_data.dashboard.curYear)||(_data&&_data.curYear)||0); if(_ss&&_Y2) _ss.textContent=_Y2+(lang==='jp'?'年度':'년도'); }catch(e){}
   if(id&&id.indexOf('fin-')===0){ if(window.FIN)FIN.onPage(id); else setTimeout(function(){ if(window.FIN)FIN.onPage(id); },600); }
   if(id&&id.indexOf('crm-')===0){ if(window.CRM)CRM.onPage(id); }
   if(id==='asset'&&window.WTAS)WTAS.render();
